@@ -35,10 +35,59 @@
         .header {
             background: #009539;
             color: white;
-            padding: 25px 30px;
+            padding: 5px 30px;
             font-size: 42px;
             font-weight: bold;
+            height: 75px;
         }
+        .content {
+            margin-left: 210px;
+        }
+        .dropdown-menu {
+            background: #2a2a2a;
+            border: none;
+            border-radius: 0;
+            margin: 0;
+            width: 100%;
+        }
+        .dropdown-item {
+            color: #cfcfcf;
+            padding: 10px 20px 10px 40px;
+        }
+        .dropdown-item:hover {
+            background: #0f8f3a;
+            color: white;
+        }
+        .dropdown-toggle::after {
+            float: right;
+            margin-top: 8px;
+        }
+        .sidebar-link {
+            color: #cfcfcf;
+            text-decoration: none;
+            display: block;
+            padding: 12px 20px;
+        }
+        .sidebar-link:hover {
+            background: #0f8f3a;
+            color: white;
+        }
+        .collapse {
+            background: #1f1f1f;
+            padding: 20px;
+        }
+        .submenu-link {
+            display: block;
+            color: #cfcfcf;
+            text-decoration: none;
+            position: relative;
+            padding: 20px;
+        }
+        .sidebar-link[aria-expanded="true"] {
+            background: #0f8f3a;
+            color: white;
+        }
+        
         .content {
             margin-left: 210px;
         }
@@ -129,6 +178,7 @@
             left: 15px;
         }
 
+        
         .stat-card.green .icon-box i {
             font-size: 22px;
             color: #009539;

@@ -7,8 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
     <style>
         body {
@@ -16,23 +15,15 @@
             margin: 0;
             font-family: 'Bricolage Grotesque', sans-serif;
         }
-        .sidebar {
-            width: 210px;
-            background: #1f1f1f;
-            min-height: 100vh;
-            position: fixed;
-            color: white;
+        .content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            max-width: calc(100vw - 250px);
+            overflow-x: hidden;
         }
-        .sidebar a {
-            color: #cfcfcf;
-            text-decoration: none;
-            display: block;
-            padding: 12px 20px;
-        }
-        .sidebar a.active,
-        .sidebar a:hover {
-            background: #0f8f3a;
-            color: white;
+        body.sidebar-collapsed .content {
+            margin-left: 68px;
+            max-width: calc(100vw - 68px);
         }
         .header {
             background: #009539;
@@ -41,89 +32,44 @@
             font-size: 42px;
             font-weight: bold;
             height: 75px;
-        }
-        .content {
-            margin-left: 210px;
-        }
-        .dropdown-menu {
-            background: #2a2a2a;
-            border: none;
-            border-radius: 0;
-            margin: 0;
-            width: 100%;
-        }
-        .dropdown-item {
-            color: #cfcfcf;
-            padding: 10px 20px 10px 40px;
-        }
-        .dropdown-item:hover {
-            background: #0f8f3a;
-            color: white;
-        }
-        .dropdown-toggle::after {
-            float: right;
-            margin-top: 8px;
-        }
-        .sidebar-link {
-            color: #cfcfcf;
-            text-decoration: none;
-            display: block;
-            padding: 12px 20px;
-        }
-        .sidebar-link:hover {
-            background: #0f8f3a;
-            color: white;
-        }
-        .collapse {
-            background: #1f1f1f;
-            padding: 20px;
-        }
-        .submenu-link {
-            display: block;
-            color: #cfcfcf;
-            text-decoration: none;
-            position: relative;
-            padding: 20px;
-        }
-        .sidebar-link[aria-expanded="true"] {
-            background: #0f8f3a;
-            color: white;
-        }
-        
-        /* NEW FILTER BAR DESIGN - Matching reference image */
-        .filter-bar {
             font-family: 'Bricolage Grotesque', sans-serif;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ── Filter bar ─────────────────────────────────────────────────── */
+        .filter-bar {
             display: flex;
             align-items: center;
             gap: 12px;
             background: #c9cec9;
-            padding: 14px 30px;
+            padding: 0 30px;
             border-bottom: 1px solid #b0b5b0;
-            height: 40px;
+            height: 50px;
         }
-
+        .page-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2d2d2d;
+        }
         .filter-bar-label {
             font-size: 13px;
             font-weight: 700;
             color: #2d2d2d;
-            white-space: nowrap;
-            margin-right: 5px;
             margin-left: auto;
+            white-space: nowrap;
         }
-
         .filter-group {
             display: flex;
             align-items: center;
             gap: 6px;
         }
-
         .filter-group label {
             font-size: 12px;
             font-weight: 600;
             color: #2d2d2d;
             white-space: nowrap;
         }
-
         .filter-group select {
             font-size: 12px;
             padding: 5px 28px 5px 12px;
@@ -136,23 +82,13 @@
             background-repeat: no-repeat;
             background-position: right 10px center;
             background-size: 8px;
-            min-width: 90px;
+            min-width: 130px;
             cursor: pointer;
         }
-
         .filter-group select:focus {
             outline: none;
             border-color: #009539;
-            background-color: white;
         }
-
-        .page-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #2d2d2d;
-            margin-right: 10px;
-        }
-
         .clear-filters-btn {
             background: #009539;
             color: white;
@@ -162,21 +98,32 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            margin-left: 8px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .clear-filters-btn:hover { background: #00802e; }
+
+        /* Active filter badge shown in page title area */
+        .active-filter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0,149,57,0.12);
+            border: 1px solid #009539;
+            color: #006b2b;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        .clear-filters-btn:hover {
-            background: #00802e;
-        }
-
-        /* Research Page Styles */
+        /* ── Stat cards ─────────────────────────────────────────────────── */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            padding: 30px;
+            padding: 28px 30px 18px;
         }
-
         .stat-card {
             border-radius: 15px;
             padding: 20px 25px;
@@ -186,630 +133,494 @@
             flex-direction: column;
             min-height: 100px;
         }
-
-        .stat-card.green {
-            background: #009539;
-            color: white;
-        }
-
-        .stat-card.green .icon-box {
-            background: white;
-            width: 50px;
-            height: 50px;
+        .stat-card.green { background: #009539; }
+        .stat-card:not(.green) { background: white; }
+        .icon-box {
+            width: 48px;
+            height: 48px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: absolute;
-            top: 15px;
-            left: 15px;
+            top: 16px;
+            left: 16px;
         }
-
-        .stat-card.green .icon-box i {
-            font-size: 22px;
-            color: #009539;
-        }
-
-        .stat-card.green .stat-content {
+        .stat-card.green .icon-box { background: white; }
+        .stat-card.green .icon-box i { font-size: 22px; color: #009539; }
+        .stat-card:not(.green) .icon-box { background: #009539; }
+        .stat-card:not(.green) .icon-box i { font-size: 22px; color: white; }
+        .stat-content {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             justify-content: center;
             flex: 1;
         }
-
-        .stat-card.green .stat-number {
-            font-size: 48px;
-            font-weight: 700;
-            color: white;
-            line-height: 1;
+        .stat-number { font-size: 46px; font-weight: 700; line-height: 1; }
+        .stat-card.green .stat-number { color: white; }
+        .stat-card:not(.green) .stat-number { color: #1f1f1f; }
+        .stat-label { font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .stat-card.green .stat-label { color: rgba(255,255,255,0.85); }
+        .stat-card:not(.green) .stat-label { color: #777; }
+        /* Small filter context label under the stat number */
+        .stat-context {
+            font-size: 10px;
+            margin-top: 2px;
+            color: rgba(255,255,255,0.65);
         }
+        .stat-card:not(.green) .stat-context { color: #aaa; }
 
-        .stat-card.green .stat-label {
-            font-size: 13px;
-            color: white;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .stat-card.blue,
-        .stat-card.orange,
-        .stat-card.purple {
-            background: white;
-            color: #1f1f1f;
-        }
-
-        .stat-card.blue .icon-box,
-        .stat-card.orange .icon-box,
-        .stat-card.purple .icon-box {
-            background: #009539;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 15px;
-            left: 15px;
-        }
-
-        .stat-card.blue .icon-box i,
-        .stat-card.orange .icon-box i,
-        .stat-card.purple .icon-box i {
-            font-size: 22px;
-            color: white;
-        }
-
-        .stat-card.blue .stat-content,
-        .stat-card.orange .stat-content,
-        .stat-card.purple .stat-content {
+        /* ── Chart layout ───────────────────────────────────────────────── */
+        .charts-section {
+            padding: 0 30px 30px;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: 700;
-            color: #1f1f1f;
-            line-height: 1;
-        }
-
-        .stat-card.green .stat-number {
-            color: white;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #666;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .stat-card.green .stat-label {
-            color: white;
-        }
-
-        /* DIFFERENT LAYOUT: Single column with wider charts */
-        .chart-main-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
             gap: 20px;
-            padding: 0 30px 30px 30px;
         }
+        .chart-row { display: grid; gap: 20px; }
+        .two-col   { grid-template-columns: 1fr 1fr; }
 
         .chart-card {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            height: 100%;
+            border-radius: 18px;
+            padding: 22px 26px 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-
         .chart-title {
-            font-size: 20px;
+            font-size: 14px;
             font-weight: 700;
-            color: #1f1f1f;
-            margin-bottom: 25px;
+            color: #1a1a1a;
+            margin-bottom: 2px;
         }
-
-        .chart-wrapper {
-            height: 350px;
-            position: relative;
-        }
-
-        .table-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 0 30px 30px 30px;
-        }
-
-        .table-responsive {
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
-
-        .table {
-            margin: 0;
-        }
-
-        .table thead th {
-            background: #009539;
-            color: white;
-            font-weight: 600;
-            border: none;
-            padding: 15px;
-        }
-
-        .table tbody td {
-            padding: 12px 15px;
-            vertical-align: middle;
-            border-color: #e0e0e0;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* Publication tags */
-        .publication-tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 15px;
+        .chart-subtitle {
             font-size: 11px;
-            font-weight: 600;
-            margin: 2px;
+            color: #999;
+            margin-bottom: 6px;
+            min-height: 16px;
         }
-
-        .tag-journal { background: #e3f2fd; color: #1565c0; }
-        .tag-conference { background: #f3e5f5; color: #7b1fa2; }
-        .tag-book { background: #e8f5e9; color: #2e7d32; }
-        .tag-report { background: #fff3e0; color: #ef6c00; }
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #009539;
+            padding: 16px 30px 0;
+        }
     </style>
 </head>
 <body>
 
-    @include('components.sidebar')
+@include('components.sidebar')
 
-    <div class="content">
-        <div class="header">Research & Non-Teaching Load</div>
-        
-        <!-- NEW FILTER BAR DESIGN -->
-        <div class="filter-bar">
-            <div class="page-title">RESEARCH & PUBLICATIONS</div>
+<div class="content">
 
-            <div class="filter-bar-label">Filters:</div>
+    <div class="header">Research &amp; Non-Teaching Load</div>
 
-            <div class="filter-group">
-                <label>Year:</label>
-                <select id="semesterFilter">
-                    <option value="all">All</option>
-                    @foreach($semesters as $semester)
-                        <option value="{{ $semester->sem_id }}" {{ $filters['semester'] == $semester->sem_id ? 'selected' : '' }}>
-                            {{ $semester->semester }} {{ $semester->sy }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>Type:</label>
-                <select id="departmentFilter">
-                    <option value="all">All</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept->department_id }}" {{ $filters['department'] == $dept->department_id ? 'selected' : '' }}>
-                            {{ $dept->department_acro }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>Status:</label>
-                <select id="roleTypeFilter">
-                    <option value="all">All</option>
-                    @foreach($roleTypes as $type)
-                        <option value="{{ $type }}" {{ $filters['role_type'] == $type ? 'selected' : '' }}>
-                            {{ $type }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <button class="clear-filters-btn" onclick="clearFilters()">
-                Clear Filters
-            </button>
+    {{-- ── Filter bar: Sector → Semester → Unit/Office ─────────────────── --}}
+    <div class="filter-bar">
+        <div class="page-title">
+            RESEARCH &amp; PUBLICATIONS
+            {{-- Show active filter badges next to title --}}
+            @if($filters['role_type'] !== 'all')
+                <span class="active-filter-badge ms-2">
+                    <i class="bi bi-funnel-fill" style="font-size:9px;"></i>
+                    {{ $filters['role_type'] }}
+                </span>
+            @endif
+            @if($filters['department'] !== 'all')
+                @php $activeDept = $departments->firstWhere('department_id', $filters['department']); @endphp
+                @if($activeDept)
+                    <span class="active-filter-badge ms-1">
+                        <i class="bi bi-building" style="font-size:9px;"></i>
+                        {{ $activeDept->department_acro }}
+                    </span>
+                @endif
+            @endif
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="stats-container">
-            <div class="stat-card green">
-                <div class="icon-box">
-                    <i class="bi bi-flask"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ $researchLoad->sum('research_count') }}</div>
-                    <div class="stat-label">Research Projects</div>
-                </div>
-            </div>
+        <div class="filter-bar-label">Filters:</div>
 
-            <div class="stat-card blue">
-                <div class="icon-box">
-                    <i class="bi bi-journal-text"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ $publications->sum('publication_count') }}</div>
-                    <div class="stat-label">Publications</div>
-                </div>
-            </div>
-
-            <div class="stat-card orange">
-                <div class="icon-box">
-                    <i class="bi bi-person-badge-fill"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ $adminRoles->count() }}</div>
-                    <div class="stat-label">Admin Roles</div>
-                </div>
-            </div>
-
-            <div class="stat-card purple">
-                <div class="icon-box">
-                    <i class="bi bi-graph-up"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ $researchLoad->sum('faculty_with_research') }}</div>
-                    <div class="stat-label">Faculty with ETL</div>
-                </div>
-            </div>
+        {{-- 1. Sector --}}
+        <div class="filter-group">
+            <label>Sector:</label>
+            <select id="sectorFilter">
+                <option value="all"       {{ $filters['role_type'] === 'all'       ? 'selected' : '' }}>All</option>
+                <option value="Academic"  {{ $filters['role_type'] === 'Academic'  ? 'selected' : '' }}>Academic</option>
+                <option value="Research"  {{ $filters['role_type'] === 'Research'  ? 'selected' : '' }}>Research</option>
+                <option value="Admin"     {{ $filters['role_type'] === 'Admin'     ? 'selected' : '' }}>Admin</option>
+                <option value="Others"    {{ $filters['role_type'] === 'Others'    ? 'selected' : '' }}>Others</option>
+            </select>
         </div>
 
-        <!-- DIFFERENT LAYOUT: Single column with sidebar -->
-        <div class="chart-main-container">
-            <!-- Left Column: Main Research Chart -->
-            <div class="chart-card">
-                <div class="chart-title">
-                    Research Load by Department (ETL Hours)
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="researchLoadChart"></canvas>
-                </div>
-                <div style="margin-top: 20px; font-size: 13px; color: #666; text-align: center;">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Total ETL: {{ number_format($researchLoad->sum('total_etl'), 1) }} hours across {{ $researchLoad->count() }} departments
-                </div>
+        {{-- 2. Semester --}}
+        <div class="filter-group">
+            <label>Semester:</label>
+            <select id="semesterFilter">
+                <option value="all" {{ (string)$filters['semester'] === 'all' ? 'selected' : '' }}>All</option>
+                @foreach($semesters as $semester)
+                    <option value="{{ $semester->sem_id }}"
+                        {{ (string)$filters['semester'] == (string)$semester->sem_id ? 'selected' : '' }}>
+                        {{ $semester->semester }} {{ $semester->sy }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- 3. Unit/Office --}}
+        <div class="filter-group">
+            <label>Unit/Office:</label>
+            <select id="departmentFilter">
+                <option value="all">All</option>
+                @foreach($departments as $dept)
+                    <option value="{{ $dept->department_id }}"
+                        {{ (string)$filters['department'] == (string)$dept->department_id ? 'selected' : '' }}>
+                        {{ $dept->department_acro }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <button class="clear-filters-btn" onclick="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i>Clear Filters
+        </button>
+    </div>
+
+    {{-- ── Stat cards ───────────────────────────────────────────────────── --}}
+    <div class="stats-container">
+        <div class="stat-card green">
+            <div class="icon-box"><i class="bi bi-flask"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ $researchLoad->sum('research_count') }}</div>
+                <div class="stat-label">Research Assignments</div>
+                @if($filters['semester'] !== 'all' && $filters['semester'] !== null)
+                    @php $sem = $semesters->firstWhere('sem_id', $filters['semester']); @endphp
+                    @if($sem)
+                        <div class="stat-context">{{ $sem->semester }} {{ $sem->sy }}</div>
+                    @endif
+                @endif
             </div>
-
-            <!-- Right Column: Two smaller charts stacked -->
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                <!-- Publications Chart -->
-                <div class="chart-card">
-                    <div class="chart-title">
-                        Publication Types
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="publicationChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Admin Roles Chart -->
-                <div class="chart-card">
-                    <div class="chart-title">
-                        Top Admin Roles
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="adminRolesChart"></canvas>
-                    </div>
-                </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box"><i class="bi bi-journal-text"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ $publications->sum('publication_count') }}</div>
+                <div class="stat-label">Publications</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box"><i class="bi bi-person-badge-fill"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ $adminRoles->sum('faculty_count') }}</div>
+                <div class="stat-label">Designation Assignments</div>
+                @if($filters['role_type'] !== 'all')
+                    <div class="stat-context">{{ $filters['role_type'] }} sector</div>
+                @endif
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="icon-box"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ number_format($researchLoad->sum('total_etl'), 0) }}</div>
+                <div class="stat-label">Total ETL Hours</div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // ============================================
-            // 1. RESEARCH LOAD BY DEPARTMENT CHART
-            // ============================================
-            const researchLoadCtx = document.getElementById('researchLoadChart');
-            if (researchLoadCtx) {
-                const deptLabels = {!! json_encode($researchLoad->pluck('department_acro')) !!};
-                const researchData = {!! json_encode($researchLoad->pluck('total_etl')) !!};
-                const facultyData = {!! json_encode($researchLoad->pluck('faculty_with_research')) !!};
-                
-                new Chart(researchLoadCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: deptLabels,
-                        datasets: [
-                            {
-                                label: 'ETL Hours',
-                                data: researchData,
-                                backgroundColor: '#009539',
-                                borderColor: '#009539',
-                                borderWidth: 1,
-                                borderRadius: 8,
-                                barPercentage: 0.6
-                            },
-                            {
-                                label: 'Faculty Count',
-                                data: facultyData,
-                                backgroundColor: '#2c7be5',
-                                borderColor: '#2c7be5',
-                                borderWidth: 1,
-                                borderRadius: 8,
-                                barPercentage: 0.6
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif",
-                                        size: 13
-                                    },
-                                    color: '#1f1f1f'
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: '#1f1f1f',
-                                titleFont: {
-                                    family: "'Bricolage Grotesque', sans-serif",
-                                    weight: '600'
-                                },
-                                bodyFont: {
-                                    family: "'Bricolage Grotesque', sans-serif"
-                                },
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.dataset.label === 'ETL Hours') {
-                                            label += context.parsed.y.toFixed(1) + ' hours';
-                                        } else {
-                                            label += context.parsed.y + ' faculty';
-                                        }
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    drawBorder: false,
-                                    color: '#e0e0e0'
-                                },
-                                ticks: {
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif"
-                                    },
-                                    color: '#666'
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'ETL Hours / Faculty Count',
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif",
-                                        weight: '600',
-                                        size: 12
-                                    },
-                                    color: '#666'
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif",
-                                        weight: '600'
-                                    },
-                                    color: '#1f1f1f',
-                                    maxRotation: 45
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // ============================================
-            // 2. PUBLICATION TYPES CHART (Doughnut)
-            // ============================================
-            const publicationCtx = document.getElementById('publicationChart');
-            if (publicationCtx) {
-                // Create sample data for publication types
-                const pubTypes = ['Journal Articles', 'Conference Papers', 'Book Chapters', 'Technical Reports'];
-                const pubCounts = [
-                    Math.floor({{ $publications->sum('publication_count') }} * 0.5),
-                    Math.floor({{ $publications->sum('publication_count') }} * 0.3),
-                    Math.floor({{ $publications->sum('publication_count') }} * 0.15),
-                    Math.floor({{ $publications->sum('publication_count') }} * 0.05)
-                ];
-                
-                new Chart(publicationCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: pubTypes,
-                        datasets: [{
-                            data: pubCounts,
-                            backgroundColor: [
-                                '#009539', // Green
-                                '#2c7be5', // Blue
-                                '#f6c343', // Orange
-                                '#9b59b6'  // Purple
-                            ],
-                            borderColor: 'white',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '65%',
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif",
-                                        size: 11
-                                    },
-                                    color: '#1f1f1f',
-                                    padding: 15
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // ============================================
-            // 3. ADMIN ROLES CHART (Horizontal Bar)
-            // ============================================
-            const adminRolesCtx = document.getElementById('adminRolesChart');
-            if (adminRolesCtx && {!! $adminRoles->count() !!} > 0) {
-                // Get top 8 admin roles by faculty count
-                const topRoles = {!! json_encode($adminRoles->sortByDesc('faculty_count')->take(8)) !!};
-                const roleLabels = topRoles.map(role => role.designation.length > 20 ? 
-                    role.designation.substring(0, 20) + '...' : role.designation);
-                const roleData = topRoles.map(role => role.faculty_count);
-                
-                new Chart(adminRolesCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: roleLabels,
-                        datasets: [{
-                            label: 'Faculty Count',
-                            data: roleData,
-                            backgroundColor: function(context) {
-                                const index = context.dataIndex;
-                                const colors = [
-                                    '#009539', '#2c7be5', '#f6c343', '#9b59b6',
-                                    '#e74c3c', '#3498db', '#1abc9c', '#8e44ad'
-                                ];
-                                return colors[index % colors.length];
-                            },
-                            borderColor: 'white',
-                            borderWidth: 1,
-                            borderRadius: 5
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: '#1f1f1f',
-                                titleFont: {
-                                    family: "'Bricolage Grotesque', sans-serif",
-                                    weight: '600'
-                                },
-                                bodyFont: {
-                                    family: "'Bricolage Grotesque', sans-serif"
-                                },
-                                callbacks: {
-                                    title: function(tooltipItems) {
-                                        const index = tooltipItems[0].dataIndex;
-                                        return topRoles[index]?.designation || '';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                grid: {
-                                    drawBorder: false,
-                                    color: '#e0e0e0'
-                                },
-                                ticks: {
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif"
-                                    },
-                                    color: '#666',
-                                    stepSize: 1
-                                }
-                            },
-                            y: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    font: {
-                                        family: "'Bricolage Grotesque', sans-serif",
-                                        weight: '600',
-                                        size: 11
-                                    },
-                                    color: '#1f1f1f'
-                                }
-                            }
-                        }
-                    }
-                });
-            } else {
-                // Display message if no data
-                adminRolesCtx.parentElement.innerHTML = `
-                    <div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #999;">
-                        <div style="text-align: center;">
-                            <i class="bi bi-people" style="font-size: 2rem; opacity: 0.3;"></i>
-                            <p style="margin-top: 10px; font-size: 0.9rem;">No admin roles data</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // ============================================
-            // FILTER HANDLERS
-            // ============================================
-            document.querySelectorAll('#semesterFilter, #departmentFilter, #roleTypeFilter')
-                .forEach(select => {
-                    select.addEventListener('change', function() {
-                        applyFilters();
-                    });
-                });
+    {{-- ── Charts ────────────────────────────────────────────────────────── --}}
+    <div class="section-label">Research Load &amp; Publications</div>
+    <div class="charts-section" style="padding-top:14px;">
+
+        <div class="chart-row two-col">
+
+            {{-- CHART 1: Research Assignments by Unit/Office --}}
+            <div class="chart-card">
+                <div class="chart-title">Research Assignments by Unit/Office</div>
+                <div class="chart-subtitle" id="sub1">
+                    Number of research assignments per unit/office
+                    @if($filters['semester'] !== 'all' && $filters['semester'] !== null)
+                        @php $sem = $semesters->firstWhere('sem_id', $filters['semester']); @endphp
+                        @if($sem) · {{ $sem->semester }} {{ $sem->sy }} @endif
+                    @endif
+                </div>
+                <div id="chart-assignments"></div>
+            </div>
+
+            {{-- CHART 2: Publications by Unit/Office --}}
+            <div class="chart-card">
+                <div class="chart-title">Publications by Unit/Office</div>
+                <div class="chart-subtitle" id="sub2">
+                    Total publications per unit/office, ranked highest to lowest
+                </div>
+                <div id="chart-publications"></div>
+            </div>
+
+        </div>
+
+        <div class="chart-row two-col">
+
+            {{-- CHART 3: Total ETL Hours by Unit/Office --}}
+            <div class="chart-card">
+                <div class="chart-title">Total ETL Hours by Unit/Office</div>
+                <div class="chart-subtitle" id="sub3">
+                    Equivalent Teaching Load from research assignments per unit/office
+                    @if($filters['semester'] !== 'all' && $filters['semester'] !== null)
+                        @php $sem = $semesters->firstWhere('sem_id', $filters['semester']); @endphp
+                        @if($sem) · {{ $sem->semester }} {{ $sem->sy }} @endif
+                    @endif
+                </div>
+                <div id="chart-etl"></div>
+            </div>
+
+            {{-- CHART 4: Publication Types --}}
+            <div class="chart-card">
+                <div class="chart-title">Publication Types</div>
+                <div class="chart-subtitle">
+                    Distribution of publication types
+                    @if($filters['department'] !== 'all')
+                        @php $d = $departments->firstWhere('department_id', $filters['department']); @endphp
+                        @if($d) · {{ $d->department_acro }} @endif
+                    @endif
+                </div>
+                <div id="chart-pub-types"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /.content -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── PHP → JS data ─────────────────────────────────────────────────────────────
+const researchLoad = {!! json_encode($researchLoad) !!};
+const publications = {!! json_encode($publications) !!};
+
+// Current active filters (to decide capping logic)
+const activeDept     = '{{ $filters['department'] }}';   // 'all' or an id string
+const activeSemester = '{{ $filters['semester'] }}';     // 'all' or a sem_id string
+const activeSector   = '{{ $filters['role_type'] }}';    // 'all' | Academic | Research | Admin | Others
+
+// ── Shared Plotly constants ────────────────────────────────────────────────────
+const FONT    = "'Bricolage Grotesque', sans-serif";
+const GREEN   = '#009539';
+const PALETTE = ['#009539','#2c7be5','#f6a623','#e74c3c','#9b59b6',
+                 '#1abc9c','#e67e22','#34495e','#e91e63','#00bcd4'];
+
+const BASE = {
+    paper_bgcolor: '#ffffff',
+    plot_bgcolor:  '#ffffff',
+    font: { family: FONT, size: 12, color: '#444' },
+    xaxis: { gridcolor: '#efefef', linecolor: '#ddd', tickfont: { family: FONT } },
+    yaxis: { gridcolor: '#efefef', linecolor: '#ddd', tickfont: { family: FONT } },
+    legend: { font: { family: FONT, size: 11 }, bgcolor: 'transparent' },
+};
+const CFG = { responsive: true, displayModeBar: false };
+
+// ── How many bars to show in default (no unit/office filter) view ─────────────
+// When a specific unit is selected the server already limits the data, so cap
+// is irrelevant — we show whatever came back.
+const CAP = 10;
+
+function shouldCap() {
+    return activeDept === 'all';
+}
+
+function capData(arr) {
+    return shouldCap() ? arr.slice(0, CAP) : arr;
+}
+
+// Append "top N of total" note to a subtitle element
+function addCapNote(elId, total) {
+    if (shouldCap() && total > CAP) {
+        const el = document.getElementById(elId);
+        if (el) {
+            const note = document.createElement('span');
+            note.style.cssText = 'color:#bbb;font-size:10px;';
+            note.textContent   = ` — showing top ${CAP} of ${total}. Select a Unit/Office to see all.`;
+            el.appendChild(note);
+        }
+    }
+}
+
+// Empty-state placeholder
+function noData(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.cssText = 'height:280px;display:flex;align-items:center;justify-content:center;';
+    el.innerHTML = `<div style="text-align:center;color:#ccc;">
+        <i class="bi bi-bar-chart" style="font-size:2rem;"></i>
+        <p style="margin-top:8px;font-size:0.82rem;">No data for current filters</p></div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CHART 1 — Research Assignments by Unit/Office  ·  Vertical Bar
+// Vertical bar is fine here; unit/office acronyms are short enough.
+// Sorted descending so highest-load units appear first (left to right).
+// ══════════════════════════════════════════════════════════════════════════════
+(function () {
+    if (!researchLoad.length) return noData('chart-assignments');
+
+    const sorted = [...researchLoad].sort((a, b) => b.research_count - a.research_count);
+    addCapNote('sub1', sorted.length);
+    const data   = capData(sorted);
+    const depts  = data.map(d => d.department_acro);
+    const counts = data.map(d => parseInt(d.research_count) || 0);
+
+    Plotly.newPlot('chart-assignments', [{
+        type: 'bar',
+        x: depts,
+        y: counts,
+        text: counts.map(String),
+        textposition: 'outside',
+        textfont: { family: FONT, size: 11 },
+        marker: { color: GREEN },
+        hovertemplate: '<b>%{x}</b><br>Assignments: %{y}<extra></extra>'
+    }], {
+        ...BASE,
+        height: 320,
+        margin: { t: 20, r: 20, b: 80, l: 50 },
+        xaxis: { ...BASE.xaxis, tickangle: -35 },
+        yaxis: { ...BASE.yaxis, title: { text: 'Assignments', font: { family: FONT, size: 12 } } },
+        bargap: 0.35,
+        showlegend: false,
+    }, CFG);
+})();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CHART 2 — Publications by Unit/Office  ·  Horizontal Bar
+// Horizontal because unit/office name labels can be long.
+// Sorted ascending so the tallest bar (most pubs) appears at the top.
+// ══════════════════════════════════════════════════════════════════════════════
+(function () {
+    if (!publications.length) return noData('chart-publications');
+
+    const sorted = [...publications].sort((a, b) => a.publication_count - b.publication_count);
+    addCapNote('sub2', sorted.length);
+    const data  = capData(sorted);
+    const depts = data.map(d => d.department_acro);
+    const pubs  = data.map(d => parseInt(d.publication_count) || 0);
+
+    Plotly.newPlot('chart-publications', [{
+        type: 'bar',
+        orientation: 'h',
+        x: pubs,
+        y: depts,
+        text: pubs.map(String),
+        textposition: 'outside',
+        textfont: { family: FONT, size: 11, color: '#333' },
+        marker: { color: GREEN },
+        hovertemplate: '<b>%{y}</b><br>Publications: %{x}<extra></extra>'
+    }], {
+        ...BASE,
+        height: 320,
+        margin: { t: 10, r: 55, b: 40, l: 70 },
+        xaxis: { ...BASE.xaxis, title: { text: 'Publications', font: { family: FONT, size: 12 } } },
+        yaxis: { ...BASE.yaxis, automargin: true },
+        bargap: 0.35,
+    }, CFG);
+})();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CHART 3 — Total ETL Hours by Unit/Office  ·  Horizontal Bar
+// Same logic as Chart 2: horizontal for readability of labels.
+// ══════════════════════════════════════════════════════════════════════════════
+(function () {
+    if (!researchLoad.length) return noData('chart-etl');
+
+    const sorted = [...researchLoad].sort((a, b) => a.total_etl - b.total_etl);
+    addCapNote('sub3', sorted.length);
+    const data  = capData(sorted);
+    const depts = data.map(d => d.department_acro);
+    const etls  = data.map(d => parseFloat(d.total_etl) || 0);
+
+    Plotly.newPlot('chart-etl', [{
+        type: 'bar',
+        orientation: 'h',
+        x: etls,
+        y: depts,
+        text: etls.map(v => v.toFixed(1)),
+        textposition: 'outside',
+        textfont: { family: FONT, size: 11, color: '#333' },
+        marker: { color: GREEN },
+        hovertemplate: '<b>%{y}</b><br>ETL: %{x:.1f} hrs<extra></extra>'
+    }], {
+        ...BASE,
+        height: 320,
+        margin: { t: 10, r: 60, b: 40, l: 70 },
+        xaxis: { ...BASE.xaxis, title: { text: 'ETL Hours', font: { family: FONT, size: 12 } } },
+        yaxis: { ...BASE.yaxis, automargin: true },
+        bargap: 0.35,
+    }, CFG);
+})();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CHART 4 — Publication Types  ·  Donut
+// Mutually exclusive parts-of-a-whole → donut is the correct choice.
+// The GROUP_CONCAT string from Laravel is split and aggregated here.
+// ══════════════════════════════════════════════════════════════════════════════
+(function () {
+    if (!publications.length) return noData('chart-pub-types');
+
+    const typeCount = {};
+    publications.forEach(p => {
+        if (!p.publication_types) return;
+        p.publication_types.split(',').forEach(raw => {
+            const t = raw.trim();
+            if (!t) return;
+            typeCount[t] = (typeCount[t] || 0) + parseInt(p.publication_count || 1);
         });
-        
-        function applyFilters() {
-            const params = new URLSearchParams();
-            
-            const semester = document.getElementById('semesterFilter').value;
-            const department = document.getElementById('departmentFilter').value;
-            const roleType = document.getElementById('roleTypeFilter').value;
-            
-            if (semester !== 'all') params.append('semester', semester);
-            if (department !== 'all') params.append('department', department);
-            if (roleType !== 'all') params.append('role_type', roleType);
-            
-            const url = new URL(window.location.href);
-            url.search = params.toString();
-            window.location.href = url.toString();
-        }
-        
-        function clearFilters() {
-            window.location.href = '{{ route("stzfaculty.research-performance") }}';
-        }
-    </script>
+    });
+
+    const labels = Object.keys(typeCount);
+    const values = Object.values(typeCount);
+    if (!labels.length) return noData('chart-pub-types');
+
+    Plotly.newPlot('chart-pub-types', [{
+        type: 'pie',
+        labels,
+        values,
+        hole: 0.48,
+        textinfo: 'percent+label',
+        textfont: { family: FONT, size: 11 },
+        marker: { colors: PALETTE, line: { color: 'white', width: 2 } },
+        hovertemplate: '<b>%{label}</b><br>%{value} pubs (%{percent})<extra></extra>'
+    }], {
+        ...BASE,
+        height: 320,
+        margin: { t: 10, r: 10, b: 10, l: 10 },
+        showlegend: true,
+        legend: { font: { family: FONT, size: 10 }, orientation: 'v', x: 1, xanchor: 'left', y: 0.5 },
+    }, CFG);
+})();
+
+// ── Filter submission ──────────────────────────────────────────────────────────
+// All three dropdowns point to the same handler. On any change we rebuild the
+// URL with only the non-"all" params and navigate — letting the controller
+// re-query with the correct filters server-side.
+document.querySelectorAll('#sectorFilter, #semesterFilter, #departmentFilter')
+    .forEach(sel => sel.addEventListener('change', applyFilters));
+
+function applyFilters() {
+    const sector = document.getElementById('sectorFilter').value;
+    const sem    = document.getElementById('semesterFilter').value;
+    const dept   = document.getElementById('departmentFilter').value;
+
+    const params = new URLSearchParams();
+    // Only append when NOT "all" — omitting keeps the controller default logic intact
+    if (sector !== 'all') params.append('role_type',  sector);
+    if (sem    !== 'all') params.append('semester',   sem);
+    if (dept   !== 'all') params.append('department', dept);
+
+    const url = new URL(window.location.href);
+    url.search = params.toString();
+    window.location.href = url.toString();
+}
+
+function clearFilters() {
+    // Navigate to the clean route with no query params — controller will use defaults
+    window.location.href = '{{ route("stzfaculty.research-performance") }}';
+}
+</script>
 </body>
 </html>

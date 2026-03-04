@@ -49,6 +49,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/research-performance', [DashboardController::class, 'researchPerformance'])
             ->name('stzfaculty.research-performance');
         
+        // Faculty Approval
+        Route::get('/approval', [DashboardController::class, 'facultyApproval'])
+            ->name('stzfaculty.approval');
+
+
         Route::get('/qualifications', [DashboardController::class, 'facultyQualifications'])   
             ->name('stzfaculty.qualifications');
 

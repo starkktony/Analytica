@@ -1,96 +1,184 @@
-<div class="sidebar">
-    <div class="text-center py-3">
-        <img src="{{ asset('images/analytica-logo.png') }}"
-             alt="CLSU Analytica Logo"
-             class="img-fluid"
-             style="max-width: 150px;">
-    </div>
+<div class="sidebar" id="mainSidebar">
 
-    <!-- Scrollable Content Container -->
+    {{-- Scrollable content area --}}
     <div class="sidebar-scrollable">
-        <!-- Search -->
-        <div class="input-group mx-3 mb-3" style="width: 85%;">
+
+        {{-- Logo - full --}}
+        <div class="text-center py-3 sidebar-logo-full">
+            <img src="{{ asset('images/analytica-logo.png') }}"
+                 alt="CLSU Analytica Logo"
+                 class="img-fluid"
+                 style="max-width: 150px;">
+        </div>
+        {{-- Logo - mini (collapsed) --}}
+        <div class="sidebar-logo-mini d-none text-center py-3">
+            <i class="bi bi-bar-chart-fill" style="font-size:1.6rem;color:#4ade80;"></i>
+        </div>
+
+        {{-- Search - full --}}
+        <div class="input-group mx-3 mb-3 sidebar-search-full" style="width: 85%;">
             <span class="input-group-text rounded-start-pill">
                 <i class="bi bi-search"></i>
             </span>
-            <input type="text" class="form-control rounded-end-pill"
-                   placeholder="Search here">
+            <input type="text" class="form-control rounded-end-pill" placeholder="Search here">
+        </div>
+        {{-- Search - mini (collapsed) --}}
+        <div class="sidebar-search-mini d-none text-center mb-3">
+            <i class="bi bi-search" style="color:#cfcfcf;font-size:1.1rem;"></i>
         </div>
 
-        <!-- Dashboard -->
-        <a href="{{ url('/dashboard') }}" class="sidebar-menu-item {{ request()->is('dashboard') ? 'active' : '' }}">
-            <i class="bi bi-grid-3x3 me-2"></i> Dashboard
+        {{-- Dashboard --}}
+        <a href="{{ url('/dashboard') }}"
+           class="sidebar-menu-item {{ request()->is('dashboard') ? 'active' : '' }}"
+           data-label="Dashboard">
+            <span class="menu-icon"><i class="bi bi-grid-3x3"></i></span>
+            <span class="menu-label ms-2">Dashboard</span>
         </a>
 
-        <!-- STUDENT -->
+        {{-- STUDENT --}}
         <div class="sidebar-item">
-            <div class="d-flex align-items-center justify-content-between student-menu-container {{ request()->is('student*') || request()->is('enrollment') || request()->is('graduation') || request()->is('scholarship') ? 'active' : '' }}" style="padding: 0;">
-                <a href="{{ url('/student') }}" 
-                   class="sidebar-link flex-grow-1"
-                   style="padding: 12px 20px; margin: 0;">
-                    <i class="bi bi-people me-2"></i>
-                    Student
+            <div class="sidebar-parent d-flex align-items-center justify-content-between
+                {{ request()->is('student*') || request()->is('enrollment') || request()->is('graduation') || request()->is('scholarship') ? 'active' : '' }}"
+                 data-label="Student">
+                <a href="{{ url('/student') }}" class="sidebar-link flex-grow-1">
+                    <span class="menu-icon"><i class="bi bi-people"></i></span>
+                    <span class="menu-label ms-2">Student</span>
                 </a>
-                <i class="bi bi-chevron-down chevron-toggle" 
+                <i class="bi bi-chevron-down sidebar-chevron"
                    data-bs-toggle="collapse"
                    data-bs-target="#studentMenu"
-                   style="cursor: pointer; padding-right: 20px;"></i>
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
             </div>
-
-            <!-- SUBMENU -->
-            <div class="collapse {{ request()->is('student*') || request()->is('enrollment') || request()->is('graduation') || request()->is('scholarship') ? 'show' : '' }}" 
+            <div class="collapse {{ request()->is('student*') || request()->is('enrollment') || request()->is('graduation') || request()->is('scholarship') ? 'show' : '' }}"
                  id="studentMenu">
-                <a href="{{ url('/enrollment') }}" class="submenu-link {{ request()->is('enrollment') ? 'active' : '' }}">Enrollment</a>
-                <a href="{{ url('/graduation') }}" class="submenu-link {{ request()->is('graduation') ? 'active' : '' }}">Graduation</a>
-                <a href="{{ url('/scholarship') }}" class="submenu-link {{ request()->is('scholarship') ? 'active' : '' }}">Scholarship</a>
+                <a href="{{ url('/enrollment') }}"  class="submenu-link {{ request()->is('enrollment')  ? 'active' : '' }}">
+                    <i class="bi bi-journal-text me-2"></i><span class="menu-label">Enrollment</span>
+                </a>
+                <a href="{{ url('/graduation') }}"  class="submenu-link {{ request()->is('graduation')  ? 'active' : '' }}">
+                    <i class="bi bi-mortarboard me-2"></i><span class="menu-label">Graduation</span>
+                </a>
+                <a href="{{ url('/scholarship') }}" class="submenu-link {{ request()->is('scholarship') ? 'active' : '' }}">
+                    <i class="bi bi-award me-2"></i><span class="menu-label">Scholarship</span>
+                </a>
             </div>
         </div>
 
-        <!-- FACULTY -->
+        {{-- FACULTY --}}
         <div class="sidebar-item">
-            <a href="#facultyMenu" 
-               class="sidebar-link d-flex align-items-center justify-content-between {{ request()->is('faculty*') ? 'active' : '' }}" 
-               data-bs-toggle="collapse">
-                <span>
-                    <i class="bi bi-person-badge me-2"></i>
-                    Faculty
-                </span>
-                <i class="bi bi-chevron-down"></i>
-            </a>
-
-            <div class="collapse" id="facultyMenu">
-                <a href="{{ route('stzfaculty.overview') }}" class="submenu-link">Faculty Overview</a>
-                <a href="{{ route('stzfaculty.teaching-load') }}" class="submenu-link">Teaching Load</a>
-                <a href="{{ route('stzfaculty.research-performance') }}" class="submenu-link">Research</a>
+            <div class="sidebar-parent d-flex align-items-center justify-content-between
+                {{ request()->routeIs('stzfaculty.*') ? 'active' : '' }}"
+                 data-label="Faculty">
+                <a href="{{ route('stzfaculty.overview') }}" class="sidebar-link flex-grow-1">
+                    <span class="menu-icon"><i class="bi bi-person-badge"></i></span>
+                    <span class="menu-label ms-2">Faculty</span>
+                </a>
+                <i class="bi bi-chevron-down sidebar-chevron"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#facultyMenu"
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
+            </div>
+            <div class="collapse {{ request()->routeIs('stzfaculty.*') ? 'show' : '' }}"
+                 id="facultyMenu">
+                <a href="{{ route('stzfaculty.overview') }}"
+                   class="submenu-link {{ request()->routeIs('stzfaculty.overview') ? 'active' : '' }}">
+                    <i class="bi bi-person-vcard me-2"></i><span class="menu-label">Faculty Profile</span>
+                </a>
+                <a href="{{ route('stzfaculty.teaching-load') }}"
+                   class="submenu-link {{ request()->routeIs('stzfaculty.teaching-load') ? 'active' : '' }}">
+                    <i class="bi bi-book me-2"></i><span class="menu-label">Teaching Load</span>
+                </a>
+                <a href="{{ route('stzfaculty.research-performance') }}"
+                   class="submenu-link {{ request()->routeIs('stzfaculty.research-performance') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Research</span>
+                </a>
+                    <a href="{{ route('stzfaculty.approval') }}"
+                   class="submenu-link {{ request()->routeIs('stzfaculty.approval') ? 'active' : '' }}">
+                    <i class="bi bi-check2-circle me-2"></i><span class="menu-label">Faculty Approval</span>
+                </a>
             </div>
         </div>
 
-        <!-- ALUMNI -->
-        <div class="sidebar-item">
-            <a href="#alumniMenu" 
-               class="sidebar-link d-flex align-items-center justify-content-between {{ request()->is('alumni*') ? 'active' : '' }}" 
-               data-bs-toggle="collapse">
-                <span>
-                    <i class="bi bi-mortarboard me-2"></i>
-                    Alumni
-                </span>
-                <i class="bi bi-chevron-down"></i>
-            </a>
 
+        {{-- FINANCIAL REPORTS --}}
+        <div class="sidebar-item">
+            <div class="sidebar-parent d-flex align-items-center justify-content-between"
+                 data-label="Financial Reports">
+                <a href="#" class="sidebar-link flex-grow-1">
+                    <span class="menu-icon"><i class="bi bi-cash-stack"></i></span>
+                    <span class="menu-label ms-2">Financial Reports</span>
+                </a>
+                <i class="bi bi-chevron-down sidebar-chevron"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#financialMenu"
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
+            </div>
+            <div class="collapse" id="financialMenu">
+                <a href="#" class="submenu-link">
+                    <i class="bi bi-pie-chart me-2"></i><span class="menu-label">Normative Funding Allocation</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- RESEARCH --}}
+        <div class="sidebar-item">
+            <div class="sidebar-parent d-flex align-items-center justify-content-between"
+                 data-label="Research">
+                <a href="#" class="sidebar-link flex-grow-1">
+                    <span class="menu-icon"><i class="bi bi-search-heart"></i></span>
+                    <span class="menu-label ms-2">Research</span>
+                </a>
+                <i class="bi bi-chevron-down sidebar-chevron"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#researchMenu"
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
+            </div>
+            <div class="collapse" id="researchMenu">
+                <a href="#" class="submenu-link">
+                    <i class="bi bi-journal me-2"></i><span class="menu-label">Publications</span>
+                </a>
+                <a href="#" class="submenu-link">
+                    <i class="bi bi-trophy me-2"></i><span class="menu-label">Awards</span>
+                </a>
+                <a href="#" class="submenu-link">
+                    <i class="bi bi-graph-up me-2"></i><span class="menu-label">Analytics</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- ALUMNI --}}
+        <div class="sidebar-item">
+            <div class="sidebar-parent d-flex align-items-center justify-content-between
+                {{ request()->is('alumni*') ? 'active' : '' }}"
+                 data-label="Alumni">
+                <a href="#alumniMenu" class="sidebar-link flex-grow-1" data-bs-toggle="collapse">
+                    <span class="menu-icon"><i class="bi bi-mortarboard"></i></span>
+                    <span class="menu-label ms-2">Alumni</span>
+                </a>
+                <i class="bi bi-chevron-down sidebar-chevron"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#alumniMenu"
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
+            </div>
             <div class="collapse" id="alumniMenu">
-                <a href="#" class="submenu-link">Alumni List</a>
-                <a href="#" class="submenu-link">Add Alumni</a>
+                <a href="#" class="submenu-link">
+                    <i class="bi bi-list-ul me-2"></i><span class="menu-label">Alumni List</span>
+                </a>
+                <a href="#" class="submenu-link">
+                    <i class="bi bi-person-plus me-2"></i><span class="menu-label">Add Alumni</span>
+                </a>
             </div>
         </div>
 
-        <hr class="sidebar-divider mx-3" style="border-color: #555;">
+        <hr class="mx-3" style="border-color:#555;">
 
-        <a href="#" class="sidebar-menu-item">
-            <i class="bi bi-info-circle me-2"></i> About Analytica
+        <a href="#" class="sidebar-menu-item" data-label="About Analytica">
+            <span class="menu-icon"><i class="bi bi-info-circle"></i></span>
+            <span class="menu-label ms-2">About Analytica</span>
         </a>
-    </div>
 
-    <!-- Profile Section - Fixed at bottom -->
+    </div>{{-- end sidebar-scrollable --}}
+
+    {{-- Profile Section — pinned at bottom --}}
     <div class="sidebar-profile">
         <div class="profile-info">
             <div class="profile-icon">
@@ -101,7 +189,6 @@
                 <div class="profile-role">{{ Auth::user()->role }}</div>
             </div>
         </div>
-
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
             @csrf
             <button type="submit" class="logout-btn" title="Logout">
@@ -109,342 +196,340 @@
             </button>
         </form>
     </div>
-</div>
+
+    {{-- Collapse/Expand Toggle Button --}}
+    <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle Sidebar">
+        <i class="bi bi-chevron-left" id="toggleIcon"></i>
+    </button>
+
+</div>{{-- end .sidebar --}}
 
 <style>
-    /* ===== SIDEBAR BASE STYLES ===== */
+    /* ============================================================
+       SIDEBAR — BASE
+    ============================================================ */
     .sidebar {
-        width: 210px;
-        background: #1f1f1f;
-        min-height: 100vh;
-        height: 100vh;
         position: fixed;
-        color: white;
+        top: 0;
+        left: 0;
+        width: 250px;
+        height: 100vh;
+        background-color: #1f1f1f;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
+        overflow: visible;
+        z-index: 1000;
+        transition: width 0.3s ease;
+        font-family: 'Bricolage Grotesque', sans-serif;
     }
 
-    /* ===== SCROLLABLE CONTENT AREA ===== */
+    .sidebar.collapsed {
+        width: 68px;
+    }
+
+    /* ============================================================
+       SCROLLABLE AREA
+    ============================================================ */
     .sidebar-scrollable {
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
+        background-color: #1f1f1f;
         padding-bottom: 20px;
     }
 
-    /* Custom scrollbar styling */
-    .sidebar-scrollable::-webkit-scrollbar {
-        width: 6px;
+    .sidebar-scrollable::-webkit-scrollbar { width: 4px; }
+    .sidebar-scrollable::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-scrollable::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+    .sidebar-scrollable::-webkit-scrollbar-thumb:hover { background: #0f8f3a; }
+
+    /* ============================================================
+       HIDE / SHOW LABELS WHEN COLLAPSED
+    ============================================================ */
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .sidebar-search-full,
+    .sidebar.collapsed .sidebar-logo-full,
+    .sidebar.collapsed .sidebar-chevron,
+    .sidebar.collapsed .profile-text {
+        display: none !important;
     }
 
-    .sidebar-scrollable::-webkit-scrollbar-track {
-        background: #1f1f1f;
+    .sidebar.collapsed .sidebar-logo-mini,
+    .sidebar.collapsed .sidebar-search-mini {
+        display: block !important;
     }
 
-    .sidebar-scrollable::-webkit-scrollbar-thumb {
-        background: #555;
-        border-radius: 3px;
+    /* Hide collapse menus when sidebar is collapsed */
+    .sidebar.collapsed .collapse {
+        display: none !important;
     }
 
-    .sidebar-scrollable::-webkit-scrollbar-thumb:hover {
-        background: #666;
+    /* ============================================================
+       CENTER ICONS WHEN COLLAPSED
+    ============================================================ */
+    .sidebar.collapsed .sidebar-menu-item,
+    .sidebar.collapsed .sidebar-link,
+    .sidebar.collapsed .sidebar-parent {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
     }
 
-    /* ===== PROFILE SECTION (FIXED AT BOTTOM) ===== */
+    .sidebar.collapsed .sidebar-parent .sidebar-link {
+        padding: 12px 0;
+        justify-content: center;
+        width: 68px;
+    }
+
+    .sidebar.collapsed .menu-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 68px;
+        font-size: 1.1rem;
+    }
+
+    /* Tooltip on hover when collapsed */
+    .sidebar.collapsed .sidebar-menu-item,
+    .sidebar.collapsed .sidebar-parent {
+        position: relative;
+    }
+
+    .sidebar.collapsed .sidebar-menu-item[data-label]:hover::after,
+    .sidebar.collapsed .sidebar-parent[data-label]:hover::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 72px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #0f8f3a;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        z-index: 9999;
+        pointer-events: none;
+    }
+
+    /* ============================================================
+       TOGGLE BUTTON
+    ============================================================ */
+    .sidebar-toggle-btn {
+        position: fixed;
+        top: 50%;
+        left: 230px;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        background: #0f8f3a;
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        transition: background 0.2s ease, left 0.3s ease;
+    }
+
+    .sidebar-toggle-btn:hover { background: #09722d; }
+
+    #toggleIcon { transition: transform 0.3s ease; }
+    .sidebar.collapsed #toggleIcon { transform: rotate(180deg); }
+
+    /* Move toggle button when collapsed */
+    .sidebar.collapsed ~ * .sidebar-toggle-btn,
+    body.sidebar-collapsed .sidebar-toggle-btn {
+        left: 48px;
+    }
+
+    /* ============================================================
+       PROFILE — PINNED BOTTOM
+    ============================================================ */
     .sidebar-profile {
+        flex-shrink: 0;
+        width: 100%;
+        padding: 12px 16px;
         background-color: #009539;
         color: white;
-        padding: 12px 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-shrink: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        transition: padding 0.3s ease;
     }
 
-    .profile-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+    .sidebar.collapsed .sidebar-profile {
+        padding: 12px 0;
+        justify-content: center;
     }
 
-    .profile-icon {
-        font-size: 32px;
-        line-height: 1;
-        display: flex;
-        align-items: center;
-    }
+    .sidebar.collapsed .sidebar-profile .profile-info { display: none; }
+    .sidebar.collapsed .sidebar-profile .logout-form  { margin: 0 auto; }
 
-    .profile-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
+    .profile-info { display: flex; align-items: center; gap: 10px; }
+    .profile-icon { font-size: 30px; line-height: 1; }
+    .profile-text { display: flex; flex-direction: column; gap: 1px; }
+    .profile-name { font-weight: 700; font-size: 14px; line-height: 1.2; }
+    .profile-role { font-size: 11px; opacity: 0.85; }
 
-    .profile-name {
-        font-weight: 600;
-        font-size: 14px;
-        line-height: 1.2;
-    }
-
-    .profile-role {
-        font-size: 12px;
-        opacity: 0.9;
-        line-height: 1.2;
-    }
-
-    .logout-form {
-        margin: 0;
-    }
-
+    .logout-form { margin: 0; }
     .logout-btn {
         background: transparent;
         border: none;
         color: white;
-        font-size: 24px;
+        font-size: 22px;
         padding: 0;
         cursor: pointer;
         display: flex;
         align-items: center;
-        transition: opacity 0.2s ease;
+        transition: opacity 0.2s;
+    }
+    .logout-btn:hover { opacity: 0.75; }
+
+    /* ============================================================
+       TOP-LEVEL MENU ITEMS
+    ============================================================ */
+    .sidebar-menu-item {
+        color: #cfcfcf;
+        text-decoration: none;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        font-size: 0.92rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .logout-btn:hover {
-        opacity: 0.8;
+    .sidebar-menu-item:hover { background: #0f8f3a; color: white; }
+    .sidebar-menu-item.active { background: #009539; color: white; }
+
+    /* ============================================================
+       PARENT ROW (expandable sections)
+    ============================================================ */
+    .sidebar-parent {
+        transition: background-color 0.2s ease;
+        cursor: default;
     }
 
-    /* ===== MENU ITEMS ===== */
-    .sidebar-menu-item,
+    .sidebar-parent:hover { background: #0f8f3a; }
+    .sidebar-parent:hover .sidebar-link,
+    .sidebar-parent:hover .sidebar-chevron { color: white; }
+
+    .sidebar-parent.active { background: #009539; }
+    .sidebar-parent.active .sidebar-link,
+    .sidebar-parent.active .sidebar-chevron { color: white; }
+
+    /* ============================================================
+       SIDEBAR LINK (parent label area)
+    ============================================================ */
     .sidebar-link {
         color: #cfcfcf;
         text-decoration: none;
         padding: 12px 20px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        transition: background-color 0.2s ease, color 0.2s ease;
-    }
-
-    .sidebar-menu-item:hover,
-    .sidebar-link:hover {
-        background: #0f8f3a;
-        color: white;
-    }
-
-    /* ===== ACTIVE STATES ===== */
-    .sidebar-menu-item.active,
-    .sidebar-link.active,
-    .student-menu-container.active {
-        background: #0f8f3a !important;
-        color: white !important;
-    }
-
-    .student-menu-container.active .sidebar-link,
-    .student-menu-container.active .chevron-toggle {
-        color: white !important;
-    }
-
-    /* ===== STUDENT MENU SPECIFIC ===== */
-    .sidebar-item {
-        margin-bottom: 0;
-    }
-
-    .student-menu-container {
-        transition: background-color 0.2s ease;
-    }
-
-    .student-menu-container:hover {
-        background: #0f8f3a;
-    }
-
-    .student-menu-container:hover .sidebar-link,
-    .student-menu-container:hover .chevron-toggle {
-        color: white;
-    }
-
-    .student-menu-container .sidebar-link {
+        font-size: 0.92rem;
+        font-weight: 500;
         background: transparent !important;
-    }
-
-    .student-menu-container .chevron-toggle {
-        color: #cfcfcf;
         transition: color 0.2s ease;
     }
 
-    /* ===== CHEVRON ANIMATION ===== */
-    .sidebar-link i.bi-chevron-down {
-        transition: transform 0.3s ease;
+    .sidebar-link:hover { color: white; }
+
+    .sidebar-chevron {
+        color: #cfcfcf;
+        font-size: 0.75rem;
+        transition: color 0.2s ease, transform 0.3s ease;
     }
 
-    .sidebar-link[aria-expanded="true"] {
-        background: #0f8f3a;
-        color: white;
-    }
-
-    .sidebar-link[aria-expanded="true"] i.bi-chevron-down {
+    /* Rotate chevron when submenu is open */
+    .sidebar-parent .collapse.show ~ .sidebar-chevron,
+    .bi-chevron-down[aria-expanded="true"] {
         transform: rotate(180deg);
     }
 
-    /* ===== COLLAPSE/DROPDOWN ===== */
-    .collapse {
-        background: #1f1f1f;
-    }
+    /* ============================================================
+       SUBMENU
+    ============================================================ */
+    .collapse { background: #2a2a2a; }
 
-    /* ===== SUBMENU LINKS ===== */
     .submenu-link {
         display: block;
         color: #cfcfcf;
         text-decoration: none;
-        padding: 10px 20px 10px 50px;
-        position: relative;
-        transition: background-color 0.2s ease, color 0.2s ease;
+        padding: 10px 20px 10px 44px;
+        font-size: 0.87rem;
+        font-weight: 400;
+        border-left: 3px solid transparent;
+        background: transparent;
+        transition: color 0.2s ease, border-left-color 0.2s ease, background-color 0.2s ease;
     }
 
-    .submenu-link:hover {
-        background: #0f8f3a;
-        color: white;
+    .submenu-link i { font-size: 0.85rem; opacity: 0.75; }
+    .submenu-link:hover { color: white; border-left-color: #009539; background: #333; }
+    .submenu-link:hover i { opacity: 1; }
+    .submenu-link.active { color: white; border-left-color: #009539; background: #333; }
+    .submenu-link.active i { opacity: 1; }
+
+    /* ============================================================
+       MAIN CONTENT SHIFT — applied to .content in each page
+    ============================================================ */
+    .content {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
     }
 
-    .submenu-link.active {
-        background: #0f8f3a;
-        color: white;
-    }
-
-    /* ===== DIVIDER ===== */
-    .sidebar-divider {
-        border-color: #555;
-        margin: 10px 0;
-    }
-
-    /* ===== DROPDOWN MENU (Bootstrap overrides) ===== */
-    .dropdown-menu {
-        background: #2a2a2a;
-        border: none;
-        border-radius: 0;
-        margin: 0;
-        width: 100%;
-    }
-
-    .dropdown-item {
-        color: #cfcfcf;
-        padding: 10px 20px 10px 40px;
-    }
-
-    .dropdown-item:hover {
-        background: #0f8f3a;
-        color: white;
-    }
-
-    .dropdown-toggle::after {
-        float: right;
-        margin-top: 8px;
+    body.sidebar-collapsed .content {
+        margin-left: 68px;
     }
 </style>
 
-<!-- 
-    ========================================
-    STYLES TO REMOVE FROM OTHER PAGES
-    ========================================
-    
-    The following styles are NOW IN THE SIDEBAR and should be DELETED from other page files:
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar   = document.getElementById('mainSidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const STORAGE_KEY = 'clsu_analytica_sidebar_collapsed';
 
-    .sidebar {
-        width: 210px;
-        background: #1f1f1f;
-        min-height: 100vh;
-        position: fixed;
-        color: white;
-    }
-    
-    .sidebar a {
-        color: #cfcfcf;
-        text-decoration: none;
-        display: block;
-        padding: 12px 20px;
-    }
-    
-    .sidebar a.active,
-    .sidebar a:hover {
-        background: #0f8f3a;
-        color: white;
-    }
-    
-    .dropdown-menu {
-        background: #2a2a2a;
-        border: none;
-        border-radius: 0;
-        margin: 0;
-        width: 100%;
-    }
-    
-    .dropdown-item {
-        color: #cfcfcf;
-        padding: 10px 20px 10px 40px;
-    }
-    
-    .dropdown-item:hover {
-        background: #0f8f3a;
-        color: white;
-    }
-    
-    .dropdown-toggle::after {
-        float: right;
-        margin-top: 8px;
-    }
-    
-    .sidebar-link {
-        color: #cfcfcf;
-        text-decoration: none;
-        display: block;
-        padding: 12px 20px;
-    }
+        function applyState(isCollapsed) {
+            sidebar.classList.toggle('collapsed', isCollapsed);
+            document.body.classList.toggle('sidebar-collapsed', isCollapsed);
 
-    .sidebar-link:hover {
-        background: #0f8f3a;
-        color: white;
-    }
+            // Move the toggle button position
+            toggleBtn.style.left = isCollapsed ? '48px' : '230px';
 
-    .collapse {
-        background: #1f1f1f;
-        padding: 20px;
-    }
+            localStorage.setItem(STORAGE_KEY, isCollapsed);
+        }
 
-    .submenu-link {
-        display: block;
-        color: #cfcfcf;
-        text-decoration: none;
-        position: relative;
-        padding: 20px;
-    }
+        // Restore saved state on load
+        const savedState = localStorage.getItem(STORAGE_KEY) === 'true';
+        applyState(savedState);
 
-    .sidebar-link[aria-expanded="true"] {
-        background: #0f8f3a;
-        color: white;
-    }
+        toggleBtn.addEventListener('click', function () {
+            applyState(!sidebar.classList.contains('collapsed'));
+        });
 
-    ========================================
-    KEEP THESE STYLES IN OTHER PAGES
-    ========================================
-    
-    These are page-specific styles that should STAY in each page:
+        // Rotate chevrons when their submenu opens/closes
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (trigger) {
+            const targetId = trigger.getAttribute('data-bs-target');
+            if (!targetId) return;
+            const target = document.querySelector(targetId);
+            if (!target) return;
 
-    body {
-        background: #f5f5f5;
-    }
-    
-    .header {
-        background: #009539;
-        color: white;
-        padding: 10px;
-        font-size: 62px;
-        font-weight: bold;
-    }
-    
-    .content {
-        margin-left: 210px;
-        font-family: 'buttershine', serif;
-    }
-    
-    All the tab, filter, stats, and chart styles...
--->
+            target.addEventListener('show.bs.collapse', function () {
+                trigger.style.transform = 'rotate(180deg)';
+            });
+            target.addEventListener('hide.bs.collapse', function () {
+                trigger.style.transform = 'rotate(0deg)';
+            });
+
+            // Set initial state
+            if (target.classList.contains('show')) {
+                trigger.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+</script>

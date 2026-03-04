@@ -2,36 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLSU Analytica - Faculty Overview</title>
+    <title>CLSU Analytica - Faculty Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
     
     <style>
         body {
             background: #e8ebe8;
             margin: 0;
-            font-family: 'Bricolage Grotesque', sans-serif;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
-        .sidebar {
-            width: 210px;
-            background: #1f1f1f;
-            min-height: 100vh;
-            position: fixed;
-            color: white;
+
+        /* =====================================================
+           CONTENT AREA — shifts with sidebar collapse/expand
+        ===================================================== */
+        .content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            max-width: calc(100vw - 250px);
+            overflow-x: hidden;
         }
-        .sidebar a {
-            color: #cfcfcf;
-            text-decoration: none;
-            display: block;
-            padding: 12px 20px;
+        body.sidebar-collapsed .content {
+            margin-left: 68px;
+            max-width: calc(100vw - 68px);
         }
-        .sidebar a.active,
-        .sidebar a:hover {
-            background: #0f8f3a;
-            color: white;
-        }
+
         .header {
             background: #009539;
             color: white;
@@ -39,14 +37,12 @@
             font-size: 42px;
             font-weight: bold;
             height: 75px;
-        }
-        .content {
-            margin-left: 210px;
+            font-family: 'Inter', sans-serif;
         }
 
-        /* NEW FILTER BAR DESIGN - Matching reference image */
+        /* Filter Bar */
         .filter-bar {
-            font-family: 'Bricolage Grotesque', sans-serif;
+            font-family: 'Inter', sans-serif;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -54,8 +50,9 @@
             padding: 14px 30px;
             border-bottom: 1px solid #b0b5b0;
             height: 40px;
+            width: 100%;
+            box-sizing: border-box;
         }
-
         .filter-bar-label {
             font-size: 13px;
             font-weight: 700;
@@ -64,20 +61,17 @@
             margin-right: 5px;
             margin-left: auto;
         }
-
         .filter-group {
             display: flex;
             align-items: center;
             gap: 6px;
         }
-
         .filter-group label {
             font-size: 12px;
             font-weight: 600;
             color: #2d2d2d;
             white-space: nowrap;
         }
-
         .filter-group select {
             font-size: 12px;
             padding: 5px 28px 5px 12px;
@@ -93,20 +87,17 @@
             min-width: 90px;
             cursor: pointer;
         }
-
         .filter-group select:focus {
             outline: none;
             border-color: #009539;
             background-color: white;
         }
-
         .page-title {
             font-size: 16px;
             font-weight: 700;
             color: #2d2d2d;
             margin-right: 10px;
         }
-
         .clear-filters-btn {
             background: #009539;
             color: white;
@@ -118,10 +109,7 @@
             cursor: pointer;
             margin-left: 8px;
         }
-
-        .clear-filters-btn:hover {
-            background: #00802e;
-        }
+        .clear-filters-btn:hover { background: #00802e; }
 
         /* Statistics Cards */
         .stats-container {
@@ -129,8 +117,9 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             padding: 30px;
+            width: 100%;
+            box-sizing: border-box;
         }
-
         .stat-card {
             border-radius: 15px;
             padding: 20px 25px;
@@ -140,133 +129,71 @@
             flex-direction: column;
             min-height: 100px;
         }
-
-        .stat-card.green {
-            background: #009539;
-            color: white;
-        }
-
+        .stat-card.green { background: #009539; color: white; }
         .stat-card.green .icon-box {
-            background: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 15px;
-            left: 15px;
+            background: white; width: 50px; height: 50px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 15px; left: 15px;
         }
-
-        .stat-card.green .icon-box i {
-            font-size: 22px;
-            color: #009539;
+        .stat-card.green .icon-box i { font-size: 22px; color: #009539; }
+        .stat-card.green .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
+        .stat-card.green .stat-number { font-size: 48px; font-weight: 700; color: white; line-height: 1; }
+        .stat-card.green .stat-label  { font-size: 13px; color: white; font-weight: 600; margin-top: 4px; }
+        .stat-card.blue, .stat-card.orange, .stat-card.purple { background: white; color: #1f1f1f; }
+        .stat-card.blue .icon-box, .stat-card.orange .icon-box, .stat-card.purple .icon-box {
+            background: #009539; width: 50px; height: 50px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 15px; left: 15px;
         }
-
-        .stat-card.green .stat-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            flex: 1;
+        .stat-card.blue .icon-box i, .stat-card.orange .icon-box i, .stat-card.purple .icon-box i { font-size: 22px; color: white; }
+        .stat-card.blue .stat-content, .stat-card.orange .stat-content, .stat-card.purple .stat-content {
+            display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1;
         }
+        .stat-number { font-size: 48px; font-weight: 700; color: #1f1f1f; line-height: 1; }
+        .stat-label  { font-size: 13px; color: #666; font-weight: 600; margin-top: 4px; }
 
-        .stat-card.green .stat-number {
-            font-size: 48px;
-            font-weight: 700;
-            color: white;
-            line-height: 1;
-        }
-
-        .stat-card.green .stat-label {
-            font-size: 13px;
-            color: white;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .stat-card.blue,
-        .stat-card.orange,
-        .stat-card.purple {
-            background: white;
-            color: #1f1f1f;
-        }
-
-        .stat-card.blue .icon-box,
-        .stat-card.orange .icon-box,
-        .stat-card.purple .icon-box {
-            background: #009539;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 15px;
-            left: 15px;
-        }
-
-        .stat-card.blue .icon-box i,
-        .stat-card.orange .icon-box i,
-        .stat-card.purple .icon-box i {
-            font-size: 22px;
-            color: white;
-        }
-
-        .stat-card.blue .stat-content,
-        .stat-card.orange .stat-content,
-        .stat-card.purple .stat-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: 700;
-            color: #1f1f1f;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #666;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
+        /* Charts */
         .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             padding: 0 30px 30px 30px;
+            width: 100%;
+            box-sizing: border-box;
         }
-
         .chart-card {
             background: white;
             border-radius: 20px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
-
-        .chart-card.full-width {
-            grid-column: 1 / -1;
-        }
-
+        .chart-card.full-width { grid-column: 1 / -1; }
         .chart-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #1f1f1f;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 40px;
         }
-
         .chart-wrapper {
             height: 350px;
+            width: 100%;
             position: relative;
+            overflow: hidden;
+        }
+        .chart-wrapper > div { width: 100%; height: 100%; }
+
+        @media (max-width: 1400px) {
+            .stats-container { grid-template-columns: repeat(2, 1fr); }
+            .charts-container { grid-template-columns: 1fr; }
+            .chart-card.full-width { grid-column: 1; }
+            .chart-title { font-size: 16px; white-space: normal; padding-right: 0; }
         }
     </style>
 </head>
@@ -274,13 +201,54 @@
     @include('components.sidebar')
 
     <div class="content">
-        <div class="header">Faculty Overview</div>
+        <div class="header" id="pageHeader">
+            @php
+                $selectedSemesterObj = $semesters->firstWhere('sem_id', $filters['semester']);
+                $semesterDisplay = $selectedSemesterObj ? $selectedSemesterObj->semester . ' ' . $selectedSemesterObj->sy : '';
+                $unitDisplay = 'All';
+                $deptDisplay = '';
+                if ($filters['college'] != 'all') {
+                    $selectedUnit = $colleges->firstWhere('c_u_id', $filters['college']);
+                    $unitDisplay = $selectedUnit ? $selectedUnit->college_acro : 'Unknown';
+                }
+                if ($filters['department'] != 'all') {
+                    $selectedDept = $departments->firstWhere('department_id', $filters['department']);
+                    $deptDisplay = $selectedDept ? $selectedDept->department_acro : '';
+                }
+                if ($filters['sector'] == 'Academic') {
+                    if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                        echo $deptDisplay . ' Faculty Profile (' . $semesterDisplay . ')';
+                    } elseif ($filters['college'] != 'all') {
+                        echo $unitDisplay . ' Faculty Profile (' . $semesterDisplay . ')';
+                    } else {
+                        echo 'Academic Faculty Profile (' . $semesterDisplay . ')';
+                    }
+                } else {
+                    if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                        echo $deptDisplay . ' Faculty Profile (' . $semesterDisplay . ')';
+                    } elseif ($filters['college'] != 'all') {
+                        echo $unitDisplay . ' Faculty Profile (' . $semesterDisplay . ')';
+                    } else {
+                        echo $filters['sector'] . ' Faculty Profile (' . $semesterDisplay . ')';
+                    }
+                }
+            @endphp
+        </div>
 
-        <!-- NEW FILTER BAR DESIGN -->
+        <!-- FILTER BAR -->
         <div class="filter-bar">
-            <div class="page-title">QUALIFICATIONS</div>
-
+            <div class="page-title">FACULTY PROFILE</div>
             <div class="filter-bar-label">Filters:</div>
+
+            <div class="filter-group">
+                <label>Sector:</label>
+                <select id="sectorFilter" onchange="toggleDepartmentFilter()">
+                    <option value="Academic" {{ $filters['sector'] == 'Academic' ? 'selected' : '' }}>Academic</option>
+                    <option value="Research" {{ $filters['sector'] == 'Research' ? 'selected' : '' }}>Research</option>
+                    <option value="Admin"    {{ $filters['sector'] == 'Admin'    ? 'selected' : '' }}>Admin</option>
+                    <option value="Others"   {{ $filters['sector'] == 'Others'   ? 'selected' : '' }}>Others</option>
+                </select>
+            </div>
 
             <div class="filter-group">
                 <label>Semester:</label>
@@ -294,8 +262,8 @@
             </div>
 
             <div class="filter-group">
-                <label>College:</label>
-                <select id="collegeFilter">
+                <label>Unit/Office:</label>
+                <select id="collegeFilter" onchange="updateDepartments()">
                     <option value="all">All</option>
                     @foreach($colleges as $college)
                         <option value="{{ $college->c_u_id }}" {{ $filters['college'] == $college->c_u_id ? 'selected' : '' }}>
@@ -305,7 +273,7 @@
                 </select>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-group" id="departmentFilterGroup" style="{{ $filters['sector'] == 'Academic' && $filters['college'] != 'all' ? '' : 'display: none;' }}">
                 <label>Department:</label>
                 <select id="departmentFilter">
                     <option value="all">All</option>
@@ -317,51 +285,34 @@
                 </select>
             </div>
 
-            <button class="clear-filters-btn" onclick="clearFilters()">
-                Clear Filters
-            </button>
+            <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
         </div>
 
-        <!-- Statistics Cards - 4 Most Important Metrics -->
+        <!-- Statistics Cards -->
         <div class="stats-container">
-            <!-- Card 1: Total Faculty (Green) -->
             <div class="stat-card green">
-                <div class="icon-box">
-                    <i class="bi bi-people-fill"></i>
-                </div>
+                <div class="icon-box"><i class="bi bi-people-fill"></i></div>
                 <div class="stat-content">
                     <div class="stat-number">{{ $totalFaculty }}</div>
                     <div class="stat-label">Total Faculty</div>
                 </div>
             </div>
-
-            <!-- Card 2: Active Faculty -->
             <div class="stat-card blue">
-                <div class="icon-box">
-                    <i class="bi bi-person-check-fill"></i>
-                </div>
+                <div class="icon-box"><i class="bi bi-person-check-fill"></i></div>
                 <div class="stat-content">
                     <div class="stat-number">{{ $activeCount }}</div>
                     <div class="stat-label">Active Faculty</div>
                 </div>
             </div>
-
-            <!-- Card 3: PhD Holders -->
             <div class="stat-card orange">
-                <div class="icon-box">
-                    <i class="bi bi-mortarboard-fill"></i>
-                </div>
+                <div class="icon-box"><i class="bi bi-mortarboard-fill"></i></div>
                 <div class="stat-content">
                     <div class="stat-number">{{ $phdHolders }}</div>
                     <div class="stat-label">PhD Holders</div>
                 </div>
             </div>
-
-            <!-- Card 4: Masters Holders -->
             <div class="stat-card purple">
-                <div class="icon-box">
-                    <i class="bi bi-book-fill"></i>
-                </div>
+                <div class="icon-box"><i class="bi bi-book-fill"></i></div>
                 <div class="stat-content">
                     <div class="stat-number">{{ $mastersHolders }}</div>
                     <div class="stat-label">Masters Holders</div>
@@ -371,386 +322,481 @@
 
         <!-- Charts Section -->
         <div class="charts-container">
-            <!-- Chart 1: Faculty by Department -->
             <div class="chart-card">
-                <div class="chart-title">
-                    Faculty by Department
+                <div class="chart-title" id="rankingTitle">
+                    @php
+                        if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                            $deptName = $departments->where('department_id', $filters['department'])->first();
+                            echo $deptName->department_acro . ' Faculty Count';
+                        } elseif ($filters['college'] != 'all') {
+                            $collegeName = $colleges->where('c_u_id', $filters['college'])->first();
+                            echo $collegeName->college_acro . ' Faculty Count';
+                        } else {
+                            echo 'Ranking of Faculty Count by College/Department';
+                        }
+                    @endphp
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="departmentChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><div id="facultyRankingChart"></div></div>
             </div>
 
-            <!-- Chart 2: Faculty Categories -->
             <div class="chart-card">
-                <div class="chart-title">
-                    Employment Status
+                <div class="chart-title" id="employmentTitle">
+                    @php
+                        if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                            $deptName = $departments->where('department_id', $filters['department'])->first();
+                            echo 'Faculty Employment Status - ' . $deptName->department;
+                        } elseif ($filters['college'] != 'all') {
+                            $collegeName = $colleges->where('c_u_id', $filters['college'])->first();
+                            echo 'Faculty Employment Status - ' . $collegeName->college_unit;
+                        } else {
+                            echo 'Faculty Employment Status';
+                        }
+                    @endphp
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="categoryChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><div id="employmentChart"></div></div>
             </div>
 
-            <!-- Chart 3: PhD Count by Department -->
             <div class="chart-card">
-                <div class="chart-title">
-                    PhD Holders by Department
+                <div class="chart-title" id="statusTitle">
+                    @php
+                        if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                            $deptName = $departments->where('department_id', $filters['department'])->first();
+                            echo 'Faculty Availability - ' . $deptName->department;
+                        } elseif ($filters['college'] != 'all') {
+                            $collegeName = $colleges->where('c_u_id', $filters['college'])->first();
+                            echo 'Faculty Availability - ' . $collegeName->college_unit;
+                        } else {
+                            echo 'Faculty Availability Status';
+                        }
+                    @endphp
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="phdByDepartmentChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><div id="statusChart"></div></div>
             </div>
 
-            <!-- Chart 4: Active vs On Leave -->
             <div class="chart-card">
-                <div class="chart-title">
-                    Faculty Status Overview
+                <div class="chart-title" id="sectorTitle">
+                    @php
+                        if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                            $deptName = $departments->where('department_id', $filters['department'])->first();
+                            echo 'Faculty by Sector - ' . $deptName->department;
+                        } elseif ($filters['college'] != 'all') {
+                            $collegeName = $colleges->where('c_u_id', $filters['college'])->first();
+                            echo 'Faculty by Sector - ' . $collegeName->college_unit;
+                        } else {
+                            echo 'Faculty by Sector Distribution';
+                        }
+                    @endphp
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="statusChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><div id="sectorChart"></div></div>
             </div>
 
-            <!-- Chart 5: Highest Degree Distribution (Full Width) -->
             <div class="chart-card full-width">
-                <div class="chart-title">
-                    Highest Academic Qualification Distribution
+                <div class="chart-title" id="qualificationTitle">
+                    @php
+                        if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                            $deptName = $departments->where('department_id', $filters['department'])->first();
+                            echo 'Faculty Qualifications - ' . $deptName->department;
+                        } elseif ($filters['college'] != 'all') {
+                            $collegeName = $colleges->where('c_u_id', $filters['college'])->first();
+                            echo 'Faculty Qualifications - ' . $collegeName->college_unit;
+                        } else {
+                            echo 'Faculty Qualification Distribution';
+                        }
+                    @endphp
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="qualificationChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><div id="qualificationChart"></div></div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // ============================================
-            // 1. FACULTY BY DEPARTMENT (Bar Chart)
-            // ============================================
-            const deptCtx = document.getElementById('departmentChart');
-            if (deptCtx) {
-                const departmentLabels = {!! json_encode($departmentStats->pluck('code')) !!};
-                const departmentData = {!! json_encode($departmentStats->pluck('count')) !!};
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-                new Chart(deptCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: departmentLabels,
-                        datasets: [{
-                            label: 'Faculty Count',
-                            data: departmentData,
-                            backgroundColor: '#009539',
-                            borderRadius: 8,
-                            barPercentage: 0.6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: '#1f1f1f',
-                                titleFont: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                                bodyFont: { family: "'Bricolage Grotesque', sans-serif" }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { drawBorder: false, color: '#e0e0e0' },
-                                ticks: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif" },
-                                    color: '#666'
-                                }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                                    color: '#1f1f1f',
-                                    maxRotation: 45
-                                }
-                            }
-                        }
-                    }
-                });
+    // ============================================
+    // Reflow all Plotly charts (called on sidebar toggle)
+    // ============================================
+    function reflowCharts() {
+        const charts = ['facultyRankingChart', 'employmentChart', 'statusChart', 'sectorChart', 'qualificationChart'];
+        charts.forEach(function(id) {
+            const div = document.getElementById(id);
+            if (div && div.data) {
+                Plotly.relayout(div, { autosize: true });
             }
+        });
+    }
 
-            // ============================================
-            // 2. EMPLOYMENT STATUS (Donut Chart)
-            // ============================================
-            const catCtx = document.getElementById('categoryChart');
-            if (catCtx) {
-                const categoryLabels = {!! json_encode($categories->pluck('category')) !!};
-                const categoryData = {!! json_encode($categories->pluck('count')) !!};
+    // Listen for sidebar toggle and reflow after the CSS transition ends (300ms)
+    const sidebarToggleBtn = document.getElementById('sidebarToggle');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function() {
+            setTimeout(reflowCharts, 320);
+        });
+    }
 
-                new Chart(catCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: categoryLabels,
-                        datasets: [{
-                            data: categoryData,
-                            backgroundColor: ['#009539', '#2c7be5', '#f6c343', '#e74c3c'],
-                            borderColor: 'white',
-                            borderWidth: 3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '65%',
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif", size: 13 },
-                                    color: '#1f1f1f',
-                                    padding: 15,
-                                    usePointStyle: true
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: '#1f1f1f',
-                                titleFont: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                                bodyFont: { family: "'Bricolage Grotesque', sans-serif" }
-                            }
-                        }
-                    }
-                });
+    // ============================================
+    // Header title updater
+    // ============================================
+    function updateHeaderTitle() {
+        const sector = document.getElementById('sectorFilter').value;
+        const semester = document.getElementById('semesterFilter');
+        const semesterText = semester.options[semester.selectedIndex].text;
+        const college = document.getElementById('collegeFilter');
+        const collegeText = college.options[college.selectedIndex].text;
+        const department = document.getElementById('departmentFilter');
+        const departmentText = department ? department.options[department.selectedIndex].text : 'All';
+        const header = document.getElementById('pageHeader');
+        let title = '';
+        if (sector === 'Academic') {
+            if (college.value !== 'all' && department && department.value !== 'all') {
+                title = departmentText + ' Faculty Profile (' + semesterText + ')';
+            } else if (college.value !== 'all') {
+                title = collegeText + ' Faculty Profile (' + semesterText + ')';
+            } else {
+                title = 'Academic Faculty Profile (' + semesterText + ')';
             }
-
-            // ============================================
-// 3. PHD BY DEPARTMENT (Bar Chart) - SINGLE GREEN
-// ============================================
-const phdDeptCtx = document.getElementById('phdByDepartmentChart');
-if (phdDeptCtx) {
-    const phdLabels = {!! json_encode($phdByDepartment->pluck('department_acro')) !!};
-    const phdCounts = {!! json_encode($phdByDepartment->pluck('phd_count')) !!};
-
-    new Chart(phdDeptCtx, {
-        type: 'bar',
-        data: {
-            labels: phdLabels,
-            datasets: [{
-                label: 'PhD Holders',
-                data: phdCounts,
-                backgroundColor: '#009539', // Single solid green
-                borderColor: '#006400',
-                borderWidth: 1,
-                borderRadius: 8,
-                hoverBackgroundColor: '#00802e' // Darker on hover
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1f1f1f',
-                    titleFont: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                    bodyFont: { family: "'Bricolage Grotesque', sans-serif" },
-                    callbacks: {
-                        label: function(context) {
-                            return 'PhD Holders: ' + context.parsed.y;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { drawBorder: false, color: '#e0e0e0' },
-                    ticks: {
-                        font: { family: "'Bricolage Grotesque', sans-serif" },
-                        color: '#666',
-                        stepSize: 1
-                    },
-                    title: {
-                        display: true,
-                        text: 'Number of PhD Holders',
-                        font: { family: "'Bricolage Grotesque', sans-serif", weight: '600', size: 12 },
-                        color: '#666'
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        font: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                        color: '#1f1f1f',
-                        maxRotation: 45
-                    }
-                }
+        } else {
+            if (college.value !== 'all' && department && department.value !== 'all') {
+                title = departmentText + ' Faculty Profile (' + semesterText + ')';
+            } else if (college.value !== 'all') {
+                title = collegeText + ' Faculty Profile (' + semesterText + ')';
+            } else {
+                title = sector + ' Faculty Profile (' + semesterText + ')';
             }
         }
+        header.textContent = title;
+    }
+
+    function applyFilters() {
+        updateHeaderTitle();
+        const params = new URLSearchParams();
+        const sector     = document.getElementById('sectorFilter').value;
+        const semester   = document.getElementById('semesterFilter').value;
+        const college    = document.getElementById('collegeFilter').value;
+        const department = document.getElementById('departmentFilter')?.value || 'all';
+        if (sector)              params.append('sector',     sector);
+        if (semester !== 'all')  params.append('semester',   semester);
+        if (college  !== 'all')  params.append('college',    college);
+        if (department !== 'all') params.append('department', department);
+        const url = new URL(window.location.href);
+        url.search = params.toString();
+        window.location.href = url.toString();
+    }
+
+    function toggleDepartmentFilter() {
+        const sector   = document.getElementById('sectorFilter').value;
+        const college  = document.getElementById('collegeFilter').value;
+        const deptGroup = document.getElementById('departmentFilterGroup');
+        deptGroup.style.display = (sector === 'Academic' && college !== 'all') ? 'flex' : 'none';
+        updateHeaderTitle();
+    }
+
+    document.getElementById('sectorFilter').addEventListener('change', function() { toggleDepartmentFilter(); updateHeaderTitle(); });
+    document.getElementById('semesterFilter').addEventListener('change', function() { updateHeaderTitle(); });
+    document.getElementById('collegeFilter').addEventListener('change', function() { updateDepartments(); updateHeaderTitle(); });
+    if (document.getElementById('departmentFilter')) {
+        document.getElementById('departmentFilter').addEventListener('change', function() { updateHeaderTitle(); });
+    }
+
+    // ============================================
+    // 1. FACULTY COUNT RANKING CHART (Horizontal Bar)
+    // ============================================
+    const rankingDiv = document.getElementById('facultyRankingChart');
+    if (rankingDiv) {
+        rankingDiv.innerHTML = '';
+        @php
+            $rankingLabels  = [];
+            $rankingData    = [];
+            $highlightIndex = -1;
+            if ($filters['college'] != 'all' && $filters['department'] != 'all') {
+                foreach($phdByDepartment as $index => $dept) {
+                    $rankingLabels[] = $dept->department_acro;
+                    $rankingData[]   = $dept->total_faculty;
+                    if ($dept->department_acro == ($filters['department_acro'] ?? '')) { $highlightIndex = $index; }
+                }
+            } elseif ($filters['college'] != 'all') {
+                foreach($phdByDepartment as $dept) {
+                    $rankingLabels[] = $dept->department_acro;
+                    $rankingData[]   = $dept->total_faculty;
+                }
+            } else {
+                $rankingLabels = $collegeStats->pluck('college')->toArray();
+                $rankingData   = $collegeStats->pluck('total_faculty')->toArray();
+            }
+        @endphp
+
+        let barColors = new Array({{ count($rankingLabels) }}).fill('#009539');
+        @if($highlightIndex >= 0)
+            barColors[{{ $highlightIndex }}] = '#FFA500';
+        @endif
+
+        const rankingData = [{
+            x: {!! json_encode($rankingData) !!},
+            y: {!! json_encode($rankingLabels) !!},
+            type: 'bar',
+            orientation: 'h',
+            marker: { color: barColors, line: { color: 'rgba(0,0,0,0.1)', width: 1 } },
+            text: {!! json_encode($rankingData) !!},
+            textposition: 'outside',
+            textfont: { family: 'Inter', size: 11, color: '#1f1f1f' },
+            hoverinfo: 'x+name',
+            hovertemplate: '<b>%{y}</b><br>Faculty Count: %{x}<extra></extra>'
+        }];
+
+        const rankingLayout = {
+            font: { family: 'Inter' },
+            autosize: true,
+            margin: { l: 80, r: 30, t: 30, b: 40 },
+            xaxis: {
+                title: { text: 'Number of Faculty', font: { family: 'Inter', size: 11, weight: 600 } },
+                gridcolor: '#e0e0e0', zeroline: false,
+                tickfont: { family: 'Inter', size: 10, color: '#666' }
+            },
+            yaxis: {
+                gridcolor: 'transparent',
+                tickfont: { family: 'Inter', size: 11, weight: 600, color: '#1f1f1f' },
+                autorange: 'reversed'
+            },
+            paper_bgcolor: 'white', plot_bgcolor: 'white', showlegend: false, bargap: 0.3
+        };
+
+        Plotly.newPlot(rankingDiv, rankingData, rankingLayout, {
+            responsive: true, displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d'],
+            toImageButtonOptions: { format: 'png', filename: 'faculty_ranking', height: 500, width: 700, scale: 1 }
+        });
+    }
+
+    // ============================================
+    // 2. EMPLOYMENT STATUS (Donut with center total)
+    // ============================================
+    const empDiv = document.getElementById('employmentChart');
+    if (empDiv) {
+        empDiv.innerHTML = '';
+        const categoryLabels = {!! json_encode($categories->pluck('category')) !!};
+        const categoryData   = {!! json_encode($categories->pluck('count')) !!};
+        const totalFaculty   = {{ $totalFaculty }};
+        const nonZeroData = [], nonZeroLabels = [], nonZeroColors = [];
+        const colorMap = ['#009539', '#2c7be5', '#f6c343', '#e74c3c'];
+        for (let i = 0; i < categoryData.length; i++) {
+            if (categoryData[i] > 0) {
+                nonZeroData.push(categoryData[i]);
+                nonZeroLabels.push(categoryLabels[i]);
+                nonZeroColors.push(colorMap[i % colorMap.length]);
+            }
+        }
+        const empData = [{
+            values: nonZeroData, labels: nonZeroLabels, type: 'pie', hole: 0.7,
+            marker: { colors: nonZeroColors },
+            textinfo: 'percent', textposition: 'outside',
+            textfont: { family: 'Inter', size: 11, color: '#1f1f1f' },
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<extra></extra>',
+            showlegend: true, direction: 'clockwise', rotation: 0, sort: false
+        }];
+        const empLayout = {
+            font: { family: 'Inter' }, autosize: true,
+            margin: { l: 10, r: 10, t: 40, b: 10 },
+            annotations: [{ text: `${totalFaculty}<br><span style="font-size:11px;color:#666;">Total</span>`, x: 0.5, y: 0.5, showarrow: false, font: { family: 'Inter', size: 20, weight: 700, color: '#1f1f1f' } }],
+            paper_bgcolor: 'white', plot_bgcolor: 'white', showlegend: true,
+            legend: { orientation: 'h', y: 1.15, x: 0.1, xanchor: 'left', font: { family: 'Inter', size: 11 }, itemclick: false, itemdoubleclick: false }
+        };
+        Plotly.newPlot(empDiv, empData, empLayout, {
+            responsive: true, displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d'],
+            toImageButtonOptions: { format: 'png', filename: 'employment_status', height: 500, width: 700, scale: 1 }
+        });
+    }
+
+    // ============================================
+    // 3. FACULTY STATUS (Donut with center total)
+    // ============================================
+    const statusDiv = document.getElementById('statusChart');
+    if (statusDiv) {
+        statusDiv.innerHTML = '';
+        const activeCount  = {{ $activeCount }};
+        const onLeaveCount = {{ $onLeaveCount }};
+        const totalStatusFaculty = activeCount + onLeaveCount;
+        const statusData = [{
+            values: [activeCount, onLeaveCount].filter(v => v > 0),
+            labels: ['Active', 'On Leave'].filter((_, i) => [activeCount, onLeaveCount][i] > 0),
+            type: 'pie', hole: 0.7,
+            marker: { colors: ['#009539', '#e74c3c'].filter((_, i) => [activeCount, onLeaveCount][i] > 0) },
+            textinfo: 'percent', textposition: 'outside',
+            textfont: { family: 'Inter', size: 11, color: '#1f1f1f' },
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<extra></extra>',
+            showlegend: true
+        }];
+        const statusLayout = {
+            font: { family: 'Inter' }, autosize: true,
+            margin: { l: 10, r: 10, t: 40, b: 10 },
+            annotations: [{ text: `${totalStatusFaculty}<br><span style="font-size:11px;color:#666;">Total</span>`, x: 0.5, y: 0.5, showarrow: false, font: { family: 'Inter', size: 20, weight: 700, color: '#1f1f1f' } }],
+            paper_bgcolor: 'white', plot_bgcolor: 'white', showlegend: true,
+            legend: { orientation: 'h', y: 1.15, x: 0.1, xanchor: 'left', font: { family: 'Inter', size: 11 } }
+        };
+        Plotly.newPlot(statusDiv, statusData, statusLayout, {
+            responsive: true, displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d'],
+            toImageButtonOptions: { format: 'png', filename: 'faculty_availability', height: 500, width: 700, scale: 1 }
+        });
+    }
+
+    // ============================================
+    // 4. SECTOR DISTRIBUTION (Donut with center total)
+    // ============================================
+    const sectorDiv = document.getElementById('sectorChart');
+    if (sectorDiv) {
+        sectorDiv.innerHTML = '';
+        const sectorData   = [{{ $sectorDistribution['Academic'] ?? 0 }}, {{ $sectorDistribution['Research'] ?? 0 }}, {{ $sectorDistribution['Admin'] ?? 0 }}, {{ $sectorDistribution['Others'] ?? 0 }}];
+        const sectorLabels = ['Academic', 'Research', 'Admin', 'Others'];
+        const totalSector  = {{ $totalSectorFaculty }};
+        const sectorColors = ['#009539', '#2c7be5', '#f6c343', '#e74c3c'];
+        const nonZeroSectorData = [], nonZeroSectorLabels = [], nonZeroSectorColors = [];
+        for (let i = 0; i < sectorData.length; i++) {
+            if (sectorData[i] > 0) { nonZeroSectorData.push(sectorData[i]); nonZeroSectorLabels.push(sectorLabels[i]); nonZeroSectorColors.push(sectorColors[i]); }
+        }
+        const sectorPlotData = [{
+            values: nonZeroSectorData, labels: nonZeroSectorLabels, type: 'pie', hole: 0.7,
+            marker: { colors: nonZeroSectorColors },
+            textinfo: 'percent', textposition: 'outside',
+            textfont: { family: 'Inter', size: 11, color: '#1f1f1f' },
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<extra></extra>',
+            showlegend: true
+        }];
+        const sectorLayout = {
+            font: { family: 'Inter' }, autosize: true,
+            margin: { l: 10, r: 10, t: 40, b: 10 },
+            annotations: [{ text: `${totalSector}<br><span style="font-size:11px;color:#666;">Total</span>`, x: 0.5, y: 0.5, showarrow: false, font: { family: 'Inter', size: 20, weight: 700, color: '#1f1f1f' } }],
+            paper_bgcolor: 'white', plot_bgcolor: 'white', showlegend: true,
+            legend: { orientation: 'h', y: 1.15, x: 0.1, xanchor: 'left', font: { family: 'Inter', size: 11 } }
+        };
+        Plotly.newPlot(sectorDiv, sectorPlotData, sectorLayout, {
+            responsive: true, displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d'],
+            toImageButtonOptions: { format: 'png', filename: 'sector_distribution', height: 500, width: 700, scale: 1 }
+        });
+    }
+
+    // ============================================
+    // 5. FACULTY QUALIFICATION DISTRIBUTION (Stacked Bar)
+    // ============================================
+    const qualDiv = document.getElementById('qualificationChart');
+    if (qualDiv) {
+        qualDiv.innerHTML = '';
+        @php
+            $qualLabels = []; $phdPercentages = []; $mastersPercentages = []; $bachelorsPercentages = [];
+            $phdCounts  = []; $mastersCounts  = []; $bachelorsCounts    = [];
+            foreach($phdByDepartment as $dept) {
+                $qualLabels[]          = $dept->department_acro;
+                $total                 = $dept->total_faculty;
+                $phdPercentages[]      = $total > 0 ? round(($dept->phd_count     / $total) * 100, 1) : 0;
+                $mastersPercentages[]  = $total > 0 ? round(($dept->masters_count / $total) * 100, 1) : 0;
+                $bachelorsPercentages[]= $total > 0 ? round((($total - $dept->phd_count - $dept->masters_count) / $total) * 100, 1) : 0;
+                $phdCounts[]      = $dept->phd_count;
+                $mastersCounts[]  = $dept->masters_count;
+                $bachelorsCounts[]= $dept->bachelors_count;
+            }
+        @endphp
+
+        const qualData = [
+            {
+                name: 'PhD',
+                x: {!! json_encode($qualLabels) !!}, y: {!! json_encode($phdPercentages) !!},
+                type: 'bar', marker: { color: '#1565c0' },
+                text: {!! json_encode($phdCounts) !!},
+                texttemplate: '%{y}%', textposition: 'inside',
+                insidetextfont: { color: 'white', family: 'Inter', size: 10 },
+                hovertemplate: '<b>%{x}</b><br>PhD: %{y}% (%{text})<extra></extra>'
+            },
+            {
+                name: 'Masters',
+                x: {!! json_encode($qualLabels) !!}, y: {!! json_encode($mastersPercentages) !!},
+                type: 'bar', marker: { color: '#009539' },
+                text: {!! json_encode($mastersCounts) !!},
+                texttemplate: '%{y}%', textposition: 'inside',
+                insidetextfont: { color: 'white', family: 'Inter', size: 10 },
+                hovertemplate: '<b>%{x}</b><br>Masters: %{y}% (%{text})<extra></extra>'
+            },
+            {
+                name: 'Bachelors',
+                x: {!! json_encode($qualLabels) !!}, y: {!! json_encode($bachelorsPercentages) !!},
+                type: 'bar', marker: { color: '#f6c343' },
+                text: {!! json_encode($bachelorsCounts) !!},
+                texttemplate: '%{y}%', textposition: 'inside',
+                insidetextfont: { color: 'white', family: 'Inter', size: 10 },
+                hovertemplate: '<b>%{x}</b><br>Bachelors: %{y}% (%{text})<extra></extra>'
+            }
+        ];
+        const qualLayout = {
+            font: { family: 'Inter' }, autosize: true, barmode: 'stack',
+            margin: { l: 50, r: 20, t: 50, b: 80 },
+            xaxis: { tickfont: { family: 'Inter', size: 10, weight: 600, color: '#1f1f1f' }, tickangle: -30, gridcolor: 'transparent' },
+            yaxis: { title: { text: 'Percentage (%)', font: { family: 'Inter', size: 11, weight: 600 } }, range: [0, 100], tickfont: { family: 'Inter', size: 10, color: '#666' }, gridcolor: '#e0e0e0' },
+            paper_bgcolor: 'white', plot_bgcolor: 'white', showlegend: true,
+            legend: { orientation: 'h', y: 1.15, x: 0.1, xanchor: 'left', font: { family: 'Inter', size: 11 } }
+        };
+        Plotly.newPlot(qualDiv, qualData, qualLayout, {
+            responsive: true, displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d'],
+            toImageButtonOptions: { format: 'png', filename: 'qualification_distribution', height: 500, width: 900, scale: 1 }
+        });
+    }
+
+    // Window resize handler
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            const charts = ['facultyRankingChart', 'employmentChart', 'statusChart', 'sectorChart', 'qualificationChart'];
+            charts.forEach(function(chartId) {
+                const div = document.getElementById(chartId);
+                if (div && div.data) { Plotly.relayout(div, { autosize: true }); }
+            });
+        }, 250);
     });
+
+});
+
+// ============================================
+// FILTER HANDLERS (outside DOMContentLoaded so they're globally accessible)
+// ============================================
+function toggleDepartmentFilter() {
+    const sector    = document.getElementById('sectorFilter').value;
+    const college   = document.getElementById('collegeFilter').value;
+    const deptGroup = document.getElementById('departmentFilterGroup');
+    deptGroup.style.display = (sector === 'Academic' && college !== 'all') ? 'flex' : 'none';
 }
 
-            // ============================================
-            // 4. FACULTY STATUS (Horizontal Bar)
-            // ============================================
-            const statusCtx = document.getElementById('statusChart');
-            if (statusCtx) {
-                new Chart(statusCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Active', 'On Leave'],
-                        datasets: [{
-                            data: [{{ $activeCount }}, {{ $onLeaveCount }}],
-                            backgroundColor: ['#009539', '#e74c3c'],
-                            borderRadius: 8,
-                            barPercentage: 0.5
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: '#1f1f1f',
-                                titleFont: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                                bodyFont: { family: "'Bricolage Grotesque', sans-serif" }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                grid: { drawBorder: false, color: '#e0e0e0' },
-                                ticks: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif" },
-                                    color: '#666'
-                                }
-                            },
-                            y: {
-                                grid: { display: false },
-                                ticks: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif", weight: '600', size: 14 },
-                                    color: '#1f1f1f'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+function updateDepartments() {
+    const college = document.getElementById('collegeFilter').value;
+    const params  = new URLSearchParams(window.location.search);
+    params.set('college', college);
+    params.delete('department');
+    window.location.href = window.location.pathname + '?' + params.toString();
+}
 
-            // ============================================
-            // 5. QUALIFICATION DISTRIBUTION (Grouped Bar)
-            // ============================================
-            const qualCtx = document.getElementById('qualificationChart');
-            if (qualCtx) {
-                const deptLabels = {!! json_encode($phdByDepartment->pluck('department_acro')) !!};
-                const phdCounts = {!! json_encode($phdByDepartment->pluck('phd_count')) !!};
-                const mastersCounts = {!! json_encode($phdByDepartment->pluck('masters_count')) !!};
-                const totalFaculty = {!! json_encode($phdByDepartment->pluck('total_faculty')) !!};
+function applyFilters() {
+    const params     = new URLSearchParams();
+    const sector     = document.getElementById('sectorFilter').value;
+    const semester   = document.getElementById('semesterFilter').value;
+    const college    = document.getElementById('collegeFilter').value;
+    const department = document.getElementById('departmentFilter')?.value || 'all';
+    if (sector)              params.append('sector',     sector);
+    if (semester !== 'all')  params.append('semester',   semester);
+    if (college  !== 'all')  params.append('college',    college);
+    if (department !== 'all') params.append('department', department);
+    const url = new URL(window.location.href);
+    url.search = params.toString();
+    window.location.href = url.toString();
+}
 
-                const bachelorsCounts = totalFaculty.map((total, index) => 
-                    total - (phdCounts[index] || 0) - (mastersCounts[index] || 0)
-                );
+function clearFilters() {
+    window.location.href = '{{ route('stzfaculty.overview') }}';
+}
 
-                new Chart(qualCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: deptLabels,
-                        datasets: [
-                            {
-                                label: 'PhD',
-                                data: phdCounts,
-                                backgroundColor: '#1565c0',
-                                borderRadius: 5
-                            },
-                            {
-                                label: "Master's",
-                                data: mastersCounts,
-                                backgroundColor: '#009539',
-                                borderRadius: 5
-                            },
-                            {
-                                label: "Bachelor's Only",
-                                data: bachelorsCounts,
-                                backgroundColor: '#f6c343',
-                                borderRadius: 5
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif", size: 13 },
-                                    color: '#1f1f1f',
-                                    padding: 15,
-                                    usePointStyle: true
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: '#1f1f1f',
-                                titleFont: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                                bodyFont: { family: "'Bricolage Grotesque', sans-serif" }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                stacked: true,
-                                grid: { display: false },
-                                ticks: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif", weight: '600' },
-                                    color: '#1f1f1f',
-                                    maxRotation: 45
-                                }
-                            },
-                            y: {
-                                stacked: true,
-                                beginAtZero: true,
-                                grid: { drawBorder: false, color: '#e0e0e0' },
-                                ticks: {
-                                    font: { family: "'Bricolage Grotesque', sans-serif" },
-                                    color: '#666'
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // ============================================
-            // FILTER HANDLERS
-            // ============================================
-            document.querySelectorAll('#semesterFilter, #collegeFilter, #departmentFilter')
-                .forEach(select => {
-                    select.addEventListener('change', function() {
-                        applyFilters();
-                    });
-                });
-        });
-
-        function applyFilters() {
-            const params = new URLSearchParams();
-            
-            const semester = document.getElementById('semesterFilter').value;
-            const college = document.getElementById('collegeFilter').value;
-            const department = document.getElementById('departmentFilter').value;
-            
-            if (semester !== 'all') params.append('semester', semester);
-            if (college !== 'all') params.append('college', college);
-            if (department !== 'all') params.append('department', department);
-            
-            const url = new URL(window.location.href);
-            url.search = params.toString();
-            window.location.href = url.toString();
-        }
-
-        function clearFilters() {
-            window.location.href = '{{ route('stzfaculty.overview') }}';
-        }
-    </script>
+document.querySelectorAll('#sectorFilter, #semesterFilter, #collegeFilter, #departmentFilter')
+    .forEach(function(select) {
+        if (select) { select.addEventListener('change', applyFilters); }
+    });
+</script>
 </body>
 </html>
