@@ -54,8 +54,10 @@
                 <a href="{{ url('/enrollment') }}"  class="submenu-link {{ request()->is('enrollment')  ? 'active' : '' }}">
                     <i class="bi bi-journal-text me-2"></i><span class="menu-label">Enrollment</span>
                 </a>
-                <a href="{{ url('/graduation') }}"  class="submenu-link {{ request()->is('graduation')  ? 'active' : '' }}">
-                    <i class="bi bi-mortarboard me-2"></i><span class="menu-label">Graduation</span>
+                <!-- Graduates -->
+                <a href="{{ route('graduates.index') }}"
+                class="submenu-link {{ request()->routeIs('graduates.index') ? 'active' : '' }}">
+                    <i class="bi bi-award-fill me-2"></i><span class="menu-label">Graduates</span>
                 </a>
                 <a href="{{ url('/scholarship') }}" class="submenu-link {{ request()->is('scholarship') ? 'active' : '' }}">
                     <i class="bi bi-award me-2"></i><span class="menu-label">Scholarship</span>
@@ -95,6 +97,11 @@
                    class="submenu-link {{ request()->routeIs('stzfaculty.approval') ? 'active' : '' }}">
                     <i class="bi bi-check2-circle me-2"></i><span class="menu-label">Faculty Approval</span>
                 </a>
+                <!-- SUC Faculty -->
+                    <a href="{{ route('suc-faculty.index') }}"
+                    class="submenu-link {{ request()->routeIs('suc-faculty.index') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill me-2"></i><span class="menu-label">SUC Faculty</span>
+                </a>
             </div>
         </div>
 
@@ -113,9 +120,10 @@
                    style="cursor:pointer; padding: 0 16px 0 8px;"></i>
             </div>
             <div class="collapse" id="financialMenu">
-                <a href="#" class="submenu-link">
-                    <i class="bi bi-pie-chart me-2"></i><span class="menu-label">Normative Funding Allocation</span>
-                </a>
+            <a href="{{ route('normative-funding.index') }}"
+            class="submenu-link {{ request()->routeIs('normative-funding.index') ? 'active' : '' }}">
+                <i class="bi bi-cash-stack me-2"></i><span class="menu-label">Normative Funding</span>
+            </a>
             </div>
         </div>
 

@@ -4,62 +4,54 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GraduatesController;
+use App\Http\Controllers\FundingController;
+use App\Http\Controllers\FacultyController;
 
-
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-
-/*
-|--------------------------------------------------------------------------
-| Protected Routes (Auth Required)
-|--------------------------------------------------------------------------
-*/
 Route::middleware('auth')->group(function () {
 
     Route::view('/dashboard', 'dashboard')->name('dashboard');
-
     Route::view('/student', 'student')->name('student.index');
 
     // Student pages
     Route::view('/enrollment', 'student.enrollment')->name('student.enrollment');
     Route::view('/graduation', 'student.graduation')->name('student.graduation');
-    Route::view('/scholarship', 'student.scholarship')->name('student.scholarship'); 
+    Route::view('/scholarship', 'student.scholarship')->name('student.scholarship');
 
+    // ✅ Graduates
+    Route::get('/graduates', [GraduatesController::class, 'index'])
+        ->name('graduates.index');
+
+    // ✅ Normative Funding
+    Route::get('/normative-funding', [FundingController::class, 'index'])
+        ->name('normative-funding.index');
 
     // ====================================================
-    // FACULTY DASHBOARD ROUTES
+    // FACULTY ROUTES
     // ====================================================
     Route::prefix('faculty')->group(function () {
-        // Faculty Overview Dashboard (Page 1)
         Route::get('/overview', [DashboardController::class, 'facultyOverview'])
             ->name('stzfaculty.overview');
-        
-        // Teaching Load (Page 2) - Will be created later
         Route::get('/teaching-load', [DashboardController::class, 'teachingLoad'])
             ->name('stzfaculty.teaching-load');
-        
-        // Research Performance (Page 3) - Will be created later
         Route::get('/research-performance', [DashboardController::class, 'researchPerformance'])
             ->name('stzfaculty.research-performance');
-        
-        // Faculty Approval
         Route::get('/approval', [DashboardController::class, 'facultyApproval'])
             ->name('stzfaculty.approval');
-
-
-        Route::get('/qualifications', [DashboardController::class, 'facultyQualifications'])   
+        Route::get('/approval/data', [DashboardController::class, 'getDashboardData'])
+            ->name('faculty.faculty_approval.data');
+        Route::get('/qualifications', [DashboardController::class, 'facultyQualifications'])
             ->name('stzfaculty.qualifications');
 
-        
-        
-        // API Endpoints for AJAX data
+        // ✅ SUC Faculty
+        Route::get('/suc-faculty', [FacultyController::class, 'index'])
+            ->name('suc-faculty.index');
+
+        // API Endpoints
         Route::prefix('api')->group(function () {
             Route::get('/faculty-stats', [DashboardController::class, 'getFacultyStats'])
                 ->name('faculty.api.stats');
@@ -67,19 +59,23 @@ Route::middleware('auth')->group(function () {
                 ->name('faculty.api.department-stats');
             Route::get('/teaching-load-data', [DashboardController::class, 'getTeachingLoadData'])
                 ->name('faculty.api.teaching-load');
+            Route::get('/teaching-load/ajax', [DashboardController::class, 'teachingLoadAjax'])
+                ->name('stzfaculty.teaching-load.ajax');
+            Route::get('/departments-by-college/{collegeId}', [DashboardController::class, 'departmentsByCollege'])
+                ->name('stzfaculty.departments-by-college');
             Route::get('/research-data', [DashboardController::class, 'getResearchData'])
                 ->name('faculty.api.research-data');
+            Route::get('/faculty/overview/ajax', [DashboardController::class, 'facultyOverviewAjax'])
+                ->name('stzfaculty.overview.ajax');
+            Route::get('/faculty/research-performance/ajax', [DashboardController::class, 'researchPerformanceAjax'])
+                ->name('stzfaculty.research-performance.ajax');
         });
     });
 
-    // ====================================================
-    // OPTIONAL: Redirect /dashboard/faculty-overview to new route
-    // ====================================================
     Route::get('/dashboard/faculty-overview', function () {
-        return redirect()->route('faculty.overview');
+        return redirect()->route('stzfaculty.overview');
     });
 
 });
-
 
 require __DIR__.'/auth.php';

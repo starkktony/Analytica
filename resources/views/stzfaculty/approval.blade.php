@@ -32,26 +32,27 @@
         }
         .content { margin-left: 210px; }
 
-        /* Filter Bar — matches faculty profile design */
+        /* ── Combined filter bar ── */
         .filter-bar {
             font-family: 'Bricolage Grotesque', sans-serif;
             display: flex;
             align-items: center;
             gap: 12px;
             background: #c9cec9;
-            padding: 14px 30px;
+            padding: 0 30px;
             border-bottom: 1px solid #b0b5b0;
-            height: 40px;
+            height: 48px;
         }
-
-        .page-title {
-            font-size: 16px;
+        .filter-bar-title {
+            font-size: 13px;
             font-weight: 700;
             color: #2d2d2d;
-            margin-right: 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 7px;
         }
-
-        /* "Filters:" pushed to the right */
         .filter-bar-label {
             font-size: 13px;
             font-weight: 700;
@@ -60,20 +61,17 @@
             margin-right: 5px;
             margin-left: auto;
         }
-
         .filter-group {
             display: flex;
             align-items: center;
             gap: 6px;
         }
-
         .filter-group label {
             font-size: 12px;
             font-weight: 600;
             color: #2d2d2d;
             white-space: nowrap;
         }
-
         .filter-group select {
             font-size: 12px;
             padding: 5px 28px 5px 12px;
@@ -88,14 +86,13 @@
             background-size: 8px;
             min-width: 90px;
             cursor: pointer;
+            transition: border-color 0.2s, opacity 0.2s;
         }
-
         .filter-group select:focus {
             outline: none;
             border-color: #009539;
             background-color: white;
         }
-
         .clear-filters-btn {
             background: #009539;
             color: white;
@@ -111,22 +108,28 @@
         }
         .clear-filters-btn:hover { background: #00802e; color: white; }
 
-        /* Header drill badge */
-        .drill-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.22);
-            border: 1px solid rgba(255,255,255,0.45);
-            border-radius: 20px;
-            padding: 3px 14px 3px 10px;
-            font-size: 14px;
-            font-weight: 600;
-            color: white;
+        /* Pulsing dot shown while AJAX is running */
+        .filter-loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #009539;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.25s, transform 0.25s;
         }
-        .drill-badge i { font-size: 13px; }
+        .filter-loading-dot.active {
+            opacity: 1;
+            transform: scale(1);
+            animation: pulse-dot 0.85s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1);    opacity: 0.65; }
+            50%       { transform: scale(1.55); opacity: 1;    }
+        }
 
-        /* Stats Cards - matching teaching-load design */
+        /* ── Stats Cards ── */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -142,134 +145,146 @@
             flex-direction: column;
             min-height: 100px;
         }
-        .stat-card.green { background: #009539; }
-        .stat-card.green .icon-box {
-            background: white; width: 48px; height: 48px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 15px; left: 15px;
-        }
-        .stat-card.green .icon-box i { font-size: 20px; color: #009539; }
-        .stat-card.green .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
-        .stat-card.green .stat-number { font-size: 44px; font-weight: 700; color: white; line-height: 1; }
-        .stat-card.green .stat-label  { font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600; margin-top: 4px; }
-        
-        .stat-card.white { background: white; }
-        .stat-card.white .icon-box {
-            background: #009539; width: 48px; height: 48px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 15px; left: 15px;
-        }
-        .stat-card.white .icon-box i { font-size: 20px; color: white; }
-        .stat-card.white .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
-        .stat-number { font-size: 44px; font-weight: 700; color: #1f1f1f; line-height: 1; }
-        .stat-label  { font-size: 12px; color: #666; font-weight: 600; margin-top: 4px; }
+        .stat-card.green  { background: #009539; }
+        .stat-card.yellow { background: #ffc107; }
+        .stat-card.red    { background: #dc3545; }
+        .stat-card.white  { background: white;   }
 
-        /* Charts */
+        .stat-card .icon-box {
+            width: 48px; height: 48px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 15px; left: 15px;
+        }
+        .stat-card.green  .icon-box              { background: white;   }
+        .stat-card.green  .icon-box i            { font-size: 20px; color: #009539; }
+        .stat-card.yellow .icon-box              { background: white;   }
+        .stat-card.yellow .icon-box i            { font-size: 20px; color: #ffc107; }
+        .stat-card.red    .icon-box              { background: white;   }
+        .stat-card.red    .icon-box i            { font-size: 20px; color: #dc3545; }
+        .stat-card.white  .icon-box              { background: #009539; }
+        .stat-card.white  .icon-box i            { font-size: 20px; color: white;   }
+
+        .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
+        .stat-number  { font-size: 44px; font-weight: 700; line-height: 1; transition: opacity 0.3s; }
+        .stat-label   { font-size: 12px; font-weight: 600; margin-top: 4px; }
+
+        .stat-card.green  .stat-number { color: white; }
+        .stat-card.yellow .stat-number { color: white; }
+        .stat-card.red    .stat-number { color: white; }
+        .stat-card.white  .stat-number { color: #1f1f1f; }
+        .stat-card.green  .stat-label  { color: rgba(255,255,255,0.85); }
+        .stat-card.yellow .stat-label  { color: rgba(255,255,255,0.9);  }
+        .stat-card.red    .stat-label  { color: rgba(255,255,255,0.9);  }
+        .stat-card.white  .stat-label  { color: #666; }
+
+        /* Shimmer on stat numbers while AJAX is loading */
+        .stat-number.shimmer {
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0.2) 25%,
+                rgba(255,255,255,0.5) 50%,
+                rgba(255,255,255,0.2) 75%);
+            background-size: 200% 100%;
+            animation: shimmer-anim 1.2s infinite;
+            border-radius: 6px;
+            color: transparent !important;
+            min-width: 70px;
+            min-height: 44px;
+            display: inline-block;
+        }
+        .stat-card.white .stat-number.shimmer {
+            background: linear-gradient(90deg, #e8ebe8 25%, #d0d4d0 50%, #e8ebe8 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer-anim {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ── Charts ── */
         .charts-row {
             display: grid;
             gap: 20px;
             padding: 0 30px 20px 30px;
         }
         .charts-row.two-col { grid-template-columns: 1fr 1fr; }
+
         .chart-card {
             background: white;
             border-radius: 20px;
             padding: 24px 24px 14px 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.09);
         }
-        .chart-title    { font-size: 14px; font-weight: 700; color: #1f1f1f; margin-bottom: 2px; }
-        .chart-subtitle { font-size: 11px; color: #999; font-weight: 500; margin-bottom: 10px; }
+        .chart-title { font-size: 14px; font-weight: 700; color: #1f1f1f; margin-bottom: 10px; }
+
+        /* Chart wrapper — needed for absolute-positioned loader */
+        .chart-wrapper { position: relative; }
+
+        /* ── Per-chart loading overlay ── */
+        .chart-loader {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.91);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            z-index: 20;
+            gap: 14px;
+            opacity: 1;
+            pointer-events: all;
+            transition: opacity 0.35s ease;
+        }
+        .chart-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Spinner ring */
+        .loader-ring {
+            width: 46px;
+            height: 46px;
+            border: 4px solid #e4e4e4;
+            border-top-color: #009539;
+            border-radius: 50%;
+            animation: spin 0.72s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loader-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #aaa;
+            letter-spacing: 0.04em;
+        }
+
+        /* Skeleton shimmer bars behind spinner */
+        .skeleton-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            width: 60%;
+        }
+        .skel-bar {
+            height: 11px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #ececec 25%, #dedede 50%, #ececec 75%);
+            background-size: 200% 100%;
+            animation: shimmer-anim 1.3s infinite;
+        }
+        .skel-bar:nth-child(1) { width: 90%; animation-delay: 0s;    }
+        .skel-bar:nth-child(2) { width: 68%; animation-delay: 0.15s; }
+        .skel-bar:nth-child(3) { width: 80%; animation-delay: 0.3s;  }
+        .skel-bar:nth-child(4) { width: 52%; animation-delay: 0.45s; }
 
         .empty-chart {
-            width: 100%; height: 320px;
+            width: 100%; height: 100%;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             color: #ccc; gap: 8px;
         }
         .empty-chart i    { font-size: 36px; }
         .empty-chart span { font-size: 13px; font-weight: 600; }
-
-        /* Table Card */
-        .table-card {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            margin: 0 30px 30px 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-        }
-        
-        .table-card .chart-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1f1f1f;
-            margin-bottom: 15px;
-        }
-
-        .table th {
-            font-size: 12px;
-            font-weight: 600;
-            vertical-align: middle;
-        }
-        
-        .table td {
-            font-size: 12px;
-            vertical-align: middle;
-        }
-        
-        .badge {
-            font-size: 12px;
-            padding: 5px 8px;
-        }
-        
-        .progress {
-            height: 20px;
-            border-radius: 10px;
-            margin: 0;
-        }
-        
-        .progress-bar {
-            font-size: 11px;
-            font-weight: 600;
-            line-height: 20px;
-        }
-
-        .summary-card {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-        }
-        .summary-card h6 {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .summary-card h3 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .summary-card small {
-            font-size: 11px;
-            color: #999;
-        }
-
-        .section-divider {
-            position: relative;
-            margin: 30px 30px 20px 30px;
-            border-top: 2px dashed #bbb;
-        }
-        .section-divider span {
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            background: #e8ebe8;
-            padding: 0 15px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #333;
-        }
 
         .text-success { color: #009539 !important; }
     </style>
@@ -280,284 +295,151 @@
     <div class="content">
 
         {{-- Page header --}}
-        <div class="header">
-            Faculty Approval Dashboard
-            @if($filters['main_signatory'])
-                <span class="drill-badge">
-                    <i class="bi bi-person-badge"></i>
-                    {{ getSignatoryName($filters['main_signatory']) }}
-                </span>
-            @endif
-        </div>
+        <div class="header">Workload Approval</div>
 
-        {{-- Filter Bar — same design as teaching-load --}}
-        <form method="GET" action="{{ route('stzfaculty.approval') }}" id="filterForm">
-            <div class="filter-bar">
-                <div class="filter-bar-label">Filters:</div>
-
-                {{-- Semester --}}
-                <div class="filter-group">
-                    <label>Semester:</label>
-                    <select id="mainSemester" name="main_semester" onchange="this.form.submit()">
-                        <option value="">All</option>
-                        @foreach($availableSemesters as $sem)
-                            <option value="{{ $sem->sem_id }}" {{ $filters['main_semester'] == $sem->sem_id ? 'selected' : '' }}>
-                                {{ $sem->semester }} {{ $sem->sy }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- Main Signatory --}}
-                <div class="filter-group">
-                    <label>Signatory:</label>
-                    <select id="mainSignatory" name="main_signatory" onchange="this.form.submit()">
-                        <option value="">All</option>
-                        <option value="dh" {{ $filters['main_signatory'] == 'dh' ? 'selected' : '' }}>Dept Head</option>
-                        <option value="dean" {{ $filters['main_signatory'] == 'dean' ? 'selected' : '' }}>Dean</option>
-                        <option value="director" {{ $filters['main_signatory'] == 'director' ? 'selected' : '' }}>Director</option>
-                        <option value="ds" {{ $filters['main_signatory'] == 'ds' ? 'selected' : '' }}>DS</option>
-                        <option value="dot_uni" {{ $filters['main_signatory'] == 'dot_uni' ? 'selected' : '' }}>DOT UNI</option>
-                        <option value="nstp" {{ $filters['main_signatory'] == 'nstp' ? 'selected' : '' }}>NSTP</option>
-                        <option value="eteeap" {{ $filters['main_signatory'] == 'eteeap' ? 'selected' : '' }}>ETEEAP</option>
-                        <option value="vpaa" {{ $filters['main_signatory'] == 'vpaa' ? 'selected' : '' }}>VPAA</option>
-                    </select>
-                </div>
-
-                @if($filters['main_semester'] || $filters['main_signatory'])
-                    <a href="{{ route('stzfaculty.approval') }}" class="clear-filters-btn">Clear Filters</a>
-                @endif
+        {{-- Combined title + filter bar (no form — AJAX handles changes) --}}
+        <div class="filter-bar" id="filterBar">
+            <div class="filter-bar-title">
+                <span id="barTitle">
+                    Faculty Workload Approval
+                    @if($filters['main_semester'])
+                        @php 
+                            $sem = $availableSemesters->firstWhere('sem_id', $filters['main_semester']); 
+                        @endphp
+                        @if($sem) 
+                            ({{ $sem->semester }} {{ $sem->sy }})
+                        @endif
+                    @endif
+                    </span>
+                <span class="filter-loading-dot" id="loadingDot"></span>
             </div>
-        </form>
+
+            <div class="filter-bar-label">Filters:</div>
+
+            <div class="filter-group">
+                <label>Semester:</label>
+                <select id="mainSemester">
+                    <option value="">All</option>
+                    @foreach($availableSemesters as $sem)
+                        <option value="{{ $sem->sem_id }}"
+                                data-label="{{ $sem->semester }} {{ $sem->sy }}"
+                                {{ $filters['main_semester'] == $sem->sem_id ? 'selected' : '' }}>
+                            {{ $sem->semester }} {{ $sem->sy }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Office:</label>
+                <select id="mainOffice">
+                    <option value="">All</option>
+                    <option value="dh"       {{ $filters['main_signatory'] == 'dh'       ? 'selected' : '' }}>Dept Head</option>
+                    <option value="dean"     {{ $filters['main_signatory'] == 'dean'     ? 'selected' : '' }}>Dean</option>
+                    <option value="director" {{ $filters['main_signatory'] == 'director' ? 'selected' : '' }}>Director</option>
+                    <option value="ds"       {{ $filters['main_signatory'] == 'ds'       ? 'selected' : '' }}>DS</option>
+                    <option value="dot_uni"  {{ $filters['main_signatory'] == 'dot_uni'  ? 'selected' : '' }}>DOT UNI</option>
+                    <option value="nstp"     {{ $filters['main_signatory'] == 'nstp'     ? 'selected' : '' }}>NSTP</option>
+                    <option value="eteeap"   {{ $filters['main_signatory'] == 'eteeap'   ? 'selected' : '' }}>ETEEAP</option>
+                    <option value="vpaa"     {{ $filters['main_signatory'] == 'vpaa'     ? 'selected' : '' }}>VPAA</option>
+                </select>
+            </div>
+
+            <a href="{{ route('stzfaculty.approval') }}" class="clear-filters-btn" id="clearBtn"
+               style="{{ ($filters['main_semester'] || $filters['main_signatory']) ? '' : 'display:none;' }}">
+                Clear Filters
+            </a>
+        </div>
 
         {{-- Stats Cards --}}
         <div class="stats-container">
             <div class="stat-card white">
                 <div class="icon-box"><i class="bi bi-file-earmark-text-fill"></i></div>
                 <div class="stat-content">
-                    <div class="stat-number">{{ number_format($totalDocuments) }}</div>
+                    <div class="stat-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
                     <div class="stat-label">Total Documents</div>
                 </div>
             </div>
             <div class="stat-card green">
                 <div class="icon-box"><i class="bi bi-check-circle-fill"></i></div>
                 <div class="stat-content">
-                    <div class="stat-number">{{ number_format($fullyApproved) }}</div>
-                    <div class="stat-label">Fully Approved</div>
+                    <div class="stat-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
+                    <div class="stat-label">Approved</div>
                 </div>
             </div>
-            <div class="stat-card white">
+            <div class="stat-card yellow">
                 <div class="icon-box"><i class="bi bi-clock-fill"></i></div>
                 <div class="stat-content">
-                    <div class="stat-number">{{ number_format($pendingApproval) }}</div>
-                    <div class="stat-label">Pending Approval</div>
+                    <div class="stat-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
+                    <div class="stat-label">Submitted</div>
                 </div>
             </div>
-            <div class="stat-card white">
+            <div class="stat-card red">
                 <div class="icon-box"><i class="bi bi-x-circle-fill"></i></div>
                 <div class="stat-content">
-                    <div class="stat-number">{{ number_format($declined) }}</div>
-                    <div class="stat-label">Declined/Rejected</div>
+                    <div class="stat-number" id="statDeclined">{{ number_format($declined) }}</div>
+                    <div class="stat-label">Declined</div>
                 </div>
             </div>
         </div>
 
-        {{-- Row 1: Overall Status Donut + Signatory Bar Chart --}}
+        {{-- Charts row --}}
         <div class="charts-row two-col">
-            <div class="chart-card">
-                <div class="chart-title">
-                    {{ $filters['main_signatory'] ? getSignatoryName($filters['main_signatory']) . ' — Approval Status' : 'Overall Approval Status' }}
-                </div>
-                <div class="chart-subtitle">Distribution of document approval status</div>
-                <div id="overallStatusChart" style="height: 320px;"></div>
-            </div>
 
             <div class="chart-card">
-                <div class="chart-title">
-                    {{ $filters['main_signatory'] ? getSignatoryName($filters['main_signatory']) . ' — Status Breakdown' : 'Status by Signatory Type' }}
-                </div>
-                <div class="chart-subtitle">Approved / Pending / Declined counts per signatory</div>
-                <div id="signatoryTypeChart" style="height: 320px;"></div>
-            </div>
-        </div>
-
-        {{-- Timeline Section Divider --}}
-        <div class="section-divider"><span>TIMELINE ANALYSIS</span></div>
-
-        {{-- Timeline Chart with its own filter --}}
-        <div style="padding: 0 30px 20px 30px;">
-            <div class="chart-card">
-                <div class="chart-title">
-                    <i class="bi bi-graph-up-arrow me-2"></i>
-                    {{ $filters['timeline_signatory'] ? getSignatoryName($filters['timeline_signatory']) . ' Document Trends' : 'Document Trends by Year' }}
-                </div>
-                
-                {{-- Timeline Filter --}}
-                <form method="GET" action="{{ route('stzfaculty.approval') }}" id="timelineForm">
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        <div class="filter-group">
-                            <label>Filter by Signatory:</label>
-                            <select id="timelineSignatory" name="timeline_signatory" onchange="this.form.submit()">
-                                <option value="">All Signatories</option>
-                                <option value="dh" {{ $filters['timeline_signatory'] == 'dh' ? 'selected' : '' }}>Dept Head</option>
-                                <option value="dean" {{ $filters['timeline_signatory'] == 'dean' ? 'selected' : '' }}>Dean</option>
-                                <option value="director" {{ $filters['timeline_signatory'] == 'director' ? 'selected' : '' }}>Director</option>
-                                <option value="ds" {{ $filters['timeline_signatory'] == 'ds' ? 'selected' : '' }}>DS</option>
-                                <option value="dot_uni" {{ $filters['timeline_signatory'] == 'dot_uni' ? 'selected' : '' }}>DOT UNI</option>
-                                <option value="nstp" {{ $filters['timeline_signatory'] == 'nstp' ? 'selected' : '' }}>NSTP</option>
-                                <option value="eteeap" {{ $filters['timeline_signatory'] == 'eteeap' ? 'selected' : '' }}>ETEEAP</option>
-                                <option value="vpaa" {{ $filters['timeline_signatory'] == 'vpaa' ? 'selected' : '' }}>VPAA</option>
-                            </select>
+                <div class="chart-title">Workload Approval Status</div>
+                <div class="chart-wrapper">
+                    <div id="overallStatusChart" style="height:320px;"></div>
+                    <div class="chart-loader" id="loaderPie">
+                        <div class="loader-ring"></div>
+                        <div class="skeleton-stack">
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
                         </div>
-                        @if($filters['timeline_signatory'])
-                            <a href="{{ route('stzfaculty.approval', array_merge(request()->query(), ['timeline_signatory' => ''])) }}" class="clear-filters-btn">Clear</a>
-                        @endif
+                        <div class="loader-label">Loading chart…</div>
                     </div>
-                </form>
-
-                <div id="timelineStackedChart" style="height: 400px;"></div>
-                
-                <div class="mt-3 text-center small text-muted">
-                    <i class="bi bi-info-circle"></i>
-                    Stacked bars show document status composition (Approved, Pending, Declined) | 
-                    <strong>Green line shows total documents</strong>
                 </div>
             </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Workload Status by Office</div>
+                <div class="chart-wrapper">
+                    <div id="signatoryTypeChart" style="height:320px;"></div>
+                    <div class="chart-loader" id="loaderBar">
+                        <div class="loader-ring"></div>
+                        <div class="skeleton-stack">
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                        </div>
+                        <div class="loader-label">Loading chart…</div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        {{-- Signatory Performance Section Divider --}}
-        <div class="section-divider"><span>SIGNATORY PERFORMANCE SUMMARY</span></div>
-
-        {{-- Summary Cards Row --}}
-        <div style="padding: 0 30px 20px 30px;">
-            <div class="row g-3">
-                @php
-                    $avgRate = collect($signatoryRows)->avg('stats.rate');
-                    $highestRate = collect($signatoryRows)->max('stats.rate');
-                    $highestSignatory = collect($signatoryRows)->firstWhere('stats.rate', $highestRate)['label'] ?? 'N/A';
-                    $totalPending = collect($signatoryRows)->sum('stats.pending');
-                    $totalDeclined = collect($signatoryRows)->sum('stats.declined');
-                    $totalOverall = collect($signatoryRows)->sum('stats.total');
-                @endphp
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h6>Average Approval Rate</h6>
-                        <h3 class="text-success">{{ number_format($avgRate, 1) }}%</h3>
-                        <small>Across all signatories</small>
+        {{-- Timeline --}}
+        <div style="padding: 0 30px 30px 30px;">
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="bi bi-graph-up-arrow me-2"></i>Annual Faculty Workload Status Breakdown
+                </div>
+                <div class="chart-wrapper">
+                    <div id="timelineStackedChart" style="height:420px;"></div>
+                    <div class="chart-loader" id="loaderTimeline">
+                        <div class="loader-ring"></div>
+                        <div class="skeleton-stack">
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                            <div class="skel-bar"></div>
+                        </div>
+                        <div class="loader-label">Loading chart…</div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h6>Highest Approval Rate</h6>
-                        <h3 class="text-primary">{{ number_format($highestRate, 1) }}%</h3>
-                        <small>{{ $highestSignatory }}</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h6>Total Pending</h6>
-                        <h3 class="text-warning">{{ number_format($totalPending) }}</h3>
-                        <small>{{ $totalOverall > 0 ? number_format(($totalPending/$totalOverall)*100, 1) : 0 }}% of total</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h6>Total Declined</h6>
-                        <h3 class="text-danger">{{ number_format($totalDeclined) }}</h3>
-                        <small>{{ $totalOverall > 0 ? number_format(($totalDeclined/$totalOverall)*100, 1) : 0 }}% of total</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Detailed Signatory Table --}}
-        <div class="table-card">
-            <div class="chart-title">
-                <i class="bi bi-bar-chart-steps me-2"></i>
-                Detailed Signatory Performance Metrics
-            </div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th rowspan="2">Signatory</th>
-                            <th colspan="3" class="text-center">Status Count</th>
-                            <th rowspan="2" class="text-center">Total</th>
-                            <th colspan="2" class="text-center">Performance Metrics</th>
-                        </tr>
-                        <tr>
-                            <th class="text-center bg-success text-white">Approved</th>
-                            <th class="text-center bg-warning">Pending</th>
-                            <th class="text-center bg-danger text-white">Declined</th>
-                            <th class="text-center">Approval Rate</th>
-                            <th class="text-center">Completion %</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($signatoryRows as $row)
-                            @php
-                                $completionRate = $row['stats']['total'] > 0 
-                                    ? (($row['stats']['approved'] + $row['stats']['declined']) / $row['stats']['total'] * 100) 
-                                    : 0;
-                            @endphp
-                            <tr>
-                                <td><strong>{{ $row['label'] }}</strong></td>
-                                <td class="text-center">
-                                    <span class="badge bg-success">{{ number_format($row['stats']['approved']) }}</span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge bg-warning text-dark">{{ number_format($row['stats']['pending']) }}</span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge bg-danger">{{ number_format($row['stats']['declined']) }}</span>
-                                </td>
-                                <td class="text-center fw-bold">{{ number_format($row['stats']['total']) }}</td>
-                                <td class="text-center" style="min-width: 150px;">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" style="width: {{ $row['stats']['rate'] }}%">
-                                            {{ number_format($row['stats']['rate'], 1) }}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-center" style="min-width: 150px;">
-                                    <div class="progress">
-                                        <div class="progress-bar bg-info" style="width: {{ $completionRate }}%">
-                                            {{ number_format($completionRate, 1) }}%
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot class="table-dark">
-                        @php
-                            $totalApproved = collect($signatoryRows)->sum('stats.approved');
-                            $totalPending = collect($signatoryRows)->sum('stats.pending');
-                            $totalDeclined = collect($signatoryRows)->sum('stats.declined');
-                            $totalOverall = collect($signatoryRows)->sum('stats.total');
-                            $avgApprovalRate = $totalOverall > 0 ? ($totalApproved / $totalOverall * 100) : 0;
-                            $avgCompletionRate = $totalOverall > 0 ? (($totalApproved + $totalDeclined) / $totalOverall * 100) : 0;
-                        @endphp
-                        <tr>
-                            <th>TOTAL / AVERAGE</th>
-                            <th class="text-center">{{ number_format($totalApproved) }}</th>
-                            <th class="text-center">{{ number_format($totalPending) }}</th>
-                            <th class="text-center">{{ number_format($totalDeclined) }}</th>
-                            <th class="text-center">{{ number_format($totalOverall) }}</th>
-                            <th class="text-center">{{ number_format($avgApprovalRate, 1) }}%</th>
-                            <th class="text-center">{{ number_format($avgCompletionRate, 1) }}%</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-            
-            <div class="mt-3 text-center small text-muted">
-                <i class="bi bi-info-circle"></i>
-                <span class="mx-2">Approval Rate = (Approved / Total) × 100</span>
-                <span class="mx-2">|</span>
-                <span class="mx-2">Completion Rate = (Approved + Declined) / Total × 100</span>
-                <span class="mx-2">|</span>
-                <span class="mx-2">Data as of {{ date('F j, Y') }}</span>
             </div>
         </div>
 
@@ -565,218 +447,287 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Pass PHP data to JavaScript
-        const timelineYears = @json($timelineYears);
-        const overallStats = {
-            totalDocuments: {{ $totalDocuments }},
-            fullyApproved: {{ $fullyApproved }},
-            pendingApproval: {{ $pendingApproval }},
-            declined: {{ $declined }},
-            overallApproved: {{ $overallApproved }},
-            overallPending: {{ $overallPending }},
-            overallDeclined: {{ $overallDeclined }}
-        };
-        
-        const signatoryStats = {
-            dh: @json($dhStats),
-            dean: @json($deanStats),
-            director: @json($directorStats),
-            ds: @json($dsStats),
-            dot_uni: @json($dotUniStats),
-            nstp: @json($nstpStats),
-            eteeap: @json($eteeapStats),
-            vpaa: @json($vpaaStats)
-        };
-        
-        const timeline = {
-            years: @json($timelineYears),
-            documentCounts: @json(array_values($yearlyDocumentCounts)),
-            approvedCounts: @json(array_values($yearlyApprovedCounts)),
-            declinedCounts: @json(array_values($yearlyDeclinedCounts)),
-            pendingCounts: @json(array_values($yearlyPendingCounts))
-        };
-        
-        const currentFilter = '{{ $filters['main_signatory'] }}';
-        const timelineFilter = '{{ $filters['timeline_signatory'] }}';
+    // ─────────────────────────────────────────────────────────────
+    // Server-side initial data
+    // ─────────────────────────────────────────────────────────────
+    let overallStats = {
+        totalDocuments:  {{ $totalDocuments }},
+        fullyApproved:   {{ $fullyApproved }},
+        pendingApproval: {{ $pendingApproval }},
+        declined:        {{ $declined }},
+        overallApproved: {{ $overallApproved }},
+        overallPending:  {{ $overallPending }},
+        overallDeclined: {{ $overallDeclined }}
+    };
+    let signatoryStats = {
+        dh:       @json($dhStats),
+        dean:     @json($deanStats),
+        director: @json($directorStats),
+        ds:       @json($dsStats),
+        dot_uni:  @json($dotUniStats),
+        nstp:     @json($nstpStats),
+        eteeap:   @json($eteeapStats),
+        vpaa:     @json($vpaaStats)
+    };
+    let timeline = {
+        years:          @json($timelineYears),
+        documentCounts: @json(array_values($yearlyDocumentCounts)),
+        approvedCounts: @json(array_values($yearlyApprovedCounts)),
+        declinedCounts: @json(array_values($yearlyDeclinedCounts)),
+        pendingCounts:  @json(array_values($yearlyPendingCounts))
+    };
+    let currentFilter = '{{ $filters['main_signatory'] }}';
+    let currentSem    = '{{ $filters['main_semester'] }}';
 
-        const FONT  = { family: "'Bricolage Grotesque', sans-serif", size: 12, color: '#444' };
-        const GREEN = '#009539';
-        const BLUE  = '#2c7be5';
-        const YELLOW = '#ffc107';
-        const RED = '#dc3545';
-        const cfg   = { responsive: true, displayModeBar: false };
-        const CHART_H = 320;
+    // ─────────────────────────────────────────────────────────────
+    // Theme constants
+    // ─────────────────────────────────────────────────────────────
+    const FONT   = { family: "'Bricolage Grotesque', sans-serif", size: 12, color: '#444' };
+    const GREEN  = '#009539';
+    const YELLOW = '#ffc107';
+    const RED    = '#dc3545';
+    const GRAY   = '#adb5bd';
+    const cfg    = { responsive: true, displayModeBar: false };
 
-        function renderDonutChart() {
-            let approved, pending, declined;
-            const keys = ['dh','dean','director','ds','dot_uni','nstp','eteeap','vpaa'];
+    // ─────────────────────────────────────────────────────────────
+    // Loader helpers
+    // ─────────────────────────────────────────────────────────────
+    const showLoader = id => document.getElementById(id)?.classList.remove('hidden');
+    const hideLoader = id => document.getElementById(id)?.classList.add('hidden');
 
-            if (currentFilter && keys.includes(currentFilter)) {
-                approved = signatoryStats[currentFilter].approved;
-                pending  = signatoryStats[currentFilter].pending;
-                declined = signatoryStats[currentFilter].declined;
-            } else {
-                approved = overallStats.overallApproved;
-                pending  = overallStats.overallPending;
-                declined = overallStats.overallDeclined;
-            }
+    function showAllLoaders() {
+        ['loaderPie', 'loaderBar', 'loaderTimeline'].forEach(showLoader);
+        document.getElementById('loadingDot').classList.add('active');
+    }
+    function hideAllLoaders() {
+        ['loaderPie', 'loaderBar', 'loaderTimeline'].forEach(hideLoader);
+        document.getElementById('loadingDot').classList.remove('active');
+    }
 
-            if (approved + pending + declined === 0) {
-                document.getElementById('overallStatusChart').innerHTML = 
-                    '<div class="empty-chart"><i class="bi bi-pie-chart"></i><span>No data available</span></div>';
-                return;
-            }
+    // Shimmer / un-shimmer the stat number elements
+    function shimmerStats(on) {
+        ['statTotal','statApproved','statSubmitted','statDeclined'].forEach(id => {
+            document.getElementById(id)?.classList.toggle('shimmer', on);
+        });
+    }
 
-            Plotly.newPlot('overallStatusChart', [{
-                type: 'pie',
-                hole: 0.45,
-                values: [approved, pending, declined],
-                labels: ['Approved', 'Pending', 'Declined'],
-                marker: { colors: [GREEN, YELLOW, RED] },
-                textinfo: 'label+percent',
-                textfont: { size: 12, color: 'white' },
-                hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>'
-            }], {
-                font: FONT,
-                paper_bgcolor: 'white',
-                margin: { t: 10, r: 140, b: 10, l: 10 },
-                legend: { orientation: 'v', x: 1.02, y: 0.5, xanchor: 'left', font: { size: 11 } },
-                showlegend: true
-            }, cfg);
+    // ─────────────────────────────────────────────────────────────
+    // Chart renderers
+    // ─────────────────────────────────────────────────────────────
+    function renderPieChart() {
+        const keys = ['dh','dean','director','ds','dot_uni','nstp','eteeap','vpaa'];
+        let approved, submitted, declined, total;
+
+        if (currentFilter && keys.includes(currentFilter)) {
+            // Per-office view: use signatory-level counts
+            approved  = signatoryStats[currentFilter].approved;
+            submitted = signatoryStats[currentFilter].pending;
+            declined  = signatoryStats[currentFilter].declined;
+            total     = signatoryStats[currentFilter].total || overallStats.totalDocuments;
+        } else {
+            // All offices: use document-level counts (1 count per document, not per signatory)
+            approved  = overallStats.fullyApproved;
+            submitted = overallStats.pendingApproval;
+            declined  = overallStats.declined;
+            total     = overallStats.totalDocuments;
         }
 
-        function renderBarChart() {
-            const allLabels = ['Dept Head','Dean','Director','DS','DOT UNI','NSTP','ETEEAP','VPAA'];
-            const keys = ['dh','dean','director','ds','dot_uni','nstp','eteeap','vpaa'];
+        const notYet = Math.max(0, total - approved - submitted - declined);
 
-            const approved = keys.map(k => signatoryStats[k].approved);
-            const pending = keys.map(k => signatoryStats[k].pending);
-            const declined = keys.map(k => signatoryStats[k].declined);
+        const pieTotal = approved + submitted + declined + notYet;
 
-            if (approved.reduce((a,b) => a + b, 0) + pending.reduce((a,b) => a + b, 0) + declined.reduce((a,b) => a + b, 0) === 0) {
-                document.getElementById('signatoryTypeChart').innerHTML = 
-                    '<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>';
-                return;
-            }
-
-            let approvedColors, pendingColors, declinedColors;
-            if (currentFilter && keys.includes(currentFilter)) {
-                const idx = keys.indexOf(currentFilter);
-                approvedColors = keys.map((_, i) => i === idx ? GREEN : 'rgba(0,149,57,0.2)');
-                pendingColors = keys.map((_, i) => i === idx ? YELLOW : 'rgba(255,193,7,0.2)');
-                declinedColors = keys.map((_, i) => i === idx ? RED : 'rgba(220,53,69,0.2)');
-            } else {
-                approvedColors = GREEN;
-                pendingColors = YELLOW;
-                declinedColors = RED;
-            }
-
-            Plotly.newPlot('signatoryTypeChart', [
-                {
-                    name: 'Approved',
-                    type: 'bar',
-                    x: allLabels,
-                    y: approved,
-                    marker: { color: approvedColors },
-                    hovertemplate: '<b>%{x}</b><br>Approved: %{y}<extra></extra>'
-                },
-                {
-                    name: 'Pending',
-                    type: 'bar',
-                    x: allLabels,
-                    y: pending,
-                    marker: { color: pendingColors },
-                    hovertemplate: '<b>%{x}</b><br>Pending: %{y}<extra></extra>'
-                },
-                {
-                    name: 'Declined',
-                    type: 'bar',
-                    x: allLabels,
-                    y: declined,
-                    marker: { color: declinedColors },
-                    hovertemplate: '<b>%{x}</b><br>Declined: %{y}<extra></extra>'
-                }
-            ], {
-                font: FONT,
-                paper_bgcolor: 'white',
-                plot_bgcolor: 'white',
-                barmode: 'group',
-                margin: { t: 30, b: 70, l: 50, r: 20 },
-                showlegend: true,
-                legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center', font: { size: 11 } },
-                xaxis: { tickangle: -30, tickfont: { size: 11 } },
-                yaxis: { title: { text: 'Count', font: { size: 11 } }, gridcolor: '#efefef', zeroline: false }
-            }, cfg);
+        if (pieTotal === 0) {
+            document.getElementById('overallStatusChart').innerHTML =
+                '<div class="empty-chart"><i class="bi bi-pie-chart"></i><span>No data available</span></div>';
+            hideLoader('loaderPie');
+            return;
         }
 
-        function renderTimelineChart() {
-            const years = timeline.years || timelineYears;
-            const approved = timeline.approvedCounts || years.map(() => 0);
-            const declined = timeline.declinedCounts || years.map(() => 0);
-            const pending = years.map((_, i) => {
-                return Math.max(0, (timeline.documentCounts[i] || 0) - approved[i] - declined[i]);
-            });
-            const totalLine = timeline.documentCounts || years.map(() => 0);
+        Plotly.react('overallStatusChart', [{
+            type: 'pie',
+            values: [approved, submitted, declined, notYet],
+            labels: ['Approved', 'Submitted', 'Declined', 'Not Yet Submitted'],
+            marker: { colors: [GREEN, YELLOW, RED, GRAY] },
+            textinfo: 'label+percent',
+            textfont: { size: 11 },
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>'
+        }], {
+            font: FONT,
+            paper_bgcolor: 'white',
+            margin: { t: 40, r: 20, b: 10, l: 20 },
+            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12, font: { size: 11 } },
+            showlegend: true
+        }, cfg).then(() => hideLoader('loaderPie'));
+    }
 
-            if (totalLine.reduce((a,b) => a + b, 0) === 0) {
-                document.getElementById('timelineStackedChart').innerHTML = 
-                    '<div class="empty-chart"><i class="bi bi-graph-up"></i><span>No timeline data available</span></div>';
-                return;
-            }
+    function renderBarChart() {
+        const labels = ['Dept Head','Dean','Director','DS','DOT UNI','NSTP','ETEEAP','VPAA'];
+        const keys   = ['dh','dean','director','ds','dot_uni','nstp','eteeap','vpaa'];
+        const aP=[], sP=[], dP=[], nP=[], totals=[];
 
-            Plotly.newPlot('timelineStackedChart', [
-                {
-                    name: 'Approved',
-                    type: 'bar',
-                    x: years,
-                    y: approved,
-                    marker: { color: GREEN },
-                    hovertemplate: '<b>%{x}</b><br>Approved: %{y}<extra></extra>'
-                },
-                {
-                    name: 'Pending',
-                    type: 'bar',
-                    x: years,
-                    y: pending,
-                    marker: { color: YELLOW },
-                    hovertemplate: '<b>%{x}</b><br>Pending: %{y}<extra></extra>'
-                },
-                {
-                    name: 'Declined',
-                    type: 'bar',
-                    x: years,
-                    y: declined,
-                    marker: { color: RED },
-                    hovertemplate: '<b>%{x}</b><br>Declined: %{y}<extra></extra>'
-                },
-                {
-                    name: 'Total Documents',
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    x: years,
-                    y: totalLine,
-                    line: { color: '#006400', width: 3 },
-                    marker: { color: '#006400', size: 8 },
-                    hovertemplate: '<b>%{x}</b><br>Total: %{y}<extra></extra>'
-                }
-            ], {
-                font: FONT,
-                paper_bgcolor: 'white',
-                plot_bgcolor: '#fafafa',
-                barmode: 'stack',
-                margin: { t: 40, b: 60, l: 60, r: 40 },
-                showlegend: true,
-                legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center', font: { size: 11 } },
-                xaxis: { title: { text: 'Year', font: { size: 11 } }, tickmode: 'linear', dtick: 1, gridcolor: '#e0e0e0' },
-                yaxis: { title: { text: 'Document Count', font: { size: 11 } }, gridcolor: '#e0e0e0', zeroline: false },
-                hovermode: 'x'
-            }, cfg);
+        keys.forEach(k => {
+            const a  = signatoryStats[k].approved || 0;
+            const s  = signatoryStats[k].pending  || 0;
+            const d  = signatoryStats[k].declined || 0;
+            const t  = signatoryStats[k].total    || 0;
+            const ny = Math.max(0, t - a - s - d);
+            totals.push(t);
+            if (t > 0) {
+                aP.push(+(a/t*100).toFixed(1));  sP.push(+(s/t*100).toFixed(1));
+                dP.push(+(d/t*100).toFixed(1));  nP.push(+(ny/t*100).toFixed(1));
+            } else { aP.push(0); sP.push(0); dP.push(0); nP.push(0); }
+        });
+
+        if (totals.reduce((a,b) => a+b, 0) === 0) {
+            document.getElementById('signatoryTypeChart').innerHTML =
+                '<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>';
+            hideLoader('loaderBar');
+            return;
         }
 
-        // Render all charts
-        renderDonutChart();
-        renderBarChart();
-        renderTimelineChart();
+        const selIdx = currentFilter && keys.includes(currentFilter) ? keys.indexOf(currentFilter) : -1;
+        const mkCol  = (base, dim=0.18) =>
+            keys.map((_, i) => selIdx === -1 ? base
+                : i === selIdx ? base
+                : base + Math.round(dim*255).toString(16).padStart(2,'0'));
+
+        const yTickColors = labels.map((_, i) =>
+            selIdx === -1 ? '#444' : i === selIdx ? '#009539' : '#bbb');
+
+        Plotly.react('signatoryTypeChart', [
+            { name:'Approved',          type:'bar', orientation:'h', x:aP, y:labels, marker:{color:mkCol(GREEN)},  hovertemplate:'<b>%{y}</b><br>Approved: %{x:.1f}%<extra></extra>' },
+            { name:'Submitted',         type:'bar', orientation:'h', x:sP, y:labels, marker:{color:mkCol(YELLOW)}, hovertemplate:'<b>%{y}</b><br>Submitted: %{x:.1f}%<extra></extra>' },
+            { name:'Declined',          type:'bar', orientation:'h', x:dP, y:labels, marker:{color:mkCol(RED)},    hovertemplate:'<b>%{y}</b><br>Declined: %{x:.1f}%<extra></extra>' },
+            { name:'Not Yet Submitted', type:'bar', orientation:'h', x:nP, y:labels, marker:{color:mkCol(GRAY)},   hovertemplate:'<b>%{y}</b><br>Not Yet Submitted: %{x:.1f}%<extra></extra>' }
+        ], {
+            font: FONT, paper_bgcolor:'white', plot_bgcolor:'white', barmode:'stack',
+            margin: { t:50, b:40, l:90, r:20 },
+            showlegend: true,
+            legend: { orientation:'h', x:0.5, xanchor:'center', y:1.15, font:{size:11} },
+            xaxis: { title:{text:'Percent (%)',font:{size:11}}, range:[0,100], ticksuffix:'%', gridcolor:'#efefef', zeroline:false },
+            yaxis: { title:{text:'Office',font:{size:11}}, tickfont:{size:11, color:yTickColors}, tickcolor: selIdx !== -1 ? '#009539' : '#444' }
+        }, cfg).then(() => hideLoader('loaderBar'));
+    }
+
+    function renderTimelineChart() {
+        const years  = timeline.years          || [];
+        const appr   = timeline.approvedCounts || years.map(()=>0);
+        const decl   = timeline.declinedCounts || years.map(()=>0);
+        const subm   = timeline.pendingCounts  || years.map(()=>0);
+        const total  = timeline.documentCounts || years.map(()=>0);
+        const notYet = years.map((_,i) => Math.max(0,(total[i]||0)-(appr[i]||0)-(subm[i]||0)-(decl[i]||0)));
+
+        if (total.reduce((a,b)=>a+b,0) === 0) {
+            document.getElementById('timelineStackedChart').innerHTML =
+                '<div class="empty-chart"><i class="bi bi-graph-up"></i><span>No timeline data available</span></div>';
+            hideLoader('loaderTimeline');
+            return;
+        }
+
+        Plotly.react('timelineStackedChart', [
+            { name:'Approved',          type:'bar',     x:years, y:appr,   marker:{color:GREEN},  hovertemplate:'<b>%{x}</b><br>Approved: %{y}<extra></extra>' },
+            { name:'Submitted',         type:'bar',     x:years, y:subm,   marker:{color:YELLOW}, hovertemplate:'<b>%{x}</b><br>Submitted: %{y}<extra></extra>' },
+            { name:'Declined',          type:'bar',     x:years, y:decl,   marker:{color:RED},    hovertemplate:'<b>%{x}</b><br>Declined: %{y}<extra></extra>' },
+            { name:'Not Yet Submitted', type:'bar',     x:years, y:notYet, marker:{color:GRAY},   hovertemplate:'<b>%{x}</b><br>Not Yet Submitted: %{y}<extra></extra>' },
+            { name:'Total Documents',   type:'scatter', mode:'lines+markers', x:years, y:total,
+              line:{color:'#006400',width:3}, marker:{color:'#006400',size:8},
+              hovertemplate:'<b>%{x}</b><br>Total: %{y}<extra></extra>' }
+        ], {
+            font: FONT, paper_bgcolor:'white', plot_bgcolor:'#fafafa', barmode:'stack',
+            margin: { t:60, b:50, l:60, r:40 },
+            showlegend: true,
+            legend: { orientation:'h', x:0.5, xanchor:'center', y:1.12, font:{size:11} },
+            xaxis: { title:{text:'Year',font:{size:11}}, tickmode:'linear', dtick:1, gridcolor:'#e0e0e0' },
+            yaxis: { title:{text:'Document Count',font:{size:11}}, gridcolor:'#e0e0e0', zeroline:false },
+            hovermode: 'x'
+        }, cfg).then(() => hideLoader('loaderTimeline'));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // AJAX — fires on every filter change, no full page reload
+    // ─────────────────────────────────────────────────────────────
+    function fetchAndRefresh() {
+        const semVal    = document.getElementById('mainSemester').value;
+        const officeVal = document.getElementById('mainOffice').value;
+
+        // Update title text immediately
+        const selOpt   = document.getElementById('mainSemester').selectedOptions[0];
+        const semLabel = selOpt?.value ? selOpt.getAttribute('data-label') : null;
+        document.getElementById('barTitle').textContent =
+            semLabel ? `Faculty Workload Approval (${semLabel})` : 'Faculty Workload Approval';
+
+        // Show/hide Clear button
+        document.getElementById('clearBtn').style.display = (semVal || officeVal) ? '' : 'none';
+
+        // Show loaders + shimmer
+        showAllLoaders();
+        shimmerStats(true);
+
+        const params = new URLSearchParams();
+        if (semVal)    params.set('main_semester',  semVal);
+        if (officeVal) params.set('main_signatory', officeVal);
+
+        fetch(`{{ route('stzfaculty.approval') }}?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept':           'application/json'
+            }
+        })
+        .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
+        .then(data => {
+            // Refresh reactive data
+            overallStats   = data.overallStats;
+            signatoryStats = data.signatoryStats;
+            timeline       = data.timeline;
+            currentFilter  = officeVal;
+            currentSem     = semVal;
+
+            // Animate stat numbers in
+            animateStat('statTotal',     data.overallStats.totalDocuments);
+            animateStat('statApproved',  data.overallStats.fullyApproved);
+            animateStat('statSubmitted', data.overallStats.pendingApproval);
+            animateStat('statDeclined',  data.overallStats.declined);
+            shimmerStats(false);
+
+            // Re-render all charts
+            renderPieChart();
+            renderBarChart();
+            renderTimelineChart();
+        })
+        .catch(err => {
+            console.error('Approval AJAX error:', err);
+            shimmerStats(false);
+            hideAllLoaders();
+        });
+    }
+
+    // Count-up animation for stat numbers
+    function animateStat(id, target) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('shimmer');
+        const start    = 0;
+        const duration = 600;
+        const startTs  = performance.now();
+        function step(ts) {
+            const progress = Math.min((ts - startTs) / duration, 1);
+            const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+            el.textContent = Math.round(eased * target).toLocaleString();
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    // Bind selects
+    document.getElementById('mainSemester').addEventListener('change', fetchAndRefresh);
+    document.getElementById('mainOffice').addEventListener('change',   fetchAndRefresh);
+
+    // ─────────────────────────────────────────────────────────────
+    // Initial render (PHP data, no AJAX needed)
+    // ─────────────────────────────────────────────────────────────
+    renderPieChart();
+    renderBarChart();
+    renderTimelineChart();
     </script>
 </body>
 </html>
@@ -784,14 +735,14 @@
 @php
 function getSignatoryName($value) {
     $names = [
-        'dh' => 'Department Head',
-        'dean' => 'Dean',
+        'dh'       => 'Department Head',
+        'dean'     => 'Dean',
         'director' => 'Director',
-        'ds' => 'DS',
-        'dot_uni' => 'DOT UNI',
-        'nstp' => 'NSTP',
-        'eteeap' => 'ETEEAP',
-        'vpaa' => 'VPAA'
+        'ds'       => 'DS',
+        'dot_uni'  => 'DOT UNI',
+        'nstp'     => 'NSTP',
+        'eteeap'   => 'ETEEAP',
+        'vpaa'     => 'VPAA'
     ];
     return $names[$value] ?? $value;
 }
