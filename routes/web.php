@@ -7,6 +7,20 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GraduatesController;
 use App\Http\Controllers\FundingController;
 use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\EIS\BidController;
+use App\Http\Controllers\EIS\FacilitiesController;
+use App\Http\Controllers\EIS\IGPController;
+use App\Http\Controllers\Radiis\AgenciesController;
+use App\Http\Controllers\Radiis\IPRightsController;
+use App\Http\Controllers\Radiis\PresentationController;
+use App\Http\Controllers\Radiis\ProgramController;
+use App\Http\Controllers\Radiis\ProjectController;
+use App\Http\Controllers\Radiis\PublicationController;
+use App\Http\Controllers\Radiis\AwardController;
+use App\Http\Controllers\Radiis\LinkagesController;
+use App\Http\Controllers\Radiis\StudyController;
+use App\Http\Controllers\Radiis\ResearcherController;
+use App\Http\Controllers\EIS\FundController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -70,6 +84,32 @@ Route::middleware('auth')->group(function () {
             Route::get('/faculty/research-performance/ajax', [DashboardController::class, 'researchPerformanceAjax'])
                 ->name('stzfaculty.research-performance.ajax');
         });
+    });
+
+    // ====================================================
+    // RADIIS ROUTES
+    // ====================================================
+    Route::prefix('radiis')->group(function () {
+        Route::get('/programs', [ProgramController::class, 'index'])->name('radiis.programs');
+        Route::get('/projects', [ProjectController::class, 'index'])->name('radiis.projects');
+        Route::get('/studies', [StudyController::class, 'index'])->name('radiis.studies');
+        Route::get('/publications', [PublicationController::class, 'index'])->name('radiis.publications');
+        Route::get('/presentations', [PresentationController::class, 'index'])->name('radiis.presentations');
+        Route::get('/iprights', [IPRightsController::class, 'index'])->name('radiis.iprights');
+        Route::get('/awards', [AwardController::class, 'index'])->name('radiis.awards');
+        Route::get('/linkages', [LinkagesController::class, 'index'])->name('radiis.linkages');
+        Route::get('/researchers', [ResearcherController::class, 'index'])->name('radiis.researchers');
+        Route::get('/fundagency', [AgenciesController::class, 'index'])->name('radiis.agencies');
+    });
+
+    // ====================================================
+    // EIS ROUTES
+    // ====================================================
+    Route::prefix('eis')->group(function () {
+        Route::get('/igps', [IGPController::class, 'index'])->name('eis.igp');
+        Route::get('/funds', [FundController::class, 'index'])->name('eis.fund');
+        Route::get('/facilities', [FacilitiesController::class, 'index'])->name('eis.facility');
+        Route::get('/bids', [BidController::class, 'index'])->name('eis.bid');
     });
 
     Route::get('/dashboard/faculty-overview', function () {

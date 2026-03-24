@@ -1,3 +1,2 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "@fortawesome/fontawesome-free/css/all.css";
+@import "tailwindcss";

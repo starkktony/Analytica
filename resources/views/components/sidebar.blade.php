@@ -153,6 +153,100 @@
             </div>
         </div>
 
+        {{-- RADIIS --}}
+        <div class="sidebar-item">
+            <div class="sidebar-parent d-flex align-items-center justify-content-between
+                {{ request()->routeIs('radiis.*') ? 'active' : '' }}"
+                 data-label="radiis">
+                <a href="{{ route('radiis.programs') }}" class="sidebar-link">
+                    <span class="menu-icon"><i class="bi bi-person-badge"></i></span>
+                    <span class="menu-label ms-2">RADIIS</span>
+                </a>
+                <i class="bi bi-chevron-down sidebar-chevron"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#radiisMenu"
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
+            </div>
+            <div class="collapse {{ request()->routeIs('radiis.*') ? 'show' : '' }}"
+                 id="radiisMenu">
+                <a href="{{ route('radiis.programs') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.programs') ? 'active' : '' }}">
+                    <i class="bi bi-person-vcard me-2"></i><span class="menu-label">Programs</span>
+                </a>
+                <a href="{{ route('radiis.projects') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.projects') ? 'active' : '' }}">
+                    <i class="bi bi-book me-2"></i><span class="menu-label">Projects</span>
+                </a>
+                <a href="{{ route('radiis.studies') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.studies') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Studies</span>
+                </a>
+                    <a href="{{ route('radiis.publications') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.publications') ? 'active' : '' }}">
+                    <i class="bi bi-check2-circle me-2"></i><span class="menu-label">Publications</span>
+                </a>
+                <a href="{{ route('radiis.presentations') }}"
+                    class="submenu-link {{ request()->routeIs('radiis.presentations') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill me-2"></i><span class="menu-label">Presentations</span>
+                </a>
+                <a href="{{ route('radiis.iprights') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.iprights') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Intellectual Property Rights</span>
+                </a>
+                <a href="{{ route('radiis.awards') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.awards') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Awards</span>
+                </a>
+                <a href="{{ route('radiis.linkages') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.linkages') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Linkages</span>
+                </a>
+                <a href="{{ route('radiis.researchers') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.researchers') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Researchers</span>
+                </a>
+                <a href="{{ route('radiis.agencies') }}"
+                   class="submenu-link {{ request()->routeIs('radiis.agencies') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Funding Agency</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- EIS --}}
+        <div class="sidebar-item">
+            <div class="sidebar-parent d-flex align-items-center justify-content-between
+                {{ request()->routeIs('eis.*') ? 'active' : '' }}"
+                 data-label="eis">
+                <a href="{{ route('eis.igp') }}" class="sidebar-link">
+                    <span class="menu-icon"><i class="bi bi-person-badge"></i></span>
+                    <span class="menu-label ms-2">EIS</span>
+                </a>
+                <i class="bi bi-chevron-down sidebar-chevron"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#eisMenu"
+                   style="cursor:pointer; padding: 0 16px 0 8px;"></i>
+            </div>
+            <div class="collapse {{ request()->routeIs('radiis.*') ? 'show' : '' }}"
+                 id="eisMenu">
+                <a href="{{ route('eis.igp') }}"
+                   class="submenu-link {{ request()->routeIs('eis.igp') ? 'active' : '' }}">
+                    <i class="bi bi-person-vcard me-2"></i><span class="menu-label">IGPs</span>
+                </a>
+                <a href="{{ route('eis.fund') }}"
+                   class="submenu-link {{ request()->routeIs('eis.fund') ? 'active' : '' }}">
+                    <i class="bi bi-book me-2"></i><span class="menu-label">Funds</span>
+                </a>
+                <a href="{{ route('eis.facility') }}"
+                   class="submenu-link {{ request()->routeIs('eis.facility') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-data me-2"></i><span class="menu-label">Facilities</span>
+                </a>
+                    <a href="{{ route('eis.bid') }}"
+                   class="submenu-link {{ request()->routeIs('eis.bid') ? 'active' : '' }}">
+                    <i class="bi bi-check2-circle me-2"></i><span class="menu-label">Bids & Awards</span>
+                </a>
+            </div>
+        </div>
+
         {{-- ALUMNI --}}
         <div class="sidebar-item">
             <div class="sidebar-parent d-flex align-items-center justify-content-between
