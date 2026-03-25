@@ -1,372 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Siel Metrics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
-        <div class="">
+    <style>
+        body {
+            background: #e8ebe8;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            max-width: calc(100vw - 250px);
+            overflow-x: hidden;
+        }
+        body.sidebar-collapsed .content {
+            margin-left: 68px;
+            max-width: calc(100vw - 68px);
+        }
 
-            <!-- FILTER BAR -->
-            <div class="sticky top-0 z-30 flex justify-between items-center h-12 bg-[#BDBDBD] px-6">
-                <div class="flex flex-row gap-6 items-center">
-                    <h2 class="text-lg lg:text-2xl font-['Bricolage_Grotesque'] font-extrabold text-black leading-tight">
-                        Total Graduates
-                            @if($selected_college && $selected_college !== 'All')
-                                of {{ $selected_college }}
-                            @else
-                                of the University
-                            @endif
-                    </h2>
-                    <div class="font-['Bricolage_Grotesque'] font-extrabold mr-5">Filters:</div>
+        /* ── Header ── */
+        .header {
+            background: #009539;
+            color: white;
+            padding: 5px 30px;
+            font-size: 42px;
+            font-weight: bold;
+            height: 75px;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+        }
 
-                    <form method="GET" action="{{ route('graduates.index') }}" class="flex items-center gap-3">
-                        <label class="font-['Bricolage_Grotesque'] font-extrabold text-sm">College:</label>
-                        <div class="relative w-48">
-                            <select name="college" id="college"
-                                class="w-full appearance-none rounded-full bg-gray-100 text-center shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer text-xs p-2"
-                                onchange="this.form.submit()">
-                                <option class="text-xs" value="All" {{ $selected_college === 'All' ? 'selected' : '' }}>All
-                                </option>
-                                @foreach($colleges as $c)
-                                    <option class="text-xs" value="{{ $c }}" {{ $selected_college === $c ? 'selected' : '' }}>{{ $c }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        </div>
-                    </form>
+        /* ── Filter Bar ── */
+        .filter-bar {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #c9cec9;
+            padding: 0 20px;
+            border-bottom: 1px solid #b0b5b0;
+            height: 52px;
+            min-height: 52px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
+        .filter-bar-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2d2d2d;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d2d2d;
+            white-space: nowrap;
+        }
+        .filter-group select {
+            font-size: 12px;
+            padding: 4px 24px 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #8a8f8a;
+            background-color: #f5f5f5;
+            color: #2d2d2d;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%232d2d2d' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 8px;
+            min-width: 110px;
+            cursor: pointer;
+        }
+        .filter-group select:focus {
+            outline: none;
+            border-color: #009539;
+            background-color: white;
+        }
+        .filter-group select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── Main content ── */
+        .main-content { padding: 0; }
+
+        /* ── Page content area ── */
+        .page-content { padding: 24px; }
+
+        /* ── Value boxes ── */
+        .value-boxes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1024px) { .value-boxes-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px)  { .value-boxes-grid { grid-template-columns: 1fr; } }
+
+        .value-box {
+            position: relative;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            min-height: 130px;
+        }
+        .value-box.first {
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+        }
+        .value-box.other {
+            background: white;
+            color: #111827;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .value-box-icon {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .value-box.first .value-box-icon { background: rgba(255,255,255,0.9); color: #16a34a; }
+        .value-box.other .value-box-icon { background: #22c55e; color: white; }
+        .value-box-body { margin-top: 52px; text-align: right; }
+        .value-box-number { font-size: 40px; font-weight: 800; line-height: 1; }
+        .value-box.first .value-box-number { color: white; }
+        .value-box.other .value-box-number { color: #111827; }
+        .value-box-label { font-size: 14px; font-weight: 600; margin-top: 4px; }
+        .value-box.first .value-box-label { color: white; }
+        .value-box.other .value-box-label { color: #6b7280; }
+
+        /* Gender split inside value box */
+        .gender-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: right; }
+        .gender-split-label { font-size: 11px; margin-bottom: 2px; }
+        .value-box.first .gender-split-label { color: rgba(255,255,255,0.8); }
+        .value-box.other .gender-split-label { color: #64748b; }
+        .gender-split-number { font-size: 36px; font-weight: 800; line-height: 1; }
+        .value-box.first .gender-split-number { color: white; }
+        .value-box.other .gender-split-number { color: #111827; }
+
+        /* ── Chart cards ── */
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
+            margin-bottom: 24px;
+        }
+        .chart-card h3 { font-size: 15px; font-weight: 700; margin: 0 0 16px 0; color: #111827; }
+        .charts-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 1024px) { .charts-grid-2 { grid-template-columns: 1fr; } }
+
+        /* ── Section toggle ── */
+        .section-hidden { display: none !important; }
+
+        /* ── No data state ── */
+        .no-data-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 96px 24px; text-align: center;
+        }
+        .no-data-icon-wrap {
+            width: 96px; height: 96px; border-radius: 50%;
+            background: #f3f4f6; display: flex;
+            align-items: center; justify-content: center;
+            margin-bottom: 24px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .no-data-icon-wrap i { font-size: 40px; color: #9ca3af; }
+        .no-data-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 800; color: #374151; margin-bottom: 8px; }
+        .no-data-text { color: #9ca3af; font-size: 14px; max-width: 360px; margin-bottom: 24px; }
+        .reset-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #16a34a; color: white; font-size: 14px;
+            font-weight: 600; padding: 10px 20px; border-radius: 9999px;
+            text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: background 0.2s;
+        }
+        .reset-btn:hover { background: #15803d; color: white; }
+    </style>
+</head>
+<body>
+
+    @include('components.sidebar')
+
+    <div class="content">
+
+        {{-- Page Header --}}
+        <div class="header">GRADUATES</div>
+
+        @php
+            $firstBoxValue   = $value_boxes[0]['value'] ?? 0;
+            $total_graduates = is_array($firstBoxValue)
+                ? (($firstBoxValue['male'] ?? 0) + ($firstBoxValue['female'] ?? 0))
+                : (int) $firstBoxValue;
+            $has_data = $total_graduates > 0;
+        @endphp
+
+        {{-- Filter Bar — all filters here --}}
+        <div class="filter-bar">
+            <span class="filter-bar-label">Filters:</span>
+
+            <form method="GET" action="{{ route('graduates.index') }}"
+                  id="graduatesFilterForm"
+                  style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
+
+                <div class="filter-group">
+                    <label>View:</label>
+                    <select name="view_type" id="view_type">
+                        <option value="graduate_headcount" {{ $selected_view_type === 'graduate_headcount' ? 'selected' : '' }}>Headcount</option>
+                        <option value="demographic_profile" {{ $selected_view_type === 'demographic_profile' ? 'selected' : '' }}>Demographic</option>
+                    </select>
                 </div>
-            </div>
 
-            <div class="mt-6 overflow-x-auto px-6">
+                <div class="filter-group">
+                    <label>Level:</label>
+                    <select name="student_level" id="student_level">
+                        <option value="All"           {{ $student_level === 'All'           ? 'selected' : '' }}>All Levels</option>
+                        <option value="Undergraduate" {{ $student_level === 'Undergraduate' ? 'selected' : '' }}>Undergraduate</option>
+                        <option value="Postgraduate"  {{ $student_level === 'Postgraduate'  ? 'selected' : '' }}>Postgraduate</option>
+                    </select>
+                </div>
 
-                <div class="py-6 sm:py-8 animate-card-in">
-                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                            <div
-                                class="relative bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
-                                <div
-                                    class="absolute top-4 left-4 w-12 h-12 bg-white/90 rounded-lg flex items-center justify-center">
-                                    <i class="fa-solid fa-graduation-cap text-green-600 text-2xl"></i>
-                                </div>
-                                <div class="mt-12 text-right">
-                                    <p class="font-[inter] text-[24px] md:text-[28px] font-extrabold leading-tight">{{ $total_graduates }}</p>
-                                    <p class="text-[24px] md:text-[20px] font-[inter] font-semibold text-white mt-1">Total Graduates</p>
-                                </div>
-                            </div>
+                <div class="filter-group">
+                    <label>Semester:</label>
+                    <select name="semester" id="semester">
+                        <option value="All" {{ $semester === 'All' ? 'selected' : '' }}>All</option>
+                        @foreach($semesters as $sem)
+                            <option value="{{ $sem }}" {{ $semester === $sem ? 'selected' : '' }}>{{ $sem }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-                            <div class="relative bg-white rounded-2xl p-6 shadow-md">
-                                <div
-                                    class="absolute top-4 left-4 w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                                    <i class="fa-solid fa-mars text-white text-xl"></i>
-                                </div>
-                                <div class="mt-12 text-right">
-                                    <p class="font-[inter] text-[24px] md:text-[28px] font-bold text-gray-900">
-                                        {{ $total_male}}</p>
-                                    <p class="text-[20px] md:text-[16px] font-[inter] text-gray-500 mt-1">Total Male Graduates</p>
-                                </div>
-                            </div>
-
-                            <div class="relative bg-white rounded-2xl p-6 shadow-md">
-                                <div
-                                    class="absolute top-4 left-4 w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                                    <i class="fa-solid fa-venus text-white text-xl"></i>
-                                </div>
-                                <div class="mt-12 text-right">
-                                    <p class="font-[inter] text-[24px] md:text-[28px] font-bold text-gray-900">
-                                        {{ $total_female }}</p>
-                                    <p class="text-[20px] md:text-[16px] font-[inter] text-gray-500 mt-1">Total Female Graduates</p>
-                                </div>
-                            </div>
-
-                            {{-- <div class="relative bg-white rounded-2xl p-6 shadow-md">
-                                <div
-                                    class="absolute top-4 left-4 w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                                    <i class="fa-solid fa-circle-plus text-white text-xl"></i>
-                                </div>
-                                <div class="mt-12 text-right">
-                                    <p class="font-[inter] text-[20px] md:text-[24px] font-bold text-gray-900">
-                                        {{ $income['other_income'] }}</p>
-                                    <p class="text-[20px] md:text-[16px] font-[inter] text-gray-500 mt-1">Other Business Income</p>
-                                </div>
-                            </div> --}}
-                        </div>
-                    </div>
-
-                <!-- HERO CARD -->
-                {{-- <div class="relative w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6
-                        bg-gradient-to-br from-[#007a2f] via-[#009539] to-[#00b347]
-                        rounded-2xl p-8 overflow-hidden
-                        shadow-[0_20px_60px_rgba(0,100,30,0.5),0_4px_12px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.08)]
-                        animate-card-in">
-
-                    <div
-                        class="absolute -top-24 -right-16 w-72 h-72 rounded-full border-[36px] border-white/[0.055] pointer-events-none">
-                    </div>
-                    <div
-                        class="absolute -bottom-14 left-16 w-44 h-44 rounded-full border-[28px] border-white/[0.04] pointer-events-none">
-                    </div>
-                    <div
-                        class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(255,255,255,0.12),transparent)] pointer-events-none">
-                    </div>
-                    <div
-                        class="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_100%_100%,rgba(0,0,0,0.15),transparent)] pointer-events-none">
-                    </div>
-
-                    <div class="relative z-10 shrink-0 animate-fade-up-1 group">
-                        <img src="{{ asset('images/school 1.png') }}" alt="CLSU Seal"
-                            class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2" />
-                    </div>
-
-                    <div class="relative z-10 flex flex-col items-center text-center flex-1 animate-fade-up-2">
-                        <p class="text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-white/60 mb-1">University
-                            Personnel</p>
-                        <h2
-                            class="font-bricolage text-3xl md:text-4xl font-extrabold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-                            Total Graduates<br>
-                            @if($selected_college && $selected_college !== 'All')
-                                of {{ strtoupper($selected_college) }}
-                            @else
-                                of the University
-                            @endif
-                        </h2>
-                        <div class="w-12 h-0.5 bg-white/30 rounded-full my-4"></div>
-                        <div class="relative">
-                            <span
-                                class="font-['anton'] text-4xl md:text-5xl text-white leading-none tracking-wide drop-shadow-[0_4px_20px_rgba(0,0,0,0.25)] mb-2">
-                                {{ $total_graduates }}
-                            </span>
-                            <div
-                                class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/5 h-[3px] bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative z-10 flex flex-col gap-3 shrink-0 w-full md:w-auto animate-fade-up-3">
-                        <div
-                            class="group relative bg-white/[0.97] rounded-2xl px-5 py-4 min-w-[170px] shadow-[0_4px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 hover:-translate-x-1 hover:scale-[1.02] hover:shadow-xl overflow-hidden">
-                            <div
-                                class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#009539] to-[#00c44f] rounded-t-2xl">
-                            </div>
-                            <p class="text-[0.62rem] font-semibold tracking-widest uppercase text-[#009539] mb-0.5">Total Male
-                                Graduates</p>
-                            <p class="font-anton text-4xl text-[#0f1a12] leading-none">{{ $total_male }}</p>
-                            <p class="text-[0.6rem] text-gray-400 mt-1">College-level faculty</p>
-                        </div>
-                        <div
-                            class="group relative bg-white/[0.97] rounded-2xl px-5 py-4 min-w-[170px] shadow-[0_4px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 hover:-translate-x-1 hover:scale-[1.02] hover:shadow-xl overflow-hidden">
-                            <div
-                                class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#009539] to-[#00c44f] rounded-t-2xl">
-                            </div>
-                            <p class="text-[0.62rem] font-semibold tracking-widest uppercase text-[#009539] mb-0.5">Total Female
-                                Graduates</p>
-                            <p class="font-anton text-4xl text-[#0f1a12] leading-none">{{ $total_female }}</p>
-                            <p class="text-[0.6rem] text-gray-400 mt-1">Basic &amp; vocational ed.</p>
-                        </div>
-                    </div>
-                </div> --}}
-
-                <!-- Gender Distribution Chart -->
-                <div class="mt-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-8 items-center">
-                        <!-- Gender Distribution Chart + Distribution by College (ONLY show when All is selected) -->
-                        @if($selected_college === 'All')
-                            <div class="bg-white rounded-xl p-4 shadow">
-                                        <h3 class="font-bold">Gender Distribution</h3>
-                                        <div class="h-96"><canvas id="genderBar"></canvas></div>
-                                    </div>
-
-                                    <div class="bg-white rounded-xl p-4 shadow">
-                                        <h3 class="font-bold mb-2">Distribution of Graduates by College</h3>
-                                        <div class="h-96"><canvas id="graduatesByCollege"></canvas></div>
-                                    </div>
-                        @endif
-                    </div>
+                <div class="filter-group">
+                    <label>College:</label>
+                    <select name="college" id="college">
+                        <option value="All" {{ $selected_college === 'All' ? 'selected' : '' }}>All</option>
+                        @foreach($colleges as $c)
+                            <option value="{{ $c }}" {{ $selected_college === $c ? 'selected' : '' }}>{{ $c }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 @if($selected_college === 'All')
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-8 items-center">
-                        <div class="mt-6">
-                            <div class="bg-white rounded-xl p-4 shadow">
-                                <h3 class="font-bold">Male Graduates per College</h3>
-                                <div class="h-96"><canvas id="maleCollegeChart"></canvas></div>
-                            </div>
-                        </div>
-                        <div class="mt-6">
-                            <div class="bg-white rounded-xl p-4 shadow">
-                                <h3 class="font-bold">Female Graduates per College</h3>
-                                <div class="h-96"><canvas id="femaleCollegeChart"></canvas></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- <div class="mt-6">
-                        <div class="bg-white rounded-xl p-4 shadow">
-                            <h3 class="font-bold mb-2">Distribution of Graduates by College</h3>
-                            <div class="h-96"><canvas id="graduatesByCollege"></canvas></div>
-                        </div>
-                    </div> --}}
+                    <input type="hidden" name="program" value="All">
                 @endif
 
-                @if($selected_college !== 'All')
-                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-6">
-                        <div class="bg-white rounded-xl p-4 shadow">
-                            <h3 class="font-bold mb-2">Most populated Programs</h3>
-                            <div class="h-96"><canvas id="programChart"></canvas></div>
-                        </div>
-                        <div class="bg-white rounded-xl p-4 shadow">
-                            <h3 class="font-bold mb-3">Total Graduates by Program</h3>
-                            <div class="rounded-lg overflow-hidden">
-                                <div id="programList" class="divide-y"></div>
+                <div class="filter-group">
+                    <label>Program:</label>
+                    <select name="program" id="program"
+                        {{ $selected_college === 'All' ? 'disabled' : '' }}>
+                        <option value="All" {{ $selected_program === 'All' ? 'selected' : '' }}>All</option>
+                        @foreach($programs as $p)
+                            <option value="{{ $p }}" {{ $selected_program === $p ? 'selected' : '' }}>{{ $p }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+            </form>
+        </div>
+
+        {{-- Main Content --}}
+        <div class="main-content">
+            <div class="page-content">
+
+                @if($has_data)
+
+                    {{-- Value Boxes --}}
+                    <div class="value-boxes-grid">
+                        @foreach($value_boxes as $index => $box)
+                            @php
+                                $isFirst = $index === 0;
+                                $icons   = [
+                                    'fa-solid fa-chart-line',
+                                    'fa-solid fa-users',
+                                    'fa-solid fa-user-graduate',
+                                    'fa-solid fa-building-columns',
+                                    'fa-solid fa-layer-group',
+                                    'fa-solid fa-circle-info',
+                                ];
+                                $icon = $icons[$index % count($icons)];
+                            @endphp
+                            <div class="value-box {{ $isFirst ? 'first' : 'other' }}">
+                                <div class="value-box-icon"><i class="{{ $icon }}"></i></div>
+                                <div class="value-box-body">
+                                    @if(is_array($box['value']))
+                                        <div class="gender-split">
+                                            <div>
+                                                <div class="gender-split-label">Male</div>
+                                                <div class="gender-split-number">{{ $box['value']['male'] ?? 0 }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="gender-split-label">Female</div>
+                                                <div class="gender-split-number">{{ $box['value']['female'] ?? 0 }}</div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="value-box-number">{{ $box['value'] }}</div>
+                                    @endif
+                                    <div class="value-box-label">{{ $box['title'] }}</div>
+                                </div>
                             </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Demographic Profile View --}}
+                    <div id="demographicSection" class="{{ $selected_view_type === 'demographic_profile' ? '' : 'section-hidden' }}">
+                        <div class="chart-card">
+                            <h3 id="demographicChartTitle">{{ $pie_chart['title'] ?? 'Percentage of Graduates by Sex' }}</h3>
+                            <div id="demographicPie" style="height:420px;"></div>
                         </div>
                     </div>
+
+                    {{-- Headcount View --}}
+                    <div id="headcountSection" class="{{ $selected_view_type === 'graduate_headcount' ? '' : 'section-hidden' }}">
+                        <div class="charts-grid-2">
+                            <div class="chart-card" style="margin-bottom:0;">
+                                <h3 id="donutChartTitle">{{ $donut_chart['title'] ?? 'Graduate Distribution' }}</h3>
+                                <div id="headcountDonut" style="height:420px;"></div>
+                            </div>
+                            <div class="chart-card" style="margin-bottom:0;">
+                                <h3 id="rankingChartTitle">{{ $ranking_chart['title'] ?? 'Ranking of Graduates Count' }}</h3>
+                                <div id="rankingBar" style="height:420px;"></div>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3 id="stackedChartTitle">{{ $stacked_chart['title'] ?? 'Graduates Sex Distribution' }}</h3>
+                            <div id="stackedSexBar" style="height:520px;"></div>
+                        </div>
+                    </div>
+
+                @else
+
+                    <div class="no-data-state">
+                        <div class="no-data-icon-wrap">
+                            <i class="fa-solid fa-filter-circle-xmark"></i>
+                        </div>
+                        <div class="no-data-title">No Data Found</div>
+                        <p class="no-data-text">No graduate records match the selected filters. Try adjusting or resetting the filters.</p>
+                        <a href="{{ route('graduates.index') }}" class="reset-btn">
+                            <i class="fa-solid fa-rotate-left" style="font-size:12px;"></i>
+                            Reset Filters
+                        </a>
+                    </div>
+
                 @endif
 
             </div>
         </div>
+    </div>{{-- /.content --}}
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    @if($has_data)
+        <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
         <script>
-            const CollegeColors = [
-                '#65FF9C', '#FFD05F', '#39EDFF', '#FFE450', '#FFB495',
-                '#FFC177', '#FFA8F7', '#00FFFF', '#E5E5E5', '#E06B0D', '#567F13', '#1A5F30',
+            const FALLBACK_ABBREVIATIONS = {
+                'Graduate School - Masters':  'GS-Masters',
+                'Graduate School - Doctoral': 'GS-Doctoral',
+                'DOT-UNI':                    'DOT-UNI',
+            };
+
+            const DEGREE_PREFIXES = [
+                { pattern: /^Bachelor of Science in\s+/i,                           short: 'BS ' },
+                { pattern: /^Bachelor of Science\s*/i,                              short: 'BS ' },
+                { pattern: /^Bachelor of Arts in\s+/i,                             short: 'BA ' },
+                { pattern: /^Bachelor of Arts\s*/i,                                short: 'BA ' },
+                { pattern: /^Bachelor of Technology in\s+/i,                       short: 'BTech ' },
+                { pattern: /^Bachelor of Engineering in\s+/i,                      short: 'BEng ' },
+                { pattern: /^Master of Science in\s+/i,                            short: 'MS ' },
+                { pattern: /^Master of Arts in\s+/i,                               short: 'MA ' },
+                { pattern: /^Master of Business Administration\s*/i,               short: 'MBA' },
+                { pattern: /^Doctor of Philosophy in\s+/i,                         short: 'PhD ' },
+                { pattern: /^Bachelor of Secondary Education\s*/i,                 short: 'BS Secondary Education' },
+                { pattern: /^Bachelor of Elementary Education\s*/i,                short: 'BS Elementary Education' },
+                { pattern: /^Bachelor of Technology and Livelihood Education\s*/i, short: 'BS Technology and Livelihood Education' },
+                { pattern: /^Bachelor of Physical Education\s*/i,                  short: 'BS Physical Education' },
+                { pattern: /^Bachelor of Early Childhood Education\s*/i,           short: 'BS Early Childhood Education' },
+                { pattern: /^Bachelor of Culture\s*&\s*Arts Education\s*/i,        short: 'BS Culture & Arts Education' },
             ];
 
-            let genderChart = null, collegeDistChart = null, maleChart = null, femaleChart = null, programChart = null;
+            const PALETTE = [
+                '#016531','#86090A','#B29A00','#6D430F','#0A6DAF',
+                '#00FFFF','#A70062','#FF0000','#4b4b4b',
+                '#5A0F8A','#0F6D5A','#C46A00',
+            ];
 
-            function escapeHtml(str) {
-                return String(str).replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
-            }
+            const MALE_COLOR   = '#3B82F6';
+            const FEMALE_COLOR = '#EC4899';
+            const BASE_CONFIG  = { responsive: true, displayModeBar: false };
+            const BASE_LAYOUT  = {
+                font: { family: 'Inter, system-ui, sans-serif', size: 12 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor:  'rgba(0,0,0,0)',
+            };
 
-            function renderProgramList(items) {
-                const wrap = document.getElementById("programList");
-                if (!wrap) return;
-                wrap.innerHTML = items.map((it, i) => {
-                    const isGreen = i % 2 === 0;
-                    const name = escapeHtml(it.program_name);
-                    const major = it.major ? escapeHtml(it.major) : "";
-                    return `
-                    <div class="${isGreen ? 'bg-[#009539] text-white' : 'bg-white text-black'} px-5 py-4 flex items-start justify-between gap-6">
-                        <div class="min-w-0">
-                            <div class="font-semibold leading-snug">${name}</div>
-                            ${major ? `<div class="text-sm opacity-90 leading-snug mt-1">Major in ${major}</div>` : ''}
-                        </div>
-                        <div class="font-extrabold shrink-0">${it.count}</div>
-                    </div>`;
-                }).join("");
-            }
+            const initialData = {{ Js::from([
+                'selected_view_type' => $selected_view_type,
+                'dynamic_title'      => $dynamic_title,
+                'value_boxes'        => $value_boxes,
+                'pie_chart'          => $pie_chart,
+                'donut_chart'        => $donut_chart,
+                'major_chart'        => $major_chart ?? null,
+                'ranking_chart'      => $ranking_chart,
+                'stacked_chart'      => $stacked_chart,
+                'selected_college'   => $selected_college,
+                'selected_program'   => $selected_program,
+            ]) }};
 
-            function shortCollegeLabel(label) {
-                label = String(label).trim();
-                const m = label.match(/\(([^)]+)\)\s*$/);
-                if (m) return m[1].trim();
-                if (/Graduate School/i.test(label)) {
-                    if (/master/i.test(label)) return "GS-Masteral";
-                    if (/doctor/i.test(label)) return "GS-Doctoral";
-                    return "GS";
+            function shortenDegreeName(name) {
+                if (!name) return name;
+                let cleaned = String(name).trim();
+                for (const { pattern, short } of DEGREE_PREFIXES) {
+                    if (pattern.test(cleaned)) return (short + cleaned.replace(pattern, '')).trim();
                 }
-                if (label.includes("DOT-UNI")) return "DOT-UNI";
-                return label.split(/[\s-]+/).filter(Boolean).map(w => w[0].toUpperCase()).join("");
+                return cleaned;
             }
 
-            async function loadProgramSection() {
-                const college = document.getElementById("college")?.value || "All";
-                const canvas = document.getElementById("programChart");
-                const list = document.getElementById("programList");
-                if (!canvas || !list) return;
+            function abbreviateProgram(name) {
+                if (!name) return name;
+                let cleaned = String(name).trim();
+                cleaned = cleaned.replace(/\s*\((DOT-Uni|DOT UNI|GS-Masters|GS-Doctoral)\)\s*$/i, '');
+                return shortenDegreeName(cleaned);
+            }
 
-                const res = await fetch(`/api/graduates-by-program?college=${encodeURIComponent(college)}&top=8`);
-                const data = await res.json();
-                const items = data.items || [];
+            function abbreviateCollege(name) {
+                if (!name) return name;
+                let cleaned = String(name).trim();
+                const parenMatch = cleaned.match(/\(([^)]+)\)\s*$/);
+                if (parenMatch) return parenMatch[1].trim();
+                if (FALLBACK_ABBREVIATIONS[cleaned]) return FALLBACK_ABBREVIATIONS[cleaned];
+                const ci = Object.keys(FALLBACK_ABBREVIATIONS).find(k => k.toLowerCase() === cleaned.toLowerCase());
+                if (ci) return FALLBACK_ABBREVIATIONS[ci];
+                return cleaned;
+            }
 
-                const chartLabels = items.map(it => it.major ? `${it.program_name} Major in ${it.major}` : it.program_name);
-                const chartValues = items.map(it => it.count);
+            function getLabelFormatter(data, mode = 'auto') {
+                const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
+                const isProgramSelected = initialData.selected_program && initialData.selected_program !== 'All';
+                if (mode === 'college') return abbreviateCollege;
+                if (mode === 'program') return abbreviateProgram;
+                if (!isCollegeSelected) return abbreviateCollege;
+                if (isProgramSelected)  return abbreviateProgram;
+                return abbreviateProgram;
+            }
 
-                renderProgramList(items);
+            function renderDemographicPie(data) {
+                if (!data?.labels?.length) return;
+                document.getElementById('demographicChartTitle').textContent = data.title || 'Percentage of Graduates by Sex';
+                Plotly.newPlot('demographicPie', [{
+                    type: 'pie', labels: data.labels, values: data.values,
+                    marker: { colors: [MALE_COLOR, FEMALE_COLOR], line: { color: '#fff', width: 2 } },
+                    texttemplate: '<b>%{percent:.1%}</b>', textposition: 'outside',
+                    hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>Share: %{percent:.1%}<extra></extra>',
+                    pull: 0.03,
+                }], {
+                    ...BASE_LAYOUT,
+                    margin: { t: 60, b: 20, l: 20, r: 20 },
+                    legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12, font: { size: 13, color: '#374151' }, itemsizing: 'constant' },
+                }, BASE_CONFIG);
+            }
 
-                if (programChart) programChart.destroy();
-                programChart = new Chart(canvas, {
-                    type: "bar",
-                    data: { labels: chartLabels, datasets: [{ label: "Graduates", data: chartValues }] },
-                    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+            function renderHeadcountDonut(data) {
+                if (!data?.labels?.length) return;
+                document.getElementById('donutChartTitle').textContent = data.title || 'Graduate Distribution';
+                const formatter      = getLabelFormatter(data);
+                const shortLabels    = data.labels.map(formatter);
+                const programColors  = data.program_colors || {};
+                const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
+                const colors = data.labels.map((label, i) => {
+                    if (isCollegeSelected) return programColors[label] || PALETTE[i % PALETTE.length];
+                    return PALETTE[i % PALETTE.length];
                 });
+                Plotly.newPlot('headcountDonut', [{
+                    type: 'pie', labels: shortLabels, values: data.values, customdata: data.labels,
+                    hole: 0.58, marker: { colors, line: { color: '#fff', width: 2 } },
+                    texttemplate: '<b>%{percent:.1%}</b>', textposition: 'inside',
+                    hovertemplate: '<b>%{customdata}</b><br>Count: %{value}<br>Share: %{percent:.1%}<extra></extra>',
+                }], {
+                    ...BASE_LAYOUT,
+                    margin: { t: 10, b: 10, l: 10, r: 160 },
+                    legend: { orientation: 'v', x: 1.02, xanchor: 'left', y: 0.5, yanchor: 'middle' },
+                }, BASE_CONFIG);
             }
 
-            async function loadGenderCollegeCharts() {
-                const res = await fetch('/api/graduates-gender-by-college');
-                const data = await res.json();
-                const fullLabels = data.labels || [];
-                const shortLabels = fullLabels.map(shortCollegeLabel);
-
-                const maleCtx = document.getElementById("maleCollegeChart");
-                if (maleChart) maleChart.destroy();
-                if (maleCtx) {
-                    maleChart = new Chart(maleCtx, {
-                        type: "bar",
-                        data: { labels: shortLabels, datasets: [{ label: "", data: data.male, backgroundColor: "#4285F4" }] },
-                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (items) => fullLabels[items[0].dataIndex] } } } }
-                    });
-                }
-
-                const femaleCtx = document.getElementById("femaleCollegeChart");
-                if (femaleChart) femaleChart.destroy();
-                if (femaleCtx) {
-                    femaleChart = new Chart(femaleCtx, {
-                        type: "bar",
-                        data: { labels: shortLabels, datasets: [{ label: "", data: data.female, backgroundColor: "#FF7BAC" }] },
-                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (items) => fullLabels[items[0].dataIndex] } } } }
-                    });
-                }
+            function renderRankingBar(data) {
+                if (!data?.labels?.length) return;
+                document.getElementById('rankingChartTitle').textContent = data.title || 'Ranking of Graduates Count';
+                const programColors     = data.program_colors || {};
+                const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
+                const formatter         = isCollegeSelected ? abbreviateProgram : abbreviateCollege;
+                const rows = data.labels
+                    .map((full, i) => ({ short: formatter(full), full, val: data.values[i], highlight: data.highlight && full === data.highlight }))
+                    .sort((a, b) => a.val - b.val);
+                const colors = rows.map((row, i) => {
+                    if (row.highlight) return '#F59E0B';
+                    if (isCollegeSelected) return programColors[row.full] || PALETTE[i % PALETTE.length];
+                    return PALETTE[(rows.length - 1 - i) % PALETTE.length];
+                });
+                Plotly.newPlot('rankingBar', [{
+                    type: 'bar', orientation: 'h',
+                    x: rows.map(d => d.val), y: rows.map(d => d.short), customdata: rows.map(d => d.full),
+                    hovertemplate: '<b>%{customdata}</b><br>Graduates: %{x}<extra></extra>',
+                    text: rows.map(d => d.val), textposition: 'outside', cliponaxis: false,
+                    marker: { color: colors, line: { color: 'transparent' } },
+                }], {
+                    ...BASE_LAYOUT,
+                    margin: { t: 10, b: 50, l: 140, r: 50 },
+                    xaxis: { title: { text: data.x_axis_label || 'Number of Graduates', font: { size: 12 } }, gridcolor: '#f1f5f9', zeroline: false },
+                    yaxis: { automargin: true, tickfont: { size: 12, color: '#374151' } },
+                    showlegend: false
+                }, BASE_CONFIG);
             }
 
-            async function loadGenderChart() {
-                const college = document.getElementById("college")?.value || "All";
-                const res = await fetch(`/api/graduates-summary?college=${encodeURIComponent(college)}`);
-                const data = await res.json();
-                const canvas = document.getElementById("genderBar");
-                if (!canvas) return;
-                if (genderChart) genderChart.destroy();
-                genderChart = new Chart(canvas, {
-                    type: "bar",
-                    data: {
-                        labels: [""],
-                        datasets: [
-                            { label: "Male", backgroundColor: "#4285F4", data: [data.male || 0] },
-                            { label: "Female", backgroundColor: "#FF7BAC", data: [data.female || 0] }
-                        ]
+            function renderStackedSexBar(data) {
+                if (!data?.labels?.length) return;
+                document.getElementById('stackedChartTitle').textContent = data.title || 'Graduates Sex Distribution';
+                const formatter   = getLabelFormatter(data);
+                const shortLabels = data.labels.map(formatter);
+                const cd = data.labels.map((l, i) => ({
+                    full: l, malePct: data.male_pct[i], femalePct: data.female_pct[i],
+                    maleCount: data.male_count[i], femaleCount: data.female_count[i],
+                }));
+                Plotly.newPlot('stackedSexBar', [
+                    {
+                        type: 'bar', name: 'Male', orientation: 'h',
+                        x: data.male_pct, y: shortLabels, customdata: cd,
+                        text: data.male_pct.map(v => v > 4 ? `${v}%` : ''),
+                        textposition: 'inside', textfont: { color: '#fff', size: 11 },
+                        marker: { color: MALE_COLOR },
+                        hovertemplate: '<b>%{customdata.full}</b><br>Male: %{customdata.malePct}% (%{customdata.maleCount})<br>Female: %{customdata.femalePct}% (%{customdata.femaleCount})<extra></extra>',
                     },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: "bottom" } } }
-                });
+                    {
+                        type: 'bar', name: 'Female', orientation: 'h',
+                        x: data.female_pct, y: shortLabels, customdata: cd,
+                        text: data.female_pct.map(v => v > 4 ? `${v}%` : ''),
+                        textposition: 'inside', textfont: { color: '#fff', size: 11 },
+                        marker: { color: FEMALE_COLOR },
+                        hovertemplate: '<b>%{customdata.full}</b><br>Male: %{customdata.malePct}% (%{customdata.maleCount})<br>Female: %{customdata.femalePct}% (%{customdata.femaleCount})<extra></extra>',
+                    }
+                ], {
+                    ...BASE_LAYOUT,
+                    barmode: 'stack',
+                    margin: { t: 50, b: 50, l: 140, r: 30 },
+                    legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.06, font: { size: 13, color: '#374151' }, itemsizing: 'constant' },
+                    xaxis: { title: { text: 'Percentage (%)', font: { size: 12 } }, range: [0, 100], gridcolor: '#f1f5f9', zeroline: false },
+                    yaxis: { title: { text: data.y_axis_label || 'College / Department', font: { size: 12 } }, automargin: true, tickfont: { size: 12, color: '#374151' } },
+                }, BASE_CONFIG);
             }
 
-            async function loadCollegeDistribution() {
-                const canvas = document.getElementById("graduatesByCollege");
-                if (!canvas) return;
-                const res = await fetch(`/api/graduates-by-college`);
-                const data = await res.json();
-                const fullLabels = data.labels || [];
-                const shortLabels = fullLabels.map(shortCollegeLabel);
-                if (collegeDistChart) collegeDistChart.destroy();
-                collegeDistChart = new Chart(canvas, {
-                    type: "bar",
-                    data: { labels: shortLabels, datasets: [{ label: "Number of Graduates", data: data.values, backgroundColor: CollegeColors.slice(0, data.values.length) }] },
-                    options: {
-                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                        scales: { x: { beginAtZero: true }, },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { callbacks: { title: (items) => fullLabels[items[0].dataIndex], label: (ctx) => { const v = ctx.raw ?? 0; const pct = data.percents?.[ctx.dataIndex] ?? 0; return ` ${v} (${pct}%)`; } } },
-                            datalabels: { anchor: "end", align: "end", formatter: (value, ctx) => { const pct = data.percents?.[ctx.dataIndex] ?? 0; return `${value} (${pct}%)`; } }
-                        }
-                    },
-
-                });
+            function renderDashboard(data) {
+                const isDemographic = data.selected_view_type === 'demographic_profile';
+                document.getElementById('demographicSection').classList.toggle('section-hidden', !isDemographic);
+                document.getElementById('headcountSection').classList.toggle('section-hidden', isDemographic);
+                if (isDemographic) {
+                    renderDemographicPie(data.pie_chart);
+                } else {
+                    const isProgramSelected = data.selected_program && data.selected_program !== 'All';
+                    const donutData = (isProgramSelected && data.major_chart?.labels?.length)
+                        ? data.major_chart
+                        : data.donut_chart;
+                    renderHeadcountDonut(donutData);
+                    renderRankingBar(data.ranking_chart);
+                    renderStackedSexBar(data.stacked_chart);
+                }
             }
 
-            document.addEventListener("DOMContentLoaded", () => {
-                loadGenderChart();
-                loadCollegeDistribution();
-                loadGenderCollegeCharts();
-                loadProgramSection();
+            document.addEventListener('DOMContentLoaded', () => {
+                renderDashboard(initialData);
             });
         </script>
+    @endif
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form         = document.getElementById('graduatesFilterForm');
+            const college      = document.getElementById('college');
+            const program      = document.getElementById('program');
+            const viewType     = document.getElementById('view_type');
+            const studentLevel = document.getElementById('student_level');
+            const semester     = document.getElementById('semester');
+
+            function syncProgramState() {
+                const isAll = college.value === 'All';
+                if (isAll) { program.value = 'All'; program.setAttribute('disabled', 'disabled'); }
+                else { program.removeAttribute('disabled'); }
+            }
+
+            syncProgramState();
+            college.addEventListener('change', syncProgramState);
+
+            [viewType, studentLevel, semester, college, program].forEach(el => {
+                el.addEventListener('change', () => {
+                    if (college.value === 'All') program.value = 'All';
+                    form.submit();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

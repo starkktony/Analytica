@@ -66,7 +66,7 @@ Route::middleware('auth')->group(function () {
             ->name('suc-faculty.index');
 
         // API Endpoints
-        Route::prefix('api')->group(function () {
+        Route::prefix('data')->group(function () {
             Route::get('/faculty-stats', [DashboardController::class, 'getFacultyStats'])
                 ->name('faculty.api.stats');
             Route::get('/department-stats', [DashboardController::class, 'getDepartmentStats'])
@@ -83,7 +83,23 @@ Route::middleware('auth')->group(function () {
                 ->name('stzfaculty.overview.ajax');
             Route::get('/faculty/research-performance/ajax', [DashboardController::class, 'researchPerformanceAjax'])
                 ->name('stzfaculty.research-performance.ajax');
+            Route::get('/faculty-pie', [FacultyController::class, 'facultyPie'])
+                ->name('faculty.api.pie');
         });
+    });
+
+        Route::prefix('data')->group(function () {
+
+        // Graduates
+        Route::get('/graduates-summary',           [GraduatesController::class, 'summary']);
+        Route::get('/graduates-by-college',        [GraduatesController::class, 'byCollege']);
+        Route::get('/graduates-gender-by-college', [GraduatesController::class, 'genderByCollege']);
+        Route::get('/graduates-by-program',        [GraduatesController::class, 'byProgram']);
+
+        // Funding
+        Route::get('/income-data',      [FundingController::class, 'getIncomeData']);
+        Route::get('/allotment-data',   [FundingController::class, 'getAllotmentData']);
+        Route::get('/expenditure-data', [FundingController::class, 'getExpenditureData']);
     });
 
     // ====================================================

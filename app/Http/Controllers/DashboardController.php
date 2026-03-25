@@ -22,7 +22,7 @@ class DashboardController extends Controller
     // =========================================================================
     // FACULTY OVERVIEW PAGE
     // =========================================================================
-public function facultyOverview(Request $request)
+    public function facultyOverview(Request $request)
     {
         $activeSemester = Semester::where('status', 1)->orderBy('sem_id', 'desc')->first()
                        ?? Semester::orderBy('sem_id', 'desc')->first();
@@ -106,9 +106,11 @@ public function facultyOverview(Request $request)
                 'count'    => $item->count,
             ]);
 
-        // 5. Faculty count ranking
+        // 5. Faculty count ranking + workload coverage totals
+        $allowedColleges = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
+
         if ($filters['college'] !== 'all') {
-            $rankingData = DB::connection('ewms')
+            $submittedByDept = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
                     $join->on('fp.id', '=', 'fs.f_id')
@@ -116,24 +118,46 @@ public function facultyOverview(Request $request)
                          ->where('fs.is_active', 'Yes');
                 })
                 ->join('table_department as d', 'fp.department', '=', 'd.department_id')
-                ->whereIn('fp.id', $activeFacultyIds)
                 ->where('fp.college', $filters['college'])
-                ->select('d.department_acro', 'd.department_id', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->select('d.department_id', 'd.department_acro', DB::raw('COUNT(DISTINCT fp.id) as submitted'))
                 ->groupBy('d.department_id', 'd.department_acro')
-                ->orderByDesc('total_faculty')
-                ->get();
+                ->get()
+                ->keyBy('department_id');
 
-            if ($filters['department'] !== 'all') {
-                $deptInfo = DB::connection('ewms')
-                    ->table('table_department')
-                    ->where('department_id', $filters['department'])
-                    ->first();
-                $filters['department_acro'] = $deptInfo->department_acro ?? '';
-            }
+            $totalByDept = DB::connection('ewms')
+                ->table('table_faculty_profile as fp')
+                ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+                ->where('fp.college', $filters['college'])
+                ->select('d.department_id', 'd.department_acro', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->groupBy('d.department_id', 'd.department_acro')
+                ->get()
+                ->keyBy('department_id');
+
+            $rankingData = $totalByDept
+                ->map(fn($row) => (object)[
+                    'department_acro' => $row->department_acro,
+                    'total_faculty'   => (int)($submittedByDept[$row->department_id]->submitted ?? 0),
+                ])
+                ->sortByDesc(fn($r, $id) => $totalByDept[$id]->total_faculty ?? 0)
+                ->values();
+
+            $rankingTotals = $totalByDept
+                ->sortByDesc('total_faculty')
+                ->values()
+                ->map(fn($row) => (int)$row->total_faculty)
+                ->toArray();
+
         } else {
-            $allowedColleges = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
+            $totalByCollege = DB::connection('ewms')
+                ->table('table_faculty_profile as fp')
+                ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
+                ->whereIn('cu.college_acro', $allowedColleges)
+                ->select('cu.college_acro as college', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->groupBy('cu.college_acro')
+                ->get()
+                ->keyBy('college');
 
-            $rankingData = DB::connection('ewms')
+            $workloadByCollege = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
                     $join->on('fp.id', '=', 'fs.f_id')
@@ -141,29 +165,40 @@ public function facultyOverview(Request $request)
                          ->where('fs.is_active', 'Yes');
                 })
                 ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
-                ->whereIn('fp.id', $activeFacultyIds)
                 ->whereIn('cu.college_acro', $allowedColleges)
                 ->select('cu.college_acro as college', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
                 ->groupBy('cu.college_acro')
-                ->having('total_faculty', '>', 0)
-                ->orderByDesc('total_faculty')
-                ->get();
+                ->get()
+                ->keyBy('college');
+
+            $rankingData = $totalByCollege
+                ->map(fn($row, $acro) => (object)[
+                    'college'       => $acro,
+                    'total_faculty' => (int)($workloadByCollege[$acro]->total_faculty ?? 0),
+                ])
+                ->sortByDesc('total_faculty')
+                ->values();
+
+            $rankingTotals = $rankingData
+                ->map(fn($row) => (int)($totalByCollege[$row->college]->total_faculty ?? 0))
+                ->toArray();
         }
 
-        // 7. Qualification by department (stacked bar)
-        $phdByDepartment = $this->buildQualificationByDepartment($activeFacultyIds, $filters);
+        // 7. Qualification distribution
+        $qualData             = $this->buildQualificationData($activeFacultyIds, $filters);
+        $phdByDepartment      = $qualData;
 
         // 8. Flat arrays for Blade JS
         $rankingLabels        = collect($rankingData)->pluck($filters['college'] !== 'all' ? 'department_acro' : 'college')->toArray();
         $rankingCounts        = collect($rankingData)->pluck('total_faculty')->toArray();
-        $selectedDeptAcro     = $filters['department_acro'] ?? '';
-        $qualLabels           = $phdByDepartment->pluck('department_acro')->toArray();
-        $phdPercentages       = $phdByDepartment->pluck('phd_percentage')->toArray();
-        $mastersPercentages   = $phdByDepartment->pluck('masters_percentage')->toArray();
-        $bachelorsPercentages = $phdByDepartment->pluck('bachelors_percentage')->toArray();
-        $phdCounts            = $phdByDepartment->pluck('phd_count')->toArray();
-        $mastersCounts        = $phdByDepartment->pluck('masters_count')->toArray();
-        $bachelorsCounts      = $phdByDepartment->pluck('bachelors_count')->toArray();
+        $selectedDeptAcro     = '';
+        $qualLabels           = $qualData->pluck('label')->toArray();
+        $phdPercentages       = $qualData->pluck('phd_percentage')->toArray();
+        $mastersPercentages   = $qualData->pluck('masters_percentage')->toArray();
+        $bachelorsPercentages = $qualData->pluck('bachelors_percentage')->toArray();
+        $phdCounts            = $qualData->pluck('phd_count')->toArray();
+        $mastersCounts        = $qualData->pluck('masters_count')->toArray();
+        $bachelorsCounts      = $qualData->pluck('bachelors_count')->toArray();
 
         // 9. Dropdown data
         $semesters   = Semester::orderBy('sem_id', 'desc')->get();
@@ -180,7 +215,7 @@ public function facultyOverview(Request $request)
             'totalFaculty', 'activeCount', 'onLeaveCount', 'phdHolders', 'mastersHolders',
             'categories', 'collegeStats', 'rankingData', 'phdByDepartment', 'filters',
             'semesters', 'colleges', 'departments',
-            'rankingLabels', 'rankingCounts', 'selectedDeptAcro',
+            'rankingLabels', 'rankingCounts', 'rankingTotals', 'selectedDeptAcro',
             'qualLabels', 'phdPercentages', 'mastersPercentages', 'bachelorsPercentages',
             'phdCounts', 'mastersCounts', 'bachelorsCounts',
         ));
@@ -205,7 +240,6 @@ public function facultyOverview(Request $request)
             'department' => $request->get('department', 'all'),
         ];
 
-        // 1. Active faculty
         $activeFaculty = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -220,7 +254,6 @@ public function facultyOverview(Request $request)
 
         $activeFacultyIds = $activeFaculty->pluck('id')->toArray();
 
-        // 2. On-leave faculty
         $onLeaveFaculty = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -240,7 +273,6 @@ public function facultyOverview(Request $request)
         $totalFaculty  = $activeCount + $onLeaveCount;
         $allFacultyIds = array_merge($activeFacultyIds, $onLeaveFacultyIds);
 
-        // 3. PhD / Masters
         $phdHolders = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->whereIn('fad.f_id', $allFacultyIds)
@@ -262,7 +294,6 @@ public function facultyOverview(Request $request)
             ->distinct()
             ->count('fad.f_id');
 
-        // 4. Employment categories
         $categoryNames = [1 => 'Regular', 2 => 'Contractual', 3 => 'Part-Time', 4 => 'Temporary'];
         $categories = DB::connection('ewms')
             ->table('table_faculty_status as fs')
@@ -278,10 +309,12 @@ public function facultyOverview(Request $request)
                 'count'    => $item->count,
             ]);
 
-        // 6. Faculty count ranking
+        $allowedColleges  = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
         $selectedDeptAcro = '';
+        $rankingTotals    = [];
+
         if ($filters['college'] !== 'all') {
-            $rankRows = DB::connection('ewms')
+            $submittedByDept = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
                     $join->on('fp.id', '=', 'fs.f_id')
@@ -289,21 +322,48 @@ public function facultyOverview(Request $request)
                          ->where('fs.is_active', 'Yes');
                 })
                 ->join('table_department as d', 'fp.department', '=', 'd.department_id')
-                ->whereIn('fp.id', $activeFacultyIds)
                 ->where('fp.college', $filters['college'])
-                ->select('d.department_acro', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->select('d.department_id', 'd.department_acro', DB::raw('COUNT(DISTINCT fp.id) as submitted'))
                 ->groupBy('d.department_id', 'd.department_acro')
-                ->orderByDesc('total_faculty')
-                ->get();
+                ->get()
+                ->keyBy('department_id');
 
-            if ($filters['department'] !== 'all') {
-                $deptInfo         = DB::connection('ewms')->table('table_department')->where('department_id', $filters['department'])->first();
-                $selectedDeptAcro = $deptInfo->department_acro ?? '';
-            }
+            $totalByDept = DB::connection('ewms')
+                ->table('table_faculty_profile as fp')
+                ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+                ->where('fp.college', $filters['college'])
+                ->select('d.department_id', 'd.department_acro', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->groupBy('d.department_id', 'd.department_acro')
+                ->get()
+                ->keyBy('department_id');
+
+            $rankRowsCollection = $totalByDept
+                ->map(fn($row) => (object)[
+                    'department_acro' => $row->department_acro,
+                    'total_faculty'   => (int)($submittedByDept[$row->department_id]->submitted ?? 0),
+                ])
+                ->sortByDesc(fn($r, $id) => $totalByDept[$id]->total_faculty ?? 0)
+                ->values();
+
+            $rankRows = $rankRowsCollection;
+
+            $rankingTotals = $totalByDept
+                ->sortByDesc('total_faculty')
+                ->values()
+                ->map(fn($row) => (int)$row->total_faculty)
+                ->toArray();
+
         } else {
-            $allowedColleges = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
+            $totalByCollege = DB::connection('ewms')
+                ->table('table_faculty_profile as fp')
+                ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
+                ->whereIn('cu.college_acro', $allowedColleges)
+                ->select('cu.college_acro as college', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->groupBy('cu.college_acro')
+                ->get()
+                ->keyBy('college');
 
-            $rankRows = DB::connection('ewms')
+            $workloadByCollege = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
                     $join->on('fp.id', '=', 'fs.f_id')
@@ -311,29 +371,39 @@ public function facultyOverview(Request $request)
                          ->where('fs.is_active', 'Yes');
                 })
                 ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
-                ->whereIn('fp.id', $activeFacultyIds)
                 ->whereIn('cu.college_acro', $allowedColleges)
-                ->select('cu.college_acro as department_acro', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
+                ->select('cu.college_acro as college', DB::raw('COUNT(DISTINCT fp.id) as total_faculty'))
                 ->groupBy('cu.college_acro')
-                ->having('total_faculty', '>', 0)
-                ->orderByDesc('total_faculty')
-                ->get();
+                ->get()
+                ->keyBy('college');
+
+            $rankRowsCollection = $totalByCollege
+                ->map(fn($row, $acro) => (object)[
+                    'department_acro' => $acro,
+                    'total_faculty'   => (int)($workloadByCollege[$acro]->total_faculty ?? 0),
+                ])
+                ->sortByDesc(fn($r) => $totalByCollege[$r->department_acro]->total_faculty ?? 0)
+                ->values();
+
+            $rankRows = $rankRowsCollection;
+
+            $rankingTotals = $rankRowsCollection
+                ->map(fn($row) => (int)($totalByCollege[$row->department_acro]->total_faculty ?? 0))
+                ->toArray();
         }
 
-        $rankingLabels = $rankRows->pluck('department_acro')->toArray();
-        $rankingCounts = $rankRows->pluck('total_faculty')->toArray();
+        $rankingLabels = collect($rankRows)->pluck('department_acro')->toArray();
+        $rankingCounts = collect($rankRows)->pluck('total_faculty')->toArray();
 
-        // 7. Qualification by department (stacked bar)
-        $phdByDepartment = $this->buildQualificationByDepartment($activeFacultyIds, $filters);
-        $qualLabels      = $phdByDepartment->pluck('department_acro')->toArray();
-        $phdPct          = $phdByDepartment->pluck('phd_percentage')->toArray();
-        $mastersPct      = $phdByDepartment->pluck('masters_percentage')->toArray();
-        $bachelorsPct    = $phdByDepartment->pluck('bachelors_percentage')->toArray();
-        $phdCounts       = $phdByDepartment->pluck('phd_count')->toArray();
-        $mastersCounts   = $phdByDepartment->pluck('masters_count')->toArray();
-        $bachelorsCounts = $phdByDepartment->pluck('bachelors_count')->toArray();
+        $qualData        = $this->buildQualificationData($activeFacultyIds, $filters);
+        $qualLabels      = $qualData->pluck('label')->toArray();
+        $phdPct          = $qualData->pluck('phd_percentage')->toArray();
+        $mastersPct      = $qualData->pluck('masters_percentage')->toArray();
+        $bachelorsPct    = $qualData->pluck('bachelors_percentage')->toArray();
+        $phdCounts       = $qualData->pluck('phd_count')->toArray();
+        $mastersCounts   = $qualData->pluck('masters_count')->toArray();
+        $bachelorsCounts = $qualData->pluck('bachelors_count')->toArray();
 
-        // 8. Semester / college / dept text for titles
         $selectedSemester = Semester::find($filters['semester']);
         $semesterText     = $selectedSemester ? $selectedSemester->semester . ' ' . $selectedSemester->sy : '';
         $collegeAcro      = '';
@@ -347,7 +417,6 @@ public function facultyOverview(Request $request)
             $deptAcro = $dep->department_acro ?? '';
         }
 
-        // 9. Dept dropdown for AJAX rebuild
         $departments = $filters['college'] !== 'all'
             ? Department::where('college_id', $filters['college'])->orderBy('department')->get(['department_id', 'department_acro'])
             : collect();
@@ -362,6 +431,7 @@ public function facultyOverview(Request $request)
             'categoryData'   => $categories->pluck('count')->values(),
             'rankingLabels'  => $rankingLabels,
             'rankingCounts'  => $rankingCounts,
+            'rankingTotals'  => $rankingTotals,
             'selectedDept'   => $selectedDeptAcro,
             'qualLabels'     => $qualLabels,
             'phdPct'         => $phdPct,
@@ -376,9 +446,70 @@ public function facultyOverview(Request $request)
             'departments'    => $departments,
         ]);
     }
+
     // =========================================================================
     // PRIVATE HELPERS
     // =========================================================================
+    private function buildQualificationData(array $facultyIds, array $filters): \Illuminate\Support\Collection
+    {
+        $allowedColleges = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
+
+        if ($filters['college'] !== 'all') {
+            return $this->buildQualificationByDepartment($facultyIds, $filters);
+        }
+
+        $collegeGroups = DB::connection('ewms')
+            ->table('table_faculty_profile as fp')
+            ->join('table_faculty_status as fs', function ($join) use ($filters) {
+                $join->on('fp.id', '=', 'fs.f_id')
+                     ->where('fs.sem_id',    $filters['semester'])
+                     ->where('fs.is_active', 'Yes');
+            })
+            ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
+            ->whereIn('fp.id', $facultyIds)
+            ->whereIn('cu.college_acro', $allowedColleges)
+            ->select('cu.college_acro', 'fp.id as faculty_id')
+            ->get()
+            ->groupBy('college_acro');
+
+        $result = collect();
+
+        foreach ($allowedColleges as $acro) {
+            $group   = $collegeGroups->get($acro, collect());
+            $deptIds = $group->pluck('faculty_id')->toArray();
+            $total   = count($deptIds);
+
+            if ($total === 0) {
+                $result->push((object)[
+                    'label'               => $acro,
+                    'total_faculty'       => 0,
+                    'phd_count'           => 0,
+                    'masters_count'       => 0,
+                    'bachelors_count'     => 0,
+                    'phd_percentage'      => 0,
+                    'masters_percentage'  => 0,
+                    'bachelors_percentage'=> 0,
+                ]);
+                continue;
+            }
+
+            [$phd, $masters, $bachAll] = $this->degreeBreakdown($deptIds);
+
+            $result->push((object)[
+                'label'               => $acro,
+                'total_faculty'       => $total,
+                'phd_count'           => $phd,
+                'masters_count'       => $masters,
+                'bachelors_count'     => $bachAll,
+                'phd_percentage'      => round($phd     / $total * 100, 1),
+                'masters_percentage'  => round($masters / $total * 100, 1),
+                'bachelors_percentage'=> round($bachAll / $total * 100, 1),
+            ]);
+        }
+
+        return $result->sortByDesc('total_faculty')->values();
+    }
+
     private function buildQualificationByDepartment(array $facultyIds, array $filters): \Illuminate\Support\Collection
     {
         $facultyByDept = DB::connection('ewms')
@@ -412,64 +543,72 @@ public function facultyOverview(Request $request)
 
             if (empty($deptIds)) continue;
 
-            $phd = DB::connection('ewms')
-                ->table('table_faculty_academic_degree as fad')
-                ->whereIn('fad.f_id', $deptIds)
-                ->whereNotNull('fad.phd_degree_title')
-                ->where('fad.phd_degree_title', '!=', '')
-                ->where('fad.phd_degree_title', '!=', 'N/A')
-                ->distinct()
-                ->count('fad.f_id');
+            [$phd, $masters, $bachAll] = $this->degreeBreakdown($deptIds);
+            $total = $dept->total_faculty;
 
-            $masters = DB::connection('ewms')
-                ->table('table_faculty_academic_degree as fad')
-                ->whereIn('fad.f_id', $deptIds)
-                ->whereNotNull('fad.ms_degree_title')
-                ->where('fad.ms_degree_title', '!=', '')
-                ->where('fad.ms_degree_title', '!=', 'N/A')
-                ->where(fn($q) => $q->whereNull('fad.phd_degree_title')
-                                    ->orWhere('fad.phd_degree_title', '')
-                                    ->orWhere('fad.phd_degree_title', 'N/A'))
-                ->distinct()
-                ->count('fad.f_id');
-
-            $withDegree = DB::connection('ewms')
-                ->table('table_faculty_academic_degree')
-                ->whereIn('f_id', $deptIds)
-                ->distinct()
-                ->pluck('f_id')
-                ->toArray();
-
-            $bachelors = 0;
-            foreach ($deptIds as $fid) {
-                if (!in_array($fid, $withDegree)) continue;
-                $deg        = DB::connection('ewms')->table('table_faculty_academic_degree')->where('f_id', $fid)->first();
-                $hasPhD     = !empty($deg->phd_degree_title) && !in_array($deg->phd_degree_title, ['N/A', '']);
-                $hasMasters = !$hasPhD && !empty($deg->ms_degree_title) && !in_array($deg->ms_degree_title, ['N/A', '']);
-                if (!$hasPhD && !$hasMasters && !empty($deg->degree_title) && !in_array($deg->degree_title, ['N/A', ''])) {
-                    $bachelors++;
-                }
-            }
-
-            $noDeg   = count($deptIds) - count($withDegree);
-            $total   = $dept->total_faculty;
-            $bachAll = $bachelors + $noDeg;
-
-            $result->push((object) [
-                'department_id'        => $dept->department_id,
-                'department_acro'      => $dept->department_acro,
-                'department'           => $dept->department,
-                'total_faculty'        => $total,
-                'phd_count'            => $phd,
-                'masters_count'        => $masters,
-                'bachelors_count'      => $bachAll,
-                'phd_percentage'       => $total > 0 ? round($phd     / $total * 100, 1) : 0,
-                'masters_percentage'   => $total > 0 ? round($masters / $total * 100, 1) : 0,
-                'bachelors_percentage' => $total > 0 ? round($bachAll / $total * 100, 1) : 0,
+            $result->push((object)[
+                'label'               => $dept->department_acro,
+                'department_acro'     => $dept->department_acro,
+                'department_id'       => $dept->department_id,
+                'department'          => $dept->department,
+                'total_faculty'       => $total,
+                'phd_count'           => $phd,
+                'masters_count'       => $masters,
+                'bachelors_count'     => $bachAll,
+                'phd_percentage'      => $total > 0 ? round($phd     / $total * 100, 1) : 0,
+                'masters_percentage'  => $total > 0 ? round($masters / $total * 100, 1) : 0,
+                'bachelors_percentage'=> $total > 0 ? round($bachAll / $total * 100, 1) : 0,
             ]);
         }
 
         return $result->sortByDesc('total_faculty')->values();
+    }
+
+    private function degreeBreakdown(array $facultyIds): array
+    {
+        $phd = DB::connection('ewms')
+            ->table('table_faculty_academic_degree as fad')
+            ->whereIn('fad.f_id', $facultyIds)
+            ->whereNotNull('fad.phd_degree_title')
+            ->where('fad.phd_degree_title', '!=', '')
+            ->where('fad.phd_degree_title', '!=', 'N/A')
+            ->distinct()
+            ->count('fad.f_id');
+
+        $masters = DB::connection('ewms')
+            ->table('table_faculty_academic_degree as fad')
+            ->whereIn('fad.f_id', $facultyIds)
+            ->whereNotNull('fad.ms_degree_title')
+            ->where('fad.ms_degree_title', '!=', '')
+            ->where('fad.ms_degree_title', '!=', 'N/A')
+            ->where(fn($q) => $q->whereNull('fad.phd_degree_title')
+                                ->orWhere('fad.phd_degree_title', '')
+                                ->orWhere('fad.phd_degree_title', 'N/A'))
+            ->distinct()
+            ->count('fad.f_id');
+
+        $withDegree = DB::connection('ewms')
+            ->table('table_faculty_academic_degree')
+            ->whereIn('f_id', $facultyIds)
+            ->distinct()
+            ->pluck('f_id')
+            ->toArray();
+
+        $bachelors = 0;
+        foreach ($facultyIds as $fid) {
+            if (!in_array($fid, $withDegree)) continue;
+            $deg        = DB::connection('ewms')->table('table_faculty_academic_degree')->where('f_id', $fid)->first();
+            $hasPhD     = !empty($deg->phd_degree_title) && !in_array($deg->phd_degree_title, ['N/A', '']);
+            $hasMasters = !$hasPhD && !empty($deg->ms_degree_title) && !in_array($deg->ms_degree_title, ['N/A', '']);
+            if (!$hasPhD && !$hasMasters && !empty($deg->degree_title) && !in_array($deg->degree_title, ['N/A', ''])) {
+                $bachelors++;
+            }
+        }
+
+        $noDeg   = count($facultyIds) - count($withDegree);
+        $bachAll = $bachelors + $noDeg;
+
+        return [$phd, $masters, $bachAll];
     }
 
 
@@ -810,10 +949,8 @@ public function facultyOverview(Request $request)
     }
 
 
-   // =========================================================================
+    // =========================================================================
     // RESEARCH PERFORMANCE PAGE
-    // Filter: semester + college_unit (shows all departments under that unit)
-    // Removed: role_type, activity_type, pub_type filters
     // =========================================================================
     public function researchPerformance(Request $request)
     {
@@ -822,132 +959,60 @@ public function facultyOverview(Request $request)
 
         $filters = [
             'semester' => $request->get('semester', $activeSemester->sem_id ?? 'all'),
-            'college'  => $request->get('college',  'all'),   // college_unit c_u_id
+            'college'  => $request->get('college',  'all'),
         ];
 
-        // Normalise
         foreach ($filters as $k => $v) {
             if ($v === '' || $v === null) $filters[$k] = 'all';
         }
 
-        // Departments that belong to the selected college unit (for scoping)
-        // When 'all', no extra filter; when a unit is chosen we join through
-        // table_college_unit so every query automatically scopes to that unit's
-        // departments.
-
-        // ── Research load by department ──────────────────────────────────────
         $researchLoad = AssignmentInStudentRS::query()
-            ->join('table_faculty_profile as fp',
-                'table_assignment_in_student_rs.f_id', '=', 'fp.id')
-            ->join('table_department as d',
-                'fp.department', '=', 'd.department_id')
-            ->join('table_college_unit as cu',
-                'd.college_id', '=', 'cu.c_u_id')
-            ->selectRaw('
-                d.department_id,
-                d.department,
-                d.department_acro,
-                cu.c_u_id           AS college_id,
-                cu.college_acro,
-                COUNT(DISTINCT fp.id)                                   AS faculty_with_research,
-                ROUND(SUM(table_assignment_in_student_rs.etl), 2)       AS total_etl,
-                ROUND(AVG(table_assignment_in_student_rs.etl), 2)       AS avg_etl,
-                COUNT(DISTINCT table_assignment_in_student_rs.id)       AS research_count
-            ')
-            ->when(
-                $filters['semester'] !== 'all',
-                fn($q) => $q->where('table_assignment_in_student_rs.sem_id', $filters['semester'])
-            )
-            ->when(
-                $filters['college'] !== 'all',
-                fn($q) => $q->where('cu.c_u_id', $filters['college'])
-            )
-            ->groupBy(
-                'd.department_id', 'd.department', 'd.department_acro',
-                'cu.c_u_id', 'cu.college_acro'
-            )
+            ->join('table_faculty_profile as fp', 'table_assignment_in_student_rs.f_id', '=', 'fp.id')
+            ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+            ->join('table_college_unit as cu', 'd.college_id', '=', 'cu.c_u_id')
+            ->selectRaw('d.department_id, d.department, d.department_acro, cu.c_u_id AS college_id, cu.college_acro, COUNT(DISTINCT fp.id) AS faculty_with_research, ROUND(SUM(table_assignment_in_student_rs.etl), 2) AS total_etl, ROUND(AVG(table_assignment_in_student_rs.etl), 2) AS avg_etl, COUNT(DISTINCT table_assignment_in_student_rs.id) AS research_count')
+            ->when($filters['semester'] !== 'all', fn($q) => $q->where('table_assignment_in_student_rs.sem_id', $filters['semester']))
+            ->when($filters['college']  !== 'all', fn($q) => $q->where('cu.c_u_id', $filters['college']))
+            ->groupBy('d.department_id', 'd.department', 'd.department_acro', 'cu.c_u_id', 'cu.college_acro')
             ->orderBy('total_etl', 'desc')
             ->get();
 
-        // ── Publications by department ────────────────────────────────────────
-        // table_publication has no sem_id — semester filter not applied here
         $publications = Publication::query()
-            ->join('table_faculty_profile as fp',
-                'table_publication.f_id', '=', 'fp.id')
-            ->join('table_department as d',
-                'fp.department', '=', 'd.department_id')
-            ->join('table_college_unit as cu',
-                'd.college_id', '=', 'cu.c_u_id')
-            ->selectRaw('
-                d.department_id,
-                d.department,
-                d.department_acro,
-                cu.c_u_id           AS college_id,
-                cu.college_acro,
-                COUNT(table_publication.id)  AS publication_count,
-                COUNT(DISTINCT fp.id)        AS faculty_with_publications
-            ')
-            ->when(
-                $filters['college'] !== 'all',
-                fn($q) => $q->where('cu.c_u_id', $filters['college'])
-            )
+            ->join('table_faculty_profile as fp', 'table_publication.f_id', '=', 'fp.id')
+            ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+            ->join('table_college_unit as cu', 'd.college_id', '=', 'cu.c_u_id')
+            ->selectRaw('d.department_id, d.department, d.department_acro, cu.c_u_id AS college_id, cu.college_acro, COUNT(table_publication.id) AS publication_count, COUNT(DISTINCT fp.id) AS faculty_with_publications')
+            ->when($filters['college'] !== 'all', fn($q) => $q->where('cu.c_u_id', $filters['college']))
             ->whereNotNull('table_publication.type')
             ->where('table_publication.type', '!=', '')
-            ->groupBy(
-                'd.department_id', 'd.department', 'd.department_acro',
-                'cu.c_u_id', 'cu.college_acro'
-            )
+            ->groupBy('d.department_id', 'd.department', 'd.department_acro', 'cu.c_u_id', 'cu.college_acro')
             ->orderBy('publication_count', 'desc')
             ->get();
 
-        // ── Per-type publication counts for pie chart ─────────────────────────
         $publicationTypeBreakdown = Publication::query()
-            ->join('table_faculty_profile as fp',
-                'table_publication.f_id', '=', 'fp.id')
-            ->join('table_department as d',
-                'fp.department', '=', 'd.department_id')
-            ->join('table_college_unit as cu',
-                'd.college_id', '=', 'cu.c_u_id')
-            ->selectRaw('
-                table_publication.type AS pub_type,
-                COUNT(table_publication.id) AS type_count
-            ')
-            ->when(
-                $filters['college'] !== 'all',
-                fn($q) => $q->where('cu.c_u_id', $filters['college'])
-            )
+            ->join('table_faculty_profile as fp', 'table_publication.f_id', '=', 'fp.id')
+            ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+            ->join('table_college_unit as cu', 'd.college_id', '=', 'cu.c_u_id')
+            ->selectRaw('table_publication.type AS pub_type, COUNT(table_publication.id) AS type_count')
+            ->when($filters['college'] !== 'all', fn($q) => $q->where('cu.c_u_id', $filters['college']))
             ->whereNotNull('table_publication.type')
             ->where('table_publication.type', '!=', '')
             ->groupBy('table_publication.type')
             ->orderBy('type_count', 'desc')
             ->get();
 
-        // ── Helpers ───────────────────────────────────────────────────────────
-        $activeSemObj = ($filters['semester'] !== 'all')
-            ? Semester::find($filters['semester'])
-            : null;
+        $activeSemObj       = ($filters['semester'] !== 'all') ? Semester::find($filters['semester'])   : null;
+        $selectedCollegeObj = ($filters['college']  !== 'all') ? CollegeUnit::find($filters['college']) : null;
+        $semesters          = Semester::orderBy('sem_id', 'desc')->get();
 
-        $selectedCollegeObj = ($filters['college'] !== 'all')
-            ? CollegeUnit::find($filters['college'])
-            : null;
-
-        $semesters = Semester::orderBy('sem_id', 'desc')->get();
-
-        // Only the 9 academic colleges (c_u_id 1–9: CAG, CASS, CBA, CED, CEN, CF, CHSI, COS, CVSM)
         $academicCollegeAcros = ['CAG','CASS','CBA','CED','CEN','CF','CHSI','COS','CVSM'];
         $collegeUnits = CollegeUnit::whereIn('college_acro', $academicCollegeAcros)
             ->orderBy('college_acro')
             ->get();
 
         return view('stzfaculty.research-performance', compact(
-            'researchLoad',
-            'publications',
-            'publicationTypeBreakdown',
-            'filters',
-            'semesters',
-            'collegeUnits',
-            'activeSemObj',
-            'selectedCollegeObj',
+            'researchLoad', 'publications', 'publicationTypeBreakdown',
+            'filters', 'semesters', 'collegeUnits', 'activeSemObj', 'selectedCollegeObj',
         ));
     }
 
@@ -973,100 +1038,47 @@ public function facultyOverview(Request $request)
             if ($v === '' || $v === null) $filters[$k] = 'all';
         }
 
-        // ── Research load ─────────────────────────────────────────────────────
         $researchLoad = AssignmentInStudentRS::query()
-            ->join('table_faculty_profile as fp',
-                'table_assignment_in_student_rs.f_id', '=', 'fp.id')
-            ->join('table_department as d',
-                'fp.department', '=', 'd.department_id')
-            ->join('table_college_unit as cu',
-                'd.college_id', '=', 'cu.c_u_id')
-            ->selectRaw('
-                d.department_id,
-                d.department,
-                d.department_acro,
-                cu.c_u_id           AS college_id,
-                cu.college_acro,
-                COUNT(DISTINCT fp.id)                                   AS faculty_with_research,
-                ROUND(SUM(table_assignment_in_student_rs.etl), 2)       AS total_etl,
-                ROUND(AVG(table_assignment_in_student_rs.etl), 2)       AS avg_etl,
-                COUNT(DISTINCT table_assignment_in_student_rs.id)       AS research_count
-            ')
-            ->when(
-                $filters['semester'] !== 'all',
-                fn($q) => $q->where('table_assignment_in_student_rs.sem_id', $filters['semester'])
-            )
-            ->when(
-                $filters['college'] !== 'all',
-                fn($q) => $q->where('cu.c_u_id', $filters['college'])
-            )
-            ->groupBy(
-                'd.department_id', 'd.department', 'd.department_acro',
-                'cu.c_u_id', 'cu.college_acro'
-            )
+            ->join('table_faculty_profile as fp', 'table_assignment_in_student_rs.f_id', '=', 'fp.id')
+            ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+            ->join('table_college_unit as cu', 'd.college_id', '=', 'cu.c_u_id')
+            ->selectRaw('d.department_id, d.department, d.department_acro, cu.c_u_id AS college_id, cu.college_acro, COUNT(DISTINCT fp.id) AS faculty_with_research, ROUND(SUM(table_assignment_in_student_rs.etl), 2) AS total_etl, ROUND(AVG(table_assignment_in_student_rs.etl), 2) AS avg_etl, COUNT(DISTINCT table_assignment_in_student_rs.id) AS research_count')
+            ->when($filters['semester'] !== 'all', fn($q) => $q->where('table_assignment_in_student_rs.sem_id', $filters['semester']))
+            ->when($filters['college']  !== 'all', fn($q) => $q->where('cu.c_u_id', $filters['college']))
+            ->groupBy('d.department_id', 'd.department', 'd.department_acro', 'cu.c_u_id', 'cu.college_acro')
             ->orderBy('total_etl', 'desc')
             ->get();
 
-        // ── Publications ──────────────────────────────────────────────────────
         $publications = Publication::query()
-            ->join('table_faculty_profile as fp',
-                'table_publication.f_id', '=', 'fp.id')
-            ->join('table_department as d',
-                'fp.department', '=', 'd.department_id')
-            ->join('table_college_unit as cu',
-                'd.college_id', '=', 'cu.c_u_id')
-            ->selectRaw('
-                d.department_id,
-                d.department,
-                d.department_acro,
-                cu.c_u_id           AS college_id,
-                cu.college_acro,
-                COUNT(table_publication.id)  AS publication_count,
-                COUNT(DISTINCT fp.id)        AS faculty_with_publications
-            ')
-            ->when(
-                $filters['college'] !== 'all',
-                fn($q) => $q->where('cu.c_u_id', $filters['college'])
-            )
+            ->join('table_faculty_profile as fp', 'table_publication.f_id', '=', 'fp.id')
+            ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+            ->join('table_college_unit as cu', 'd.college_id', '=', 'cu.c_u_id')
+            ->selectRaw('d.department_id, d.department, d.department_acro, cu.c_u_id AS college_id, cu.college_acro, COUNT(table_publication.id) AS publication_count, COUNT(DISTINCT fp.id) AS faculty_with_publications')
+            ->when($filters['college'] !== 'all', fn($q) => $q->where('cu.c_u_id', $filters['college']))
             ->whereNotNull('table_publication.type')
             ->where('table_publication.type', '!=', '')
-            ->groupBy(
-                'd.department_id', 'd.department', 'd.department_acro',
-                'cu.c_u_id', 'cu.college_acro'
-            )
+            ->groupBy('d.department_id', 'd.department', 'd.department_acro', 'cu.c_u_id', 'cu.college_acro')
             ->orderBy('publication_count', 'desc')
             ->get();
 
-        // ── Per-type pie breakdown ────────────────────────────────────────────
         $publicationTypeBreakdown = Publication::query()
-            ->join('table_faculty_profile as fp',
-                'table_publication.f_id', '=', 'fp.id')
-            ->join('table_department as d',
-                'fp.department', '=', 'd.department_id')
-            ->join('table_college_unit as cu',
-                'd.college_id', '=', 'cu.c_u_id')
-            ->selectRaw('
-                table_publication.type AS pub_type,
-                COUNT(table_publication.id) AS type_count
-            ')
-            ->when(
-                $filters['college'] !== 'all',
-                fn($q) => $q->where('cu.c_u_id', $filters['college'])
-            )
+            ->join('table_faculty_profile as fp', 'table_publication.f_id', '=', 'fp.id')
+            ->join('table_department as d', 'fp.department', '=', 'd.department_id')
+            ->join('table_college_unit as cu', 'd.college_id', '=', 'cu.c_u_id')
+            ->selectRaw('table_publication.type AS pub_type, COUNT(table_publication.id) AS type_count')
+            ->when($filters['college'] !== 'all', fn($q) => $q->where('cu.c_u_id', $filters['college']))
             ->whereNotNull('table_publication.type')
             ->where('table_publication.type', '!=', '')
             ->groupBy('table_publication.type')
             ->orderBy('type_count', 'desc')
             ->get();
 
-        // ── Totals ────────────────────────────────────────────────────────────
         $totals = [
             'researchCount' => (int)   $researchLoad->sum('research_count'),
             'pubCount'      => (int)   $publications->sum('publication_count'),
             'etlHours'      => (float) round($researchLoad->sum('total_etl'), 0),
         ];
 
-        // ── Labels ────────────────────────────────────────────────────────────
         $semesterText = '';
         if ($filters['semester'] !== 'all') {
             $sem          = Semester::find($filters['semester']);
@@ -1089,6 +1101,7 @@ public function facultyOverview(Request $request)
         ]);
     }
 
+
     // =========================================================================
     // FACULTY APPROVAL PAGE
     // =========================================================================
@@ -1102,6 +1115,7 @@ public function facultyOverview(Request $request)
             'timeline_signatory' => $request->get('timeline_signatory', null),
         ];
 
+        // ── Stats cards: filter by selected semester date range ──────────────
         $mainQuery = DB::connection('ewms')->table('table_signatory');
         if (!empty($filters['main_semester'])) {
             $semester = Semester::find($filters['main_semester']);
@@ -1144,48 +1158,76 @@ public function facultyOverview(Request $request)
             ['label' => 'VPAA',                'filter' => 'vpaa',    'stats' => $vpaaStats],
         ];
 
-        $allTimelineDocs = DB::connection('ewms')->table('table_signatory')->get();
-        $timelineYears   = DB::connection('ewms')->table('table_signatory')
-            ->select(DB::raw('YEAR(date_submitted) as year'))
-            ->whereNotNull('date_submitted')
-            ->distinct()
-            ->orderBy('year', 'asc')
-            ->pluck('year')
-            ->toArray();
-        if (empty($timelineYears)) {
-            $timelineYears = range(date('Y') - 4, date('Y'));
-        }
+        // ── Timeline: iterate over each semester in order ────────────────────
+        // Pull ALL signatory records once for PHP-side filtering per semester
+        $allTimelineDocs   = DB::connection('ewms')->table('table_signatory')->get();
+        $timelineSemesters = Semester::orderBy('sem_id', 'asc')->get();
 
-        $yearlyDocumentCounts = $yearlyApprovedCounts = $yearlyDeclinedCounts = $yearlyPendingCounts = $yearlyApprovalRates = [];
-        foreach ($timelineYears as $year) {
-            $yearlyDocs = $allTimelineDocs->filter(fn($item) =>
-                ($item->date_submitted ?? null) && date('Y', strtotime($item->date_submitted)) == $year
-            );
-            $totalCount                   = $yearlyDocs->count();
-            $yearlyDocumentCounts[$year]  = $totalCount;
+        $timelineLabels       = [];
+        $yearlyDocumentCounts = [];
+        $yearlyApprovedCounts = [];
+        $yearlyDeclinedCounts = [];
+        $yearlyPendingCounts  = [];
+        $yearlyApprovalRates  = [];
+
+        foreach ($timelineSemesters as $sem) {
+            // Skip semesters without date bounds — we can't bucket records without them
+            if (empty($sem->start_date) || empty($sem->end_date)) continue;
+
+            // Label: e.g. "1st Semester 2023-2024"
+            $label            = $sem->semester . ' ' . $sem->sy;
+            $timelineLabels[] = $label;
+
+            // Filter all docs that fall within this semester's date window
+            $semDocs = $allTimelineDocs->filter(function ($item) use ($sem) {
+                $d = $item->date_submitted ?? null;
+                if (!$d) return false;
+                return $d >= $sem->start_date && $d <= $sem->end_date;
+            });
+
+            $totalCount                   = $semDocs->count();
+            $yearlyDocumentCounts[$label] = $totalCount;
 
             if ($filters['timeline_signatory']) {
                 $field     = $this->getTimelineField($filters['timeline_signatory']);
-                $approved  = $yearlyDocs->filter(fn($i) => $this->checkIsApproved($i->$field ?? null))->count();
-                $declined2 = $yearlyDocs->filter(fn($i) => $this->checkIsDeclined($i->$field ?? null))->count();
+                $approved  = $field ? $semDocs->filter(fn($i) => $this->checkIsApproved($i->$field ?? null))->count() : 0;
+                $declined2 = $field ? $semDocs->filter(fn($i) => $this->checkIsDeclined($i->$field ?? null))->count() : 0;
                 $pending   = max(0, $totalCount - $approved - $declined2);
             } else {
-                $approved  = $yearlyDocs->filter(fn($i) => $this->isFullyApproved($i))->count();
-                $declined2 = $yearlyDocs->filter(fn($i) => $this->hasDeclinedApproval($i))->count();
-                $pending   = $yearlyDocs->filter(fn($i) => $this->isSubmitted($i))->count();
+                $approved  = $semDocs->filter(fn($i) => $this->isFullyApproved($i))->count();
+                $declined2 = $semDocs->filter(fn($i) => $this->hasDeclinedApproval($i))->count();
+                $pending   = $semDocs->filter(fn($i) => $this->isSubmitted($i))->count();
             }
 
-            $yearlyApprovedCounts[$year] = $approved;
-            $yearlyDeclinedCounts[$year] = $declined2;
-            $yearlyPendingCounts[$year]  = $pending;
-            $yearlyApprovalRates[$year]  = $totalCount > 0 ? round(($approved / $totalCount) * 100, 1) : 0;
+            $yearlyApprovedCounts[$label] = $approved;
+            $yearlyDeclinedCounts[$label] = $declined2;
+            $yearlyPendingCounts[$label]  = $pending;
+            $yearlyApprovalRates[$label]  = $totalCount > 0 ? round(($approved / $totalCount) * 100, 1) : 0;
         }
+
+        // $timelineYears is kept as the label array for the blade/JS
+        $timelineYears = $timelineLabels;
 
         if ($request->ajax()) {
             return response()->json([
                 'overallStats'   => compact('totalDocuments', 'fullyApproved', 'pendingApproval', 'declined', 'overallApproved', 'overallPending', 'overallDeclined'),
-                'signatoryStats' => ['dh' => $dhStats, 'dean' => $deanStats, 'director' => $directorStats, 'ds' => $dsStats, 'dot_uni' => $dotUniStats, 'nstp' => $nstpStats, 'eteeap' => $eteeapStats, 'vpaa' => $vpaaStats],
-                'timeline'       => ['years' => array_values($timelineYears), 'documentCounts' => array_values($yearlyDocumentCounts), 'approvedCounts' => array_values($yearlyApprovedCounts), 'declinedCounts' => array_values($yearlyDeclinedCounts), 'pendingCounts' => array_values($yearlyPendingCounts)],
+                'signatoryStats' => [
+                    'dh'       => $dhStats,
+                    'dean'     => $deanStats,
+                    'director' => $directorStats,
+                    'ds'       => $dsStats,
+                    'dot_uni'  => $dotUniStats,
+                    'nstp'     => $nstpStats,
+                    'eteeap'   => $eteeapStats,
+                    'vpaa'     => $vpaaStats,
+                ],
+                'timeline' => [
+                    'years'          => array_values($timelineLabels),
+                    'documentCounts' => array_values($yearlyDocumentCounts),
+                    'approvedCounts' => array_values($yearlyApprovedCounts),
+                    'declinedCounts' => array_values($yearlyDeclinedCounts),
+                    'pendingCounts'  => array_values($yearlyPendingCounts),
+                ],
             ]);
         }
 

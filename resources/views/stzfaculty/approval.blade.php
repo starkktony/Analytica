@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLSU Analytica - Faculty Approval</title>
+    <title>Siel Metrics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -130,81 +129,72 @@
             50%       { transform: scale(1.55); opacity: 1;    }
         }
 
-/* ── Stat Cards ── */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    padding: 28px 30px 18px 30px;
-    margin-bottom: 0;
-}
-@media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 580px)  { .cards-grid { grid-template-columns: 1fr; } }
+        /* ── Stats Cards ── */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 28px 30px 18px 30px;
+        }
+        .stat-card {
+            border-radius: 15px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100px;
+        }
+        .stat-card.green  { background: #009539; }
+        .stat-card.yellow { background: #ffc107; }
+        .stat-card.red    { background: #dc3545; }
+        .stat-card.white  { background: white;   }
 
-.stat-card {
-    position: relative;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    min-height: 130px;
-}
-.stat-card.green  { background: linear-gradient(to right, #22c55e, #16a34a); }
-.stat-card.yellow { background: #ffc107; }
-.stat-card.red    { background: #dc3545; }
-.stat-card.card-total {
-    background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.stat-card-icon {
-    position: absolute;
-    top: 16px; left: 16px;
-    width: 48px; height: 48px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-}
-.stat-card.green  .stat-card-icon { background: rgba(255,255,255,0.9); }
-.stat-card.green  .stat-card-icon i { color: #16a34a; }
-.stat-card.yellow .stat-card-icon { background: rgba(255,255,255,0.9); }
-.stat-card.yellow .stat-card-icon i { color: #b45309; }
-.stat-card.red    .stat-card-icon { background: rgba(255,255,255,0.9); }
-.stat-card.red    .stat-card-icon i { color: #dc3545; }
-.stat-card.card-total .stat-card-icon { background: #22c55e; }
-.stat-card.card-total .stat-card-icon i { color: white; }
+        .stat-card .icon-box {
+            width: 48px; height: 48px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 15px; left: 15px;
+        }
+        .stat-card.green  .icon-box              { background: white;   }
+        .stat-card.green  .icon-box i            { font-size: 20px; color: #009539; }
+        .stat-card.yellow .icon-box              { background: white;   }
+        .stat-card.yellow .icon-box i            { font-size: 20px; color: #ffc107; }
+        .stat-card.red    .icon-box              { background: white;   }
+        .stat-card.red    .icon-box i            { font-size: 20px; color: #dc3545; }
+        .stat-card.white  .icon-box              { background: #009539; }
+        .stat-card.white  .icon-box i            { font-size: 20px; color: white;   }
 
-.stat-card-body { margin-top: 52px; text-align: right; }
-.stat-card-number {
-    font-size: 40px; font-weight: 800; line-height: 1;
-    font-family: 'Bricolage Grotesque', sans-serif;
-    transition: opacity 0.3s;
-}
-.stat-card.green  .stat-card-number,
-.stat-card.yellow .stat-card-number,
-.stat-card.red    .stat-card-number { color: white; }
-.stat-card.card-total .stat-card-number { color: #111827; }
+        .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
+        .stat-number  { font-size: 44px; font-weight: 700; line-height: 1; transition: opacity 0.3s; }
+        .stat-label   { font-size: 12px; font-weight: 600; margin-top: 4px; }
 
-.stat-card-label { font-size: 14px; font-weight: 600; margin-top: 4px; }
-.stat-card.green  .stat-card-label,
-.stat-card.yellow .stat-card-label,
-.stat-card.red    .stat-card-label { color: rgba(255,255,255,0.88); }
-.stat-card.card-total .stat-card-label { color: #6b7280; }
+        .stat-card.green  .stat-number { color: white; }
+        .stat-card.yellow .stat-number { color: white; }
+        .stat-card.red    .stat-number { color: white; }
+        .stat-card.white  .stat-number { color: #1f1f1f; }
+        .stat-card.green  .stat-label  { color: rgba(255,255,255,0.85); }
+        .stat-card.yellow .stat-label  { color: rgba(255,255,255,0.9);  }
+        .stat-card.red    .stat-label  { color: rgba(255,255,255,0.9);  }
+        .stat-card.white  .stat-label  { color: #666; }
 
-.stat-card-number.shimmer {
-    background: linear-gradient(90deg,
-        rgba(255,255,255,0.2) 25%,
-        rgba(255,255,255,0.5) 50%,
-        rgba(255,255,255,0.2) 75%);
-    background-size: 200% 100%;
-    animation: shimmer-anim 1.2s infinite;
-    border-radius: 6px;
-    color: transparent !important;
-    min-width: 70px; min-height: 40px;
-    display: inline-block;
-}
-.stat-card.card-total .stat-card-number.shimmer {
-    background: linear-gradient(90deg, #e8ebe8 25%, #d0d4d0 50%, #e8ebe8 75%);
-    background-size: 200% 100%;
-}
+        /* Shimmer on stat numbers while AJAX is loading */
+        .stat-number.shimmer {
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0.2) 25%,
+                rgba(255,255,255,0.5) 50%,
+                rgba(255,255,255,0.2) 75%);
+            background-size: 200% 100%;
+            animation: shimmer-anim 1.2s infinite;
+            border-radius: 6px;
+            color: transparent !important;
+            min-width: 70px;
+            min-height: 44px;
+            display: inline-block;
+        }
+        .stat-card.white .stat-number.shimmer {
+            background: linear-gradient(90deg, #e8ebe8 25%, #d0d4d0 50%, #e8ebe8 75%);
+            background-size: 200% 100%;
+        }
         @keyframes shimmer-anim {
             0%   { background-position: 200% 0; }
             100% { background-position: -200% 0; }
@@ -313,14 +303,14 @@
                 <span id="barTitle">
                     Faculty Workload Approval
                     @if($filters['main_semester'])
-                        @php 
-                            $sem = $availableSemesters->firstWhere('sem_id', $filters['main_semester']); 
+                        @php
+                            $sem = $availableSemesters->firstWhere('sem_id', $filters['main_semester']);
                         @endphp
-                        @if($sem) 
+                        @if($sem)
                             ({{ $sem->semester }} {{ $sem->sy }})
                         @endif
                     @endif
-                    </span>
+                </span>
                 <span class="filter-loading-dot" id="loadingDot"></span>
             </div>
 
@@ -347,7 +337,6 @@
                     <option value="dh"       {{ $filters['main_signatory'] == 'dh'       ? 'selected' : '' }}>Dept Head</option>
                     <option value="dean"     {{ $filters['main_signatory'] == 'dean'     ? 'selected' : '' }}>Dean</option>
                     <option value="director" {{ $filters['main_signatory'] == 'director' ? 'selected' : '' }}>Director</option>
-                    <option value="ds"       {{ $filters['main_signatory'] == 'ds'       ? 'selected' : '' }}>DS</option>
                     <option value="dot_uni"  {{ $filters['main_signatory'] == 'dot_uni'  ? 'selected' : '' }}>DOT UNI</option>
                     <option value="nstp"     {{ $filters['main_signatory'] == 'nstp'     ? 'selected' : '' }}>NSTP</option>
                     <option value="eteeap"   {{ $filters['main_signatory'] == 'eteeap'   ? 'selected' : '' }}>ETEEAP</option>
@@ -361,44 +350,34 @@
             </a>
         </div>
 
-<<<<<<< Updated upstream
         {{-- Stats Cards --}}
         <div class="stats-container">
             <div class="stat-card white">
                 <div class="icon-box"><i class="bi bi-file-earmark-text-fill"></i></div>
                 <div class="stat-content">
                     <div class="stat-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
-                    <div class="stat-label">Total Documents</div>
-=======
-        {{-- Stat Cards --}}
-        <div class="cards-grid">
-            <div class="stat-card card-total">
-                <div class="stat-card-icon"><i class="fa-solid fa-file-lines"></i></div>
-                <div class="stat-card-body">
-                    <div class="stat-card-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
-                    <div class="stat-card-label">Total Documents</div>
->>>>>>> Stashed changes
+                    <div class="stat-label">Active Faculty</div>
                 </div>
             </div>
             <div class="stat-card green">
-                <div class="stat-card-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <div class="stat-card-body">
-                    <div class="stat-card-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
-                    <div class="stat-card-label">Approved</div>
+                <div class="icon-box"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
+                    <div class="stat-label">Approved</div>
                 </div>
             </div>
             <div class="stat-card yellow">
-                <div class="stat-card-icon"><i class="fa-solid fa-clock"></i></div>
-                <div class="stat-card-body">
-                    <div class="stat-card-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
-                    <div class="stat-card-label">Submitted</div>
+                <div class="icon-box"><i class="bi bi-clock-fill"></i></div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
+                    <div class="stat-label">Submitted</div>
                 </div>
             </div>
             <div class="stat-card red">
-                <div class="stat-card-icon"><i class="fa-solid fa-circle-xmark"></i></div>
-                <div class="stat-card-body">
-                    <div class="stat-card-number" id="statDeclined">{{ number_format($declined) }}</div>
-                    <div class="stat-card-label">Declined</div>
+                <div class="icon-box"><i class="bi bi-x-circle-fill"></i></div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statDeclined">{{ number_format($declined) }}</div>
+                    <div class="stat-label">Declined</div>
                 </div>
             </div>
         </div>
@@ -483,7 +462,6 @@
         dh:       @json($dhStats),
         dean:     @json($deanStats),
         director: @json($directorStats),
-        ds:       @json($dsStats),
         dot_uni:  @json($dotUniStats),
         nstp:     @json($nstpStats),
         eteeap:   @json($eteeapStats),
@@ -535,25 +513,22 @@
     // Chart renderers
     // ─────────────────────────────────────────────────────────────
     function renderPieChart() {
-        const keys = ['dh','dean','director','ds','dot_uni','nstp','eteeap','vpaa'];
+        const keys = ['dh','dean','director','dot_uni','nstp','eteeap','vpaa'];
         let approved, submitted, declined, total;
 
         if (currentFilter && keys.includes(currentFilter)) {
-            // Per-office view: use signatory-level counts
             approved  = signatoryStats[currentFilter].approved;
             submitted = signatoryStats[currentFilter].pending;
             declined  = signatoryStats[currentFilter].declined;
             total     = signatoryStats[currentFilter].total || overallStats.totalDocuments;
         } else {
-            // All offices: use document-level counts (1 count per document, not per signatory)
             approved  = overallStats.fullyApproved;
             submitted = overallStats.pendingApproval;
             declined  = overallStats.declined;
             total     = overallStats.totalDocuments;
         }
 
-        const notYet = Math.max(0, total - approved - submitted - declined);
-
+        const notYet   = Math.max(0, total - approved - submitted - declined);
         const pieTotal = approved + submitted + declined + notYet;
 
         if (pieTotal === 0) {
@@ -581,8 +556,8 @@
     }
 
     function renderBarChart() {
-        const labels = ['Dept Head','Dean','Director','DS','DOT UNI','NSTP','ETEEAP','VPAA'];
-        const keys   = ['dh','dean','director','ds','dot_uni','nstp','eteeap','vpaa'];
+        const labels = ['Dept Head','Dean','Director','DOT UNI','NSTP','ETEEAP','VPAA'];
+        const keys   = ['dh','dean','director','dot_uni','nstp','eteeap','vpaa'];
         const aP=[], sP=[], dP=[], nP=[], totals=[];
 
         keys.forEach(k => {
@@ -654,12 +629,12 @@
               hovertemplate:'<b>%{x}</b><br>Total: %{y}<extra></extra>' }
         ], {
             font: FONT, paper_bgcolor:'white', plot_bgcolor:'#fafafa', barmode:'stack',
-            margin: { t:60, b:50, l:60, r:40 },
+            margin: { t:60, b:100, l:60, r:40 },
             showlegend: true,
             legend: { orientation:'h', x:0.5, xanchor:'center', y:1.12, font:{size:11} },
-            xaxis: { title:{text:'Year',font:{size:11}}, tickmode:'linear', dtick:1, gridcolor:'#e0e0e0' },
+            xaxis: { title:{text:'Semester',font:{size:11}}, tickangle:-30, gridcolor:'#e0e0e0', automargin:true },
             yaxis: { title:{text:'Document Count',font:{size:11}}, gridcolor:'#e0e0e0', zeroline:false },
-            hovermode: 'x'
+            hovermode: 'closest'
         }, cfg).then(() => hideLoader('loaderTimeline'));
     }
 
@@ -670,16 +645,13 @@
         const semVal    = document.getElementById('mainSemester').value;
         const officeVal = document.getElementById('mainOffice').value;
 
-        // Update title text immediately
         const selOpt   = document.getElementById('mainSemester').selectedOptions[0];
         const semLabel = selOpt?.value ? selOpt.getAttribute('data-label') : null;
         document.getElementById('barTitle').textContent =
             semLabel ? `Faculty Workload Approval (${semLabel})` : 'Faculty Workload Approval';
 
-        // Show/hide Clear button
         document.getElementById('clearBtn').style.display = (semVal || officeVal) ? '' : 'none';
 
-        // Show loaders + shimmer
         showAllLoaders();
         shimmerStats(true);
 
@@ -695,21 +667,18 @@
         })
         .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
         .then(data => {
-            // Refresh reactive data
             overallStats   = data.overallStats;
             signatoryStats = data.signatoryStats;
             timeline       = data.timeline;
             currentFilter  = officeVal;
             currentSem     = semVal;
 
-            // Animate stat numbers in
             animateStat('statTotal',     data.overallStats.totalDocuments);
             animateStat('statApproved',  data.overallStats.fullyApproved);
             animateStat('statSubmitted', data.overallStats.pendingApproval);
             animateStat('statDeclined',  data.overallStats.declined);
             shimmerStats(false);
 
-            // Re-render all charts
             renderPieChart();
             renderBarChart();
             renderTimelineChart();
@@ -726,12 +695,11 @@
         const el = document.getElementById(id);
         if (!el) return;
         el.classList.remove('shimmer');
-        const start    = 0;
         const duration = 600;
         const startTs  = performance.now();
         function step(ts) {
             const progress = Math.min((ts - startTs) / duration, 1);
-            const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+            const eased    = 1 - Math.pow(1 - progress, 3);
             el.textContent = Math.round(eased * target).toLocaleString();
             if (progress < 1) requestAnimationFrame(step);
         }
@@ -758,7 +726,6 @@ function getSignatoryName($value) {
         'dh'       => 'Department Head',
         'dean'     => 'Dean',
         'director' => 'Director',
-        'ds'       => 'DS',
         'dot_uni'  => 'DOT UNI',
         'nstp'     => 'NSTP',
         'eteeap'   => 'ETEEAP',

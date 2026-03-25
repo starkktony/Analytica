@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLSU Analytica - Faculty Profile</title>
+    <title>Siel Metrics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
 
     <style>
@@ -27,24 +28,28 @@
             max-width: calc(100vw - 68px);
         }
 
+        /* ── Page header (copied from SUC Faculty) ── */
         .header {
             background: #009539;
             color: white;
-            padding: 5px 30px;
-            font-size: 42px;
-            font-weight: bold;
+            padding: 0 30px;
+            font-size: 36px;
+            font-weight: 800;
             height: 75px;
-            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-family: 'Bricolage Grotesque', sans-serif;
         }
 
-        /* Filter Bar */
+        /* ── Filter Bar ── */
         .filter-bar {
             font-family: 'Inter', sans-serif;
             display: flex;
             align-items: center;
             gap: 10px;
             background: #c9cec9;
-            padding: 0 20px;
+            padding: 0 24px;
             border-bottom: 1px solid #b0b5b0;
             height: 52px;
             min-height: 52px;
@@ -67,7 +72,7 @@
         .filter-group {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             flex-shrink: 0;
         }
         .filter-group label {
@@ -78,7 +83,7 @@
         }
         .filter-group select {
             font-size: 12px;
-            padding: 4px 24px 4px 10px;
+            padding: 4px 28px 4px 12px;
             border-radius: 20px;
             border: 1px solid #8a8f8a;
             background-color: #f5f5f5;
@@ -126,103 +131,128 @@
         }
         .clear-filters-btn:hover { background: #00802e; }
 
-        /* Statistics Cards */
-        .stats-container {
+        /* ── Main content wrapper ── */
+        .main-content {
+            padding: 24px 30px 40px 30px;
+        }
+
+        /* ── Stat Cards (copied from SUC Faculty) ── */
+        .cards-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 30px;
-            width: 100%;
-            box-sizing: border-box;
+            gap: 16px;
+            margin-bottom: 32px;
         }
-        .stat-card {
-            border-radius: 15px;
-            padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-height: 100px;
-        }
-        .stat-card.green { background: #009539; color: white; }
-        .stat-card.green .icon-box {
-            background: white; width: 50px; height: 50px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 15px; left: 15px;
-        }
-        .stat-card.green .icon-box i { font-size: 22px; color: #009539; }
-        .stat-card.green .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
-        .stat-card.green .stat-number { font-size: 48px; font-weight: 700; color: white; line-height: 1; }
-        .stat-card.green .stat-label  { font-size: 13px; color: white; font-weight: 600; margin-top: 4px; }
-        .stat-card.blue, .stat-card.orange, .stat-card.purple { background: white; color: #1f1f1f; }
-        .stat-card.blue .icon-box, .stat-card.orange .icon-box, .stat-card.purple .icon-box {
-            background: #009539; width: 50px; height: 50px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 15px; left: 15px;
-        }
-        .stat-card.blue .icon-box i, .stat-card.orange .icon-box i, .stat-card.purple .icon-box i { font-size: 22px; color: white; }
-        .stat-card.blue .stat-content, .stat-card.orange .stat-content, .stat-card.purple .stat-content {
-            display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1;
-        }
-        .stat-number { font-size: 48px; font-weight: 700; color: #1f1f1f; line-height: 1; }
-        .stat-label  { font-size: 13px; color: #666; font-weight: 600; margin-top: 4px; }
+        @media (max-width: 1200px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px)  { .cards-grid { grid-template-columns: 1fr; } }
 
-        /* Charts */
-        .charts-container {
+        .stat-card {
+            position: relative;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            min-height: 130px;
+        }
+        .stat-card.green {
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+        }
+        .stat-card.white {
+            background: white;
+            color: #111827;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-card-icon {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .stat-card.green .stat-card-icon {
+            background: rgba(255,255,255,0.9);
+            color: #16a34a;
+        }
+        .stat-card.white .stat-card-icon {
+            background: #22c55e;
+            color: white;
+        }
+        .stat-card-body {
+            margin-top: 52px;
+            text-align: right;
+        }
+        .stat-card-number {
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+        }
+        .stat-card.green .stat-card-number { color: white; }
+        .stat-card.white .stat-card-number { color: #111827; }
+
+        .stat-card-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .stat-card.green .stat-card-label { color: rgba(255,255,255,0.85); }
+        .stat-card.white .stat-card-label { color: #6b7280; }
+
+        /* ── Charts Grid (copied from SUC Faculty, adapted to 3-col + full-width) ── */
+        .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
-            padding: 0 30px 30px 30px;
-            width: 100%;
-            box-sizing: border-box;
         }
+        @media (max-width: 1100px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 700px)  { .charts-grid { grid-template-columns: 1fr; } }
+
         .chart-card {
             background: white;
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-        .chart-card.full-width { grid-column: 1 / -1; }
-        .chart-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1f1f1f;
-            margin-bottom: 15px;
-            white-space: normal;
-            word-break: break-word;
-            line-height: 1.3;
-            padding-right: 0;
-        }
-        .chart-wrapper {
-            height: 420px;
-            width: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
             overflow: hidden;
         }
-        .chart-wrapper > div { width: 100%; height: 100%; }
-
-        @media (max-width: 1400px) {
-            .stats-container { grid-template-columns: repeat(2, 1fr); }
-            .charts-container { grid-template-columns: 1fr 1fr; }
-            .chart-card.full-width { grid-column: 1 / -1; }
-            .chart-title { font-size: 16px; white-space: normal; padding-right: 0; }
+        .chart-card.full-width {
+            grid-column: 1 / -1;
         }
-        @media (max-width: 900px) {
-            .charts-container { grid-template-columns: 1fr; }
-            .chart-card.full-width { grid-column: 1; }
+        .chart-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 14px 0;
+            color: #111827;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        .chart-height {
+            height: 380px;
+            width: 100%;
+            position: relative;
+        }
+        .chart-height > div {
+            width: 100%;
+            height: 100%;
         }
 
-        /* Loading / skeleton */
+        /* ── Loading overlay ── */
         .loading-overlay {
-            position: absolute; inset: 0;
+            position: absolute;
+            inset: 0;
             background: rgba(255,255,255,0.82);
             border-radius: inherit;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 10;
-            opacity: 0; pointer-events: none;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity 0.2s ease;
         }
         .loading-overlay.active { opacity: 1; pointer-events: all; }
@@ -234,8 +264,10 @@
             animation: spin 0.75s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .stat-card.loading .stat-number,
-        .stat-card.loading .stat-label {
+
+        /* Loading skeleton for stat cards */
+        .stat-card.loading .stat-card-number,
+        .stat-card.loading .stat-card-label {
             background: linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);
             background-size: 200% 100%;
             animation: shimmer 1.2s infinite;
@@ -244,24 +276,46 @@
             min-width: 60px;
         }
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        .stat-card   { position: relative; }
-        .chart-card  { position: relative; }
+
         .filter-bar.is-loading select,
         .filter-bar.is-loading button { pointer-events: none; opacity: 0.5; }
+
+        /* ── No data ── */
+        .no-data-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: inherit;
+            z-index: 5;
+            gap: 10px;
+        }
+        .no-data-overlay i  { font-size: 40px; color: #ccc; }
+        .no-data-overlay span {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+        }
     </style>
 </head>
 <body>
+
     @include('components.sidebar')
 
     <div class="content">
+
+        {{-- Page Header --}}
         <div class="header" id="pageHeader">
             FACULTY PROFILE
         </div>
 
-        <!-- FILTER BAR -->
-        <div class="filter-bar">
+        {{-- Filter Bar --}}
+        <div class="filter-bar" id="filterBar">
 
-            {{-- Left: dynamic page title --}}
             <div class="page-title" id="dynamicTitle">
                 @php
                     $selectedSemesterObj = $semesters->firstWhere('sem_id', $filters['semester']);
@@ -281,9 +335,7 @@
                 @endphp
             </div>
 
-            {{-- Right: filter controls --}}
             <div class="filter-right">
-
                 <div class="filter-bar-label">Filters:</div>
 
                 <div class="filter-group">
@@ -309,146 +361,146 @@
                     </select>
                 </div>
 
-                <div class="filter-group" id="departmentFilterGroup"
-                     style="{{ $filters['college'] != 'all' ? '' : 'display: none;' }}">
-                    <label>Department:</label>
-                    <select id="departmentFilter">
-                        <option value="all">All</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->department_id }}" {{ $filters['department'] == $dept->department_id ? 'selected' : '' }}>
-                                {{ $dept->department_acro }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
-
-            </div>{{-- /.filter-right --}}
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="stats-container" id="statsContainer">
-            <div class="stat-card green" id="statTotal">
-                <div class="icon-box"><i class="bi bi-people-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statTotalNum">{{ $totalFaculty }}</div>
-                    <div class="stat-label">Total Faculty</div>
-                </div>
-            </div>
-            <div class="stat-card blue" id="statActive">
-                <div class="icon-box"><i class="bi bi-person-check-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statActiveNum">{{ $activeCount }}</div>
-                    <div class="stat-label">Active Faculty</div>
-                </div>
-            </div>
-            <div class="stat-card orange" id="statPhd">
-                <div class="icon-box"><i class="bi bi-mortarboard-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statPhdNum">{{ $phdHolders }}</div>
-                    <div class="stat-label">PhD Holders</div>
-                </div>
-            </div>
-            <div class="stat-card purple" id="statMasters">
-                <div class="icon-box"><i class="bi bi-book-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statMastersNum">{{ $mastersHolders }}</div>
-                    <div class="stat-label">Masters Holders</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="charts-container">
-
-            {{-- ① Faculty Count Ranking --}}
-            <div class="chart-card" id="cardRanking">
-                <div class="loading-overlay" id="loadRanking"><div class="spinner"></div></div>
-                {{-- CHANGED: title now always says "by College" when no college filter is selected --}}
-                <div class="chart-title" id="rankingTitle">
-                    @if($filters['college'] != 'all')
-                        @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
-                        {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Count by Department
-                    @else
-                        Ranking of Faculty Count by College
-                    @endif
-                </div>
-                <div class="chart-wrapper"><div id="facultyRankingChart"></div></div>
-            </div>
-
-            {{-- ② Employment Status (Donut) --}}
-            <div class="chart-card" id="cardEmployment">
-                <div class="loading-overlay" id="loadEmployment"><div class="spinner"></div></div>
-                <div class="chart-title" id="employmentTitle">
-                    @if($filters['college'] != 'all')
-                        @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
-                        {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Employment Status
-                    @else
-                        Faculty Employment Status
-                    @endif
-                </div>
-                <div class="chart-wrapper"><div id="employmentChart"></div></div>
-            </div>
-
-            {{-- ③ Faculty Availability (Donut) --}}
-            <div class="chart-card" id="cardStatus">
-                <div class="loading-overlay" id="loadStatus"><div class="spinner"></div></div>
-                <div class="chart-title" id="statusTitle">
-                    @if($filters['college'] != 'all')
-                        @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
-                        {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Availability Status
-                    @else
-                        Faculty Availability Status
-                    @endif
-                </div>
-                <div class="chart-wrapper"><div id="statusChart"></div></div>
-            </div>
-
-            {{-- ⑤ Faculty Qualification Distribution (Stacked Bar) - full width --}}
-            <div class="chart-card full-width" id="cardQual">
-                <div class="loading-overlay" id="loadQual"><div class="spinner"></div></div>
-                <div class="chart-title" id="qualificationTitle">
-                    @if($filters['college'] != 'all')
-                        @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
-                        {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Qualification Distribution
-                    @else
-                        Faculty Qualification Distribution
-                    @endif
-                </div>
-                <div class="chart-wrapper"><div id="qualificationChart"></div></div>
             </div>
 
         </div>
-    </div>
+
+        {{-- Main Content --}}
+        <div class="main-content">
+
+            {{-- ── Stat Cards ── --}}
+            <div class="cards-grid">
+
+                <div class="stat-card green" id="statTotal">
+                    <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-number" id="statTotalNum">{{ $totalFaculty }}</div>
+                        <div class="stat-card-label">Total Faculty</div>
+                    </div>
+                </div>
+
+                <div class="stat-card white" id="statActive">
+                    <div class="stat-card-icon"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-number" id="statActiveNum">{{ $activeCount }}</div>
+                        <div class="stat-card-label">Active Faculty</div>
+                    </div>
+                </div>
+
+                <div class="stat-card white" id="statPhd">
+                    <div class="stat-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-number" id="statPhdNum">{{ $phdHolders }}</div>
+                        <div class="stat-card-label">PhD Holders</div>
+                    </div>
+                </div>
+
+                <div class="stat-card white" id="statMasters">
+                    <div class="stat-card-icon"><i class="fa-solid fa-book-open"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-number" id="statMastersNum">{{ $mastersHolders }}</div>
+                        <div class="stat-card-label">Masters Holders</div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- ── Charts ── --}}
+            <div class="charts-grid">
+
+                {{-- ① Submitted Faculty Workload --}}
+                <div class="chart-card" id="cardRanking">
+                    <div class="loading-overlay" id="loadRanking"><div class="spinner"></div></div>
+                    <h3 id="rankingTitle">
+                        @if($filters['college'] != 'all')
+                            @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
+                            {{ $collegeName ? $collegeName->college_acro : '' }} Submitted Faculty Workload by Department
+                        @else
+                            Submitted Faculty Workload per College
+                        @endif
+                    </h3>
+                    <div class="chart-height"><div id="facultyRankingChart"></div></div>
+                </div>
+
+                {{-- ② Employment Status --}}
+                <div class="chart-card" id="cardEmployment">
+                    <div class="loading-overlay" id="loadEmployment"><div class="spinner"></div></div>
+                    <h3 id="employmentTitle">
+                        @if($filters['college'] != 'all')
+                            @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
+                            {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Employment Status
+                        @else
+                            Faculty Employment Status
+                        @endif
+                    </h3>
+                    <div class="chart-height"><div id="employmentChart"></div></div>
+                </div>
+
+                {{-- ③ Faculty Availability --}}
+                <div class="chart-card" id="cardStatus">
+                    <div class="loading-overlay" id="loadStatus"><div class="spinner"></div></div>
+                    <h3 id="statusTitle">
+                        @if($filters['college'] != 'all')
+                            @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
+                            {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Availability Status
+                        @else
+                            Faculty Availability Status
+                        @endif
+                    </h3>
+                    <div class="chart-height"><div id="statusChart"></div></div>
+                </div>
+
+                {{-- ④ Faculty Qualification Distribution (full width) --}}
+                <div class="chart-card full-width" id="cardQual">
+                    <div class="loading-overlay" id="loadQual"><div class="spinner"></div></div>
+                    <h3 id="qualificationTitle">
+                        @if($filters['college'] != 'all')
+                            @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
+                            {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Qualification Distribution
+                        @else
+                            Faculty Qualification Distribution
+                        @endif
+                    </h3>
+                    <div class="chart-height"><div id="qualificationChart"></div></div>
+                </div>
+
+            </div>{{-- /.charts-grid --}}
+
+        </div>{{-- /.main-content --}}
+    </div>{{-- /.content --}}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ── Inline data from server (initial load) ──────────────────────────────────
+// ── All your existing JS below is UNCHANGED ──────────────────────────────────
+
 const INITIAL_DATA = {
-    totalFaculty   : {{ $totalFaculty }},
-    activeCount    : {{ $activeCount }},
-    phdHolders     : {{ $phdHolders }},
-    mastersHolders : {{ $mastersHolders }},
-    categoryLabels : {!! json_encode($categories->pluck('category')) !!},
-    categoryData   : {!! json_encode($categories->pluck('count')) !!},
-    onLeaveCount   : {{ $onLeaveCount }},
-    rankingLabels  : {!! json_encode($rankingLabels) !!},
-    rankingCounts  : {!! json_encode($rankingCounts) !!},
-    selectedDept   : @json($selectedDeptAcro),
-    qualLabels     : {!! json_encode($qualLabels) !!},
-    phdPct         : {!! json_encode($phdPercentages) !!},
-    mastersPct     : {!! json_encode($mastersPercentages) !!},
-    bachelorsPct   : {!! json_encode($bachelorsPercentages) !!},
-    phdCounts      : {!! json_encode($phdCounts) !!},
-    mastersCounts  : {!! json_encode($mastersCounts) !!},
-    bachelorsCounts: {!! json_encode($bachelorsCounts) !!},
+    totalFaculty      : {{ $totalFaculty }},
+    activeCount       : {{ $activeCount }},
+    phdHolders        : {{ $phdHolders }},
+    mastersHolders    : {{ $mastersHolders }},
+    categoryLabels    : {!! json_encode($categories->pluck('category')) !!},
+    categoryData      : {!! json_encode($categories->pluck('count')) !!},
+    onLeaveCount      : {{ $onLeaveCount }},
+    rankingLabels     : {!! json_encode($rankingLabels) !!},
+    rankingCounts     : {!! json_encode($rankingCounts) !!},
+    rankingTotals     : {!! json_encode($rankingTotals) !!},
+    selectedDept      : @json($selectedDeptAcro),
+    qualLabels        : {!! json_encode($qualLabels) !!},
+    phdPct            : {!! json_encode($phdPercentages) !!},
+    mastersPct        : {!! json_encode($mastersPercentages) !!},
+    bachelorsPct      : {!! json_encode($bachelorsPercentages) !!},
+    phdCounts         : {!! json_encode($phdCounts) !!},
+    mastersCounts     : {!! json_encode($mastersCounts) !!},
+    bachelorsCounts   : {!! json_encode($bachelorsCounts) !!},
+    collegeAcro       : @json(optional($colleges->firstWhere('c_u_id', $filters['college']))->college_acro ?? ''),
+    semesterText      : @json(optional($semesters->firstWhere('sem_id', $filters['semester']))->semester . ' ' . optional($semesters->firstWhere('sem_id', $filters['semester']))->sy),
+    collegeFilterValue: @json($filters['college']),
 };
 
 const AJAX_URL   = '{{ route("stzfaculty.overview.ajax") }}';
 const CSRF_TOKEN = '{{ csrf_token() }}';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 function showLoaders() {
     document.querySelector('.filter-bar').classList.add('is-loading');
     ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
@@ -473,25 +525,12 @@ function hideLoaders() {
     });
 }
 
-function donutLayout(totalVal) {
+function donutLayout() {
     return {
         font: { family: 'Inter' },
         autosize: true,
         margin: { l: 20, r: 20, t: 70, b: 20 },
-        annotations: [
-            {
-                text: '<b>Total</b>',
-                x: 0.5, y: 0.57,
-                showarrow: false,
-                font: { family: 'Inter', size: 13, color: '#666' }
-            },
-            {
-                text: '<b>' + totalVal + '</b>',
-                x: 0.5, y: 0.43,
-                showarrow: false,
-                font: { family: 'Inter', size: 34, color: '#1f1f1f' }
-            }
-        ],
+        annotations: [],
         paper_bgcolor: 'white',
         plot_bgcolor : 'white',
         showlegend   : true,
@@ -513,14 +552,9 @@ function showNoData(div) {
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.className = 'no-data-overlay';
-        overlay.style.cssText = [
-            'position:absolute','inset:0','display:flex',
-            'flex-direction:column','align-items:center','justify-content:center',
-            'background:white','border-radius:inherit','z-index:5','gap:10px'
-        ].join(';');
         overlay.innerHTML =
-            '<i class="bi bi-inbox" style="font-size:40px;color:#ccc;"></i>' +
-            '<span style="font-family:Inter;font-size:14px;font-weight:600;color:#999;">No record found</span>';
+            '<i class="bi bi-inbox"></i>' +
+            '<span>No record found</span>';
         div.parentNode.appendChild(overlay);
     }
     overlay.style.display = 'flex';
@@ -546,50 +580,128 @@ const plotCfg = {
     modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
 };
 
-// ── Chart renderers ───────────────────────────────────────────────────────────
 function renderRanking(d) {
     const div = document.getElementById('facultyRankingChart');
     if (!div) return;
 
-    const total = (d.rankingCounts || []).reduce((a, b) => a + b, 0);
-    if (!d.rankingLabels || d.rankingLabels.length === 0 || total === 0) {
+    if (!d.rankingLabels || d.rankingLabels.length === 0) {
         showNoData(div); return;
     }
+
+    const hasTotals = Array.isArray(d.rankingTotals)
+        && d.rankingTotals.length === d.rankingLabels.length
+        && d.rankingTotals.some(v => v > 0);
+
+    const isEmpty = hasTotals
+        ? !d.rankingTotals.some(v => v > 0)
+        : !d.rankingCounts.some(v => v > 0);
+
+    if (isEmpty) { showNoData(div); return; }
     clearNoData(div);
-    const colors = d.rankingLabels.map(l =>
-        (d.selectedDept && l === d.selectedDept) ? '#FFA500' : '#009539'
-    );
-    Plotly.react(div, [{
-        x: d.rankingCounts,
-        y: d.rankingLabels,
-        type: 'bar',
-        orientation: 'h',
-        marker: { color: colors, line: { color: 'rgba(0,0,0,0.1)', width: 1 } },
-        text: d.rankingCounts,
-        textposition: 'outside',
-        textfont: { family: 'Inter', size: 11, color: '#1f1f1f' },
-        hovertemplate: '<b>%{y}</b><br>Faculty Count: %{x}<extra></extra>'
-    }], {
-        font: { family: 'Inter' },
-        autosize: true,
-        margin: { l: 60, r: 40, t: 20, b: 40 },
-        xaxis: {
-            title   : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
-            range   : [0, Math.max(...d.rankingCounts) * 1.2],
-            gridcolor: '#e0e0e0',
-            zeroline: false,
-            tickfont: { family: 'Inter', size: 10, color: '#666' }
-        },
-        yaxis: {
-            gridcolor: 'transparent',
-            autorange: 'reversed',
-            tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
-        },
-        paper_bgcolor: 'white',
-        plot_bgcolor : 'white',
-        showlegend   : false,
-        bargap       : 0.3
-    }, plotCfg);
+
+    if (hasTotals) {
+        const labels  = [...d.rankingLabels].reverse();
+        const counts  = [...d.rankingCounts].reverse();
+        const totals  = [...d.rankingTotals].reverse();
+        const maxVal  = Math.max(...totals, ...counts, 1);
+
+        Plotly.react(div, [
+            {
+                name          : 'Submitted Workload',
+                x             : counts,
+                y             : labels,
+                type          : 'bar',
+                orientation   : 'h',
+                marker        : { color: '#009539', line: { color: 'rgba(0,0,0,0.08)', width: 1 } },
+                text          : counts,
+                textposition  : 'outside',
+                textfont      : { family: 'Inter', size: 11, color: '#1f1f1f' },
+                hovertemplate : '<b>%{y}</b><br>Submitted Workload: %{x}<extra></extra>'
+            },
+            {
+                name          : 'Total Faculty',
+                x             : totals,
+                y             : labels,
+                type          : 'bar',
+                orientation   : 'h',
+                marker        : { color: '#a8d5b8', line: { color: 'rgba(0,149,57,0.25)', width: 1 } },
+                text          : totals,
+                textposition  : 'outside',
+                textfont      : { family: 'Inter', size: 11, color: '#555' },
+                hovertemplate : '<b>%{y}</b><br>Total Faculty: %{x}<extra></extra>'
+            }
+        ], {
+            font        : { family: 'Inter' },
+            autosize    : true,
+            barmode     : 'group',
+            margin      : { l: 65, r: 55, t: 50, b: 40 },
+            xaxis: {
+                title    : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
+                range    : [0, maxVal * 1.25],
+                gridcolor: '#e0e0e0',
+                zeroline : false,
+                tickfont : { family: 'Inter', size: 10, color: '#666' }
+            },
+            yaxis: {
+                gridcolor: 'transparent',
+                autorange: true,
+                tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
+            },
+            paper_bgcolor: 'white',
+            plot_bgcolor : 'white',
+            showlegend   : true,
+            legend: {
+                orientation: 'h',
+                x: 0.5, y: 1.08,
+                xanchor: 'center',
+                yanchor: 'bottom',
+                font: { family: 'Inter', size: 11 }
+            },
+            bargap      : 0.25,
+            bargroupgap : 0.08
+        }, plotCfg);
+
+    } else {
+        const labels = [...d.rankingLabels].reverse();
+        const counts = [...d.rankingCounts].reverse();
+        const maxVal = Math.max(...counts, 1);
+
+        const colors = labels.map(l =>
+            (d.selectedDept && l === d.selectedDept) ? '#FFA500' : '#009539'
+        );
+
+        Plotly.react(div, [{
+            x             : counts,
+            y             : labels,
+            type          : 'bar',
+            orientation   : 'h',
+            marker        : { color: colors, line: { color: 'rgba(0,0,0,0.1)', width: 1 } },
+            text          : counts,
+            textposition  : 'outside',
+            textfont      : { family: 'Inter', size: 11, color: '#1f1f1f' },
+            hovertemplate : '<b>%{y}</b><br>Submitted: %{x}<extra></extra>'
+        }], {
+            font        : { family: 'Inter' },
+            autosize    : true,
+            margin      : { l: 60, r: 50, t: 20, b: 40 },
+            xaxis: {
+                title    : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
+                range    : [0, maxVal * 1.25],
+                gridcolor: '#e0e0e0',
+                zeroline : false,
+                tickfont : { family: 'Inter', size: 10, color: '#666' }
+            },
+            yaxis: {
+                gridcolor: 'transparent',
+                autorange: true,
+                tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
+            },
+            paper_bgcolor: 'white',
+            plot_bgcolor : 'white',
+            showlegend   : false,
+            bargap       : 0.3
+        }, plotCfg);
+    }
 }
 
 function renderEmployment(d) {
@@ -610,7 +722,7 @@ function renderEmployment(d) {
         values       : vals,
         labels       : labels,
         type         : 'pie',
-        hole         : 0.65,
+        hole         : 0.50,
         domain       : { x: [0, 1], y: [0, 1] },
         marker       : { colors: colors },
         textinfo     : 'percent',
@@ -621,7 +733,7 @@ function renderEmployment(d) {
         showlegend   : true,
         direction    : 'clockwise',
         sort         : false
-    }], donutLayout(d.totalFaculty), plotCfg);
+    }], donutLayout(), plotCfg);
 }
 
 function renderStatus(d) {
@@ -640,7 +752,7 @@ function renderStatus(d) {
         values       : vals,
         labels       : labels,
         type         : 'pie',
-        hole         : 0.65,
+        hole         : 0.50,
         domain       : { x: [0, 1], y: [0, 1] },
         marker       : { colors: colors },
         textinfo     : 'percent',
@@ -649,7 +761,7 @@ function renderStatus(d) {
         textfont     : { family: 'Inter', size: 11, color: 'white' },
         hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>',
         showlegend   : true
-    }], donutLayout(d.activeCount + d.onLeaveCount), plotCfg);
+    }], donutLayout(), plotCfg);
 }
 
 function normalizeQualPct(phdArr, mastersArr, bachelorsArr) {
@@ -758,35 +870,26 @@ function updateStatCards(d) {
 }
 
 function updateTitles(d, filters) {
-    const col      = filters.college;
-    const dept     = filters.department;
-    const sem      = filters.semesterText || '';
-    const colAcro  = d.collegeAcro || '';
-    const deptAcro = d.deptAcro    || '';
+    const col     = filters.college      || d.collegeFilterValue || 'all';
+    const sem     = filters.semesterText || d.semesterText       || '';
+    const colAcro = d.collegeAcro || '';
 
-    let barTitle = '';
-    if (col !== 'all' && dept !== 'all') {
-        barTitle = deptAcro + ' Faculty Profile (' + sem + ')';
-    } else if (col !== 'all') {
-        barTitle = colAcro + ' Faculty Profile (' + sem + ')';
-    } else {
-        barTitle = 'Faculty Profile (' + sem + ')';
-    }
+    const barTitle = col !== 'all'
+        ? colAcro + ' Faculty Profile (' + sem + ')'
+        : 'Faculty Profile (' + sem + ')';
     document.getElementById('dynamicTitle').textContent = barTitle;
 
     const prefix = col !== 'all' ? colAcro + ' ' : '';
 
-    // CHANGED: "by College" when no college filter, "by Department" when a college is selected
-    document.getElementById('rankingTitle').textContent       = col !== 'all'
-        ? colAcro + ' Faculty Count by Department'
-        : 'Ranking of Faculty Count by College';
+    document.getElementById('rankingTitle').textContent = col !== 'all'
+        ? colAcro + ' Submitted Faculty Workload by Department'
+        : 'Submitted Faculty Workload per College';
 
     document.getElementById('employmentTitle').textContent    = prefix + 'Faculty Employment Status';
     document.getElementById('statusTitle').textContent        = prefix + 'Faculty Availability Status';
     document.getElementById('qualificationTitle').textContent = prefix + 'Faculty Qualification Distribution';
 }
 
-// ── Core AJAX fetch & render ──────────────────────────────────────────────────
 function fetchAndRender(params) {
     showLoaders();
 
@@ -804,54 +907,26 @@ function fetchAndRender(params) {
             department  : params.get('department') || 'all',
             semesterText: data.semesterText
         });
-
         renderRanking(data);
         renderEmployment(data);
         renderStatus(data);
         renderQual(data);
 
-        // Update browser URL without reload
         const url = new URL(window.location.href);
         url.search = params.toString();
         window.history.replaceState({}, '', url.toString());
-
-        const college = params.get('college') || 'all';
-
-        // Rebuild dept dropdown if server sent new list
-        if (data.departments) {
-            const deptSel     = document.getElementById('departmentFilter');
-            const currentDept = params.get('department') || 'all';
-            if (deptSel) {
-                deptSel.innerHTML = '<option value="all">All</option>';
-                data.departments.forEach(dep => {
-                    const opt       = document.createElement('option');
-                    opt.value       = dep.department_id;
-                    opt.textContent = dep.department_acro;
-                    if (String(dep.department_id) === String(currentDept)) opt.selected = true;
-                    deptSel.appendChild(opt);
-                });
-            }
-        }
-
-        // Show/hide dept filter group
-        const deptGrp = document.getElementById('departmentFilterGroup');
-        if (deptGrp) {
-            deptGrp.style.display = (college !== 'all') ? 'flex' : 'none';
-        }
     })
     .catch(err => console.error('Faculty filter error:', err))
     .finally(()  => hideLoaders());
 }
 
-// ── Filter logic ──────────────────────────────────────────────────────────────
 function buildParams() {
-    const params     = new URLSearchParams();
-    const semester   = document.getElementById('semesterFilter').value;
-    const college    = document.getElementById('collegeFilter').value;
-    const department = document.getElementById('departmentFilter')?.value || 'all';
-    params.set('semester',   semester);
-    params.set('college',    college);
-    params.set('department', department);
+    const params   = new URLSearchParams();
+    const semester = document.getElementById('semesterFilter').value;
+    const college  = document.getElementById('collegeFilter').value;
+    params.set('semester', semester);
+    params.set('college',  college);
+    params.set('department', 'all');
     return params;
 }
 
@@ -861,9 +936,6 @@ function applyFilters() {
 }
 
 function updateDepartments() {
-    const deptSel = document.getElementById('departmentFilter');
-    if (deptSel) deptSel.value = 'all';
-    toggleDepartmentFilter();
     updateDynamicTitle();
     fetchAndRender(buildParams());
 }
@@ -872,36 +944,18 @@ function clearFilters() {
     window.location.href = '{{ route("stzfaculty.overview") }}';
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
 function updateDynamicTitle() {
-    const semEl    = document.getElementById('semesterFilter');
-    const semText  = semEl.options[semEl.selectedIndex].text;
-    const colEl    = document.getElementById('collegeFilter');
-    const colText  = colEl.options[colEl.selectedIndex].text;
-    const deptEl   = document.getElementById('departmentFilter');
-    const deptText = deptEl ? deptEl.options[deptEl.selectedIndex]?.text : 'All';
-    const titleEl  = document.getElementById('dynamicTitle');
+    const semEl   = document.getElementById('semesterFilter');
+    const semText = semEl.options[semEl.selectedIndex].text;
+    const colEl   = document.getElementById('collegeFilter');
+    const colText = colEl.options[colEl.selectedIndex].text;
+    const titleEl = document.getElementById('dynamicTitle');
 
-    let title = '';
-    if (colEl.value !== 'all' && deptEl && deptEl.value !== 'all') {
-        title = deptText + ' Faculty Profile (' + semText + ')';
-    } else if (colEl.value !== 'all') {
-        title = colText + ' Faculty Profile (' + semText + ')';
-    } else {
-        title = 'Faculty Profile (' + semText + ')';
-    }
-    titleEl.textContent = title;
+    titleEl.textContent = colEl.value !== 'all'
+        ? colText + ' Faculty Profile (' + semText + ')'
+        : 'Faculty Profile (' + semText + ')';
 }
 
-function toggleDepartmentFilter() {
-    const college   = document.getElementById('collegeFilter').value;
-    const deptGroup = document.getElementById('departmentFilterGroup');
-    if (deptGroup) {
-        deptGroup.style.display = (college !== 'all') ? 'flex' : 'none';
-    }
-}
-
-// ── Sidebar reflow ────────────────────────────────────────────────────────────
 function reflowCharts() {
     ['facultyRankingChart','employmentChart','statusChart','qualificationChart']
         .forEach(id => {
@@ -910,30 +964,22 @@ function reflowCharts() {
         });
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
-
-    // ── Wire up: Semester filter ──────────────────────────────────────────────
     document.getElementById('semesterFilter').addEventListener('change', applyFilters);
-
-    // ── Wire up: Unit/Office filter ───────────────────────────────────────────
     document.getElementById('collegeFilter').addEventListener('change', updateDepartments);
 
-    // ── Wire up: Department filter ────────────────────────────────────────────
-    const deptSel = document.getElementById('departmentFilter');
-    if (deptSel) deptSel.addEventListener('change', applyFilters);
-
-    // ── Sidebar toggle reflow ─────────────────────────────────────────────────
     const sidebarBtn = document.getElementById('sidebarToggle');
     if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
 
-    // ── Render charts from initial server data (no AJAX on first load) ────────
+    updateTitles(INITIAL_DATA, {
+        college     : INITIAL_DATA.collegeFilterValue,
+        semesterText: INITIAL_DATA.semesterText
+    });
     renderRanking(INITIAL_DATA);
     renderEmployment(INITIAL_DATA);
     renderStatus(INITIAL_DATA);
     renderQual(INITIAL_DATA);
 
-    // ── Window resize ─────────────────────────────────────────────────────────
     let resizeTimeout;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimeout);

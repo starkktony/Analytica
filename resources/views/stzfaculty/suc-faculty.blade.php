@@ -1,168 +1,381 @@
-<script src="https://cdn.tailwindcss.com"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Siel Metrics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
+    <style>
+        body {
+            background: #e8ebe8;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            max-width: calc(100vw - 250px);
+            overflow-x: hidden;
+        }
+        body.sidebar-collapsed .content {
+            margin-left: 68px;
+            max-width: calc(100vw - 68px);
+        }
 
+        /* ── Page header ── */
+        .page-header {
+            background: #009539;
+            color: white;
+            padding: 0 30px;
+            font-size: 36px;
+            font-weight: 800;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+        }
 
-<div class="">
+        /* ── Filter bar ── */
+        .filter-bar {
+            background: #c9cec9;
+            border-bottom: 1px solid #b0b5b0;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 12px;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
+        .filter-bar-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2d2d2d;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d2d2d;
+            white-space: nowrap;
+        }
+        .filter-group select {
+            font-size: 12px;
+            padding: 4px 28px 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #8a8f8a;
+            background-color: #f5f5f5;
+            color: #2d2d2d;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%232d2d2d' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 8px;
+            min-width: 130px;
+            cursor: pointer;
+        }
+        .filter-group select:focus {
+            outline: none;
+            border-color: #009539;
+        }
+        .clear-btn {
+            background: #009539;
+            color: white;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .clear-btn:hover { background: #00802e; color: white; }
 
-    <!-- FILTER BAR -->
-    <div class="sticky top-0 z-50 flex justify-between items-center h-12 bg-[#BDBDBD] px-6">
-        <form id="facultyFilterForm" method="GET" action="{{ route('suc-faculty.index') }}" class="flex flex-row gap-3 items-center">
+        /* ── Main content ── */
+        .main-content { padding: 24px 30px 40px 30px; }
 
-            @foreach($filter_columns as $col)
-                @php $param = $filter_param_keys[$col] ?? $col; @endphp
+        /* ── Stat cards ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        @media (max-width: 1024px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px)  { .cards-grid { grid-template-columns: 1fr; } }
 
-                <div class="flex items-center gap-3">
-                    <label class="font-['Bricolage_Grotesque'] font-extrabold text-xs">{{ $col }}</label>
-                    <div class="relative w-40">
-                        <select name="{{ $param }}"
-                            class="w-40 appearance-none rounded-full bg-gray-100 text-center shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer text-xs p-2">
-                            <option class="text-xs" value="All">All</option>
+        .stat-card {
+            position: relative;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            min-height: 130px;
+        }
+        .stat-card.green {
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+        }
+        .stat-card.white {
+            background: white;
+            color: #111827;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-card-icon {
+            position: absolute;
+            top: 16px; left: 16px;
+            width: 48px; height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .stat-card.green .stat-card-icon { background: rgba(255,255,255,0.9); color: #16a34a; }
+        .stat-card.white .stat-card-icon { background: #22c55e; color: white; }
+        .stat-card-body { margin-top: 52px; text-align: right; }
+        .stat-card-number { font-size: 40px; font-weight: 800; line-height: 1; font-family: 'Inter', sans-serif; }
+        .stat-card.green .stat-card-number { color: white; }
+        .stat-card.white .stat-card-number { color: #111827; }
+        .stat-card-label { font-size: 14px; font-weight: 600; margin-top: 4px; }
+        .stat-card.green .stat-card-label { color: white; }
+        .stat-card.white .stat-card-label { color: #6b7280; }
 
+        /* ── Charts ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 24px;
+        }
+        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .chart-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            color: #111827;
+        }
+        .chart-height {
+            height: 320px;
+            position: relative;
+        }
+
+        /* ── No data state ── */
+        .no-data-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 96px 24px;
+            text-align: center;
+        }
+        .no-data-icon-wrap {
+            width: 96px; height: 96px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .no-data-icon-wrap i { font-size: 40px; color: #9ca3af; }
+        .no-data-title {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 24px; font-weight: 800;
+            color: #374151; margin-bottom: 8px;
+        }
+        .no-data-text { color: #9ca3af; font-size: 14px; max-width: 360px; margin-bottom: 24px; }
+        .reset-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #16a34a; color: white;
+            font-size: 14px; font-weight: 600;
+            padding: 10px 20px; border-radius: 9999px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: background 0.2s;
+        }
+        .reset-btn:hover { background: #15803d; color: white; }
+
+        /* ── No data inside chart ── */
+        .no-data {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #ccc;
+            gap: 8px;
+        }
+        .no-data i { font-size: 36px; }
+        .no-data span { font-size: 13px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    @include('components.sidebar')
+
+    <div class="content">
+
+        {{-- Page Header --}}
+        <div class="page-header">
+            Total Faculty of the University
+        </div>
+
+        {{-- Filter Bar --}}
+        <div class="filter-bar">
+            <form id="facultyFilterForm"
+                  method="GET"
+                  action="{{ route('suc-faculty.index') }}"
+                  style="display:flex;align-items:center;gap:12px;flex-wrap:nowrap;">
+
+                <span class="filter-bar-label">Filters:</span>
+
+                @foreach($filter_columns as $col)
+                    @php $param = $filter_param_keys[$col] ?? $col; @endphp
+                    <div class="filter-group">
+                        <label>{{ $col }}:</label>
+                        <select name="{{ $param }}">
+                            <option value="All">All</option>
                             @foreach(($filter_options[$col] ?? []) as $val)
-                                <option class="text-xs" value="{{ $val }}"
-                                    {{ request($param) == $val ? 'selected' : '' }}>
+                                <option value="{{ $val }}" {{ request($param) == $val ? 'selected' : '' }}>
                                     {{ $val }}
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                @endforeach
 
-                        <div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+                @if(count(array_filter(request()->only(array_values($filter_param_keys)))) > 0)
+                    <a href="{{ route('suc-faculty.index') }}" class="clear-btn">Clear</a>
+                @endif
+
+            </form>
+        </div>
+
+        {{-- Main Content --}}
+        <div class="main-content">
+
+            @if($total_faculty > 0)
+
+                {{-- Stat Cards --}}
+                <div class="cards-grid">
+                    <div class="stat-card green">
+                        <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-number">{{ number_format($total_faculty) }}</div>
+                            <div class="stat-card-label">Total Faculty of the University</div>
+                        </div>
+                    </div>
+                    <div class="stat-card white">
+                        <div class="stat-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-number">{{ number_format($tertiary_total) }}</div>
+                            <div class="stat-card-label">Total Tertiary Faculty</div>
+                        </div>
+                    </div>
+                    <div class="stat-card white">
+                        <div class="stat-card-icon"><i class="fa-solid fa-school"></i></div>
+                        <div class="stat-card-body">
+                            <div class="stat-card-number">{{ number_format($elem_secon_techbo_total) }}</div>
+                            <div class="stat-card-label">Total Elem / Second / TechVoc Faculty</div>
                         </div>
                     </div>
                 </div>
-            @endforeach
 
-            {{-- <button type="submit" class="px-4 py-1 bg-white text-black rounded-full text-sm">Apply</button>
-
-            @if(count(request()->query()) > 0)
-                <a href="{{ route('suc-faculty.index') }}" class="px-4 py-1 bg-white text-black rounded-full text-sm">Clear</a>
-            @endif --}}
-        </form>
-    </div>
-
-    <div class="mt-6 overflow-x-auto px-6">
-
-        <!-- HERO CARD -->
-        <div class="relative w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6
-                bg-gradient-to-br from-[#007a2f] via-[#009539] to-[#00b347]
-                rounded-2xl p-8 overflow-hidden
-                shadow-[0_20px_60px_rgba(0,100,30,0.5),0_4px_12px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.08)]
-                animate-card-in">
-
-            <div class="absolute -top-24 -right-16 w-72 h-72 rounded-full border-[36px] border-white/[0.055] pointer-events-none"></div>
-            <div class="absolute -bottom-14 left-16 w-44 h-44 rounded-full border-[28px] border-white/[0.04] pointer-events-none"></div>
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(255,255,255,0.12),transparent)] pointer-events-none"></div>
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_40%_40%_at_100%_100%,rgba(0,0,0,0.15),transparent)] pointer-events-none"></div>
-
-            <div class="relative z-10 shrink-0 animate-fade-up-1 group">
-                <img src="{{ asset('images/school 1.png') }}" alt="CLSU Seal"
-                    class="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-2" />
-            </div>
-
-            <div class="relative z-10 flex flex-col items-center text-center flex-1 animate-fade-up-2">
-                <h2 class="font-bricolage text-3xl md:text-4xl font-extrabold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-                    Total Faculty<br>
-                    @if($selected_college)
-                        of {{ strtoupper($selected_college) }}
-                    @else
-                        of the University
-                    @endif
-                </h2>
-                <div class="w-12 h-0.5 bg-white/30 rounded-full my-4"></div>
-                <div class="relative">
-                    <span class="font-['anton'] text-4xl md:text-5xl text-white leading-none tracking-wide drop-shadow-[0_4px_20px_rgba(0,0,0,0.25)] mb-2">
-                        {{ $total_faculty }}
-                    </span>
-                    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/5 h-[3px] bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full"></div>
+                {{-- Charts --}}
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Faculty Tenure Distribution</h3>
+                        <div class="chart-height"><canvas id="tenurePie"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Faculty Rank Distribution</h3>
+                        <div class="chart-height"><canvas id="rankPie"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Faculty Sex Distribution</h3>
+                        <div class="chart-height"><canvas id="genderPie"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Sex Distribution by College</h3>
+                        <div class="chart-height"><canvas id="genderCollegeStacked"></canvas></div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="relative z-10 flex flex-col gap-3 shrink-0 w-full md:w-auto animate-fade-up-3">
-                <div class="group relative bg-white/[0.97] rounded-2xl px-5 py-4 min-w-[170px] shadow-[0_4px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 hover:-translate-x-1 hover:scale-[1.02] hover:shadow-xl overflow-hidden">
-                    <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#009539] to-[#00c44f] rounded-t-2xl"></div>
-                    <p class="text-[0.62rem] font-semibold tracking-widest uppercase text-[#009539] mb-0.5">Tertiary</p>
-                    <p class="font-anton text-4xl text-[#0f1a12] leading-none">{{ $tertiary_total }}</p>
-                    <p class="text-[0.6rem] text-gray-400 mt-1">College-level faculty</p>
+            @else
+
+                {{-- No Data --}}
+                <div class="no-data-state">
+                    <div class="no-data-icon-wrap">
+                        <i class="fa-solid fa-filter-circle-xmark"></i>
+                    </div>
+                    <div class="no-data-title">No Data Found</div>
+                    <p class="no-data-text">
+                        No faculty records match the selected filter criteria. Try adjusting or resetting the filters above.
+                    </p>
+                    <a href="{{ route('suc-faculty.index') }}" class="reset-btn">
+                        <i class="fa-solid fa-rotate-left" style="font-size:12px;"></i>
+                        Reset Filters
+                    </a>
                 </div>
-                <div class="group relative bg-white/[0.97] rounded-2xl px-5 py-4 min-w-[170px] shadow-[0_4px_16px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 hover:-translate-x-1 hover:scale-[1.02] hover:shadow-xl overflow-hidden">
-                    <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#009539] to-[#00c44f] rounded-t-2xl"></div>
-                    <p class="text-[0.62rem] font-semibold tracking-widest uppercase text-[#009539] mb-0.5">Elem / Second / Tech-Voc</p>
-                    <p class="font-anton text-4xl text-[#0f1a12] leading-none">{{ $elem_secon_techbo_total }}</p>
-                    <p class="text-[0.6rem] text-gray-400 mt-1">Basic &amp; vocational ed.</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- CHARTS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 px-6 mt-8 items-center">
-            <div class="bg-white rounded-xl p-4 shadow">
-                <h3 class="font-bold mb-2">Faculty Tenure Distribution</h3>
-                <div class="h-80 flex items-center justify-center"><canvas id="tenurePie"></canvas></div>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow">
-                <h3 class="font-bold mb-2">Faculty Rank Distribution</h3>
-                <div class="h-80 flex items-center justify-center"><canvas id="rankPie"></canvas></div>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow">
-                <h3 class="font-bold mb-2">Faculty Gender Distribution</h3>
-                <div class="h-80 flex items-center justify-center"><canvas id="genderPie"></canvas></div>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow my-5 px-6">
-                    <h3 class="font-bold mb-2">Gender Distribution per College</h3>
-                    <div class="h-80"><canvas id="genderCollegeStacked"></canvas></div>
-            </div>
-        </div>
+            @endif
 
-    </div>
-</div>
+        </div>{{-- /.main-content --}}
+    </div>{{-- /.content --}}
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("facultyFilterForm");
-    if (!form) return;
-
-    form.querySelectorAll("select").forEach(sel => {
-        sel.addEventListener("change", () => form.submit());
-    });
+    if (form) {
+        form.querySelectorAll("select").forEach(sel => {
+            sel.addEventListener("change", () => form.submit());
+        });
+    }
+    loadFacultyPies();
 });
 
-const colors = [
-    "#009639","#FFD700","#65FF9C","#FFD05F","#39EDFF",
-    "#FFE450","#FFB495","#FFC177","#00FFFF","#494949","#E0DA0D",
-];
-const GenderColor = ['#4285F4', '#FF7BAC'];
+const COLORS        = ["#009639","#FFD700","#65FF9C","#FFD05F","#39EDFF","#FFE450","#FFB495","#FFC177","#00FFFF","#494949","#E0DA0D"];
+const GENDER_COLORS = ['#4285F4', '#FF7BAC'];
 
-let tenureChart, rankChart, genderChart, genderCollegeChart, maleChart, femaleChart;
+let tenureChart, rankChart, genderChart, genderCollegeChart;
 
-if (window.ChartDataLabels) {
-    Chart.register(ChartDataLabels);
-}
+if (window.ChartDataLabels) Chart.register(ChartDataLabels);
 
 function sum(arr) {
     return (arr || []).reduce((a, b) => a + (Number(b) || 0), 0);
 }
 
-function percentFormatter(value, ctx) {
-    const dataArr = ctx.chart.data.datasets[ctx.datasetIndex].data || [];
-    const total = sum(dataArr);
-    if (!total) return '';
-    const pct = (Number(value) / total) * 100;
-    return pct >= 3 ? `${pct.toFixed(1)}%` : ''; // hide tiny labels
-}
-
-function findSeries(ds, label) {
-    return (ds || []).find(d => (d.label || "").toLowerCase() === label.toLowerCase());
-}
-
 function hexToRgb(hex) {
-    if (!hex) return { r: 0, g: 0, b: 0 };
-    hex = String(hex).replace("#", "");
+    hex = String(hex || '').replace("#", "");
     if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
     const n = parseInt(hex, 16);
     return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
@@ -170,79 +383,46 @@ function hexToRgb(hex) {
 
 function getContrastColor(bgHex) {
     const { r, g, b } = hexToRgb(bgHex);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 150 ? "#111827" : "#FFFFFF";
+    return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111827" : "#FFFFFF";
 }
 
 const doughnutCenterText = {
     id: 'doughnutCenterText',
     afterDraw(chart) {
         if (chart.config.type !== 'doughnut') return;
-
         const { ctx, chartArea } = chart;
         if (!chartArea) return;
-
-        const dataset = chart.data.datasets?.[0]?.data || [];
-        const total = sum(dataset);
-
-        const centerX = (chartArea.left + chartArea.right) / 2;
-        const centerY = (chartArea.top + chartArea.bottom) / 2;
-
+        const total   = sum(chart.data.datasets?.[0]?.data || []);
+        const centerX = (chartArea.left + chartArea.right)  / 2;
+        const centerY = (chartArea.top  + chartArea.bottom) / 2;
         ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        // TOTAL label
-        ctx.font = '600 12px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial';
-        ctx.fillStyle = '#6B7280';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = '600 11px Inter, sans-serif'; ctx.fillStyle = '#6B7280';
         ctx.fillText('TOTAL', centerX, centerY - 12);
-
-        // Total number
-        ctx.font = '800 22px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial';
-        ctx.fillStyle = '#111827';
+        ctx.font = '800 22px Inter, sans-serif'; ctx.fillStyle = '#111827';
         ctx.fillText(String(total), centerX, centerY + 12);
-
         ctx.restore();
     }
 };
-
 Chart.register(doughnutCenterText);
-
 
 const pieLabelOptions = {
     plugins: {
         legend: { position: "top" },
         datalabels: {
-            formatter: percentFormatter,
-
-            // ✅ INSIDE SLICE
-            anchor: "center",
-            align: "center",
-            offset: 0,
-            clamp: true,
-            clip: true,
-
-            font: { weight: "900", size: 12 },
-
-            // auto white/black for readability
-            color: (ctx) => {
-                const bg = ctx.dataset.backgroundColor?.[ctx.dataIndex];
-                return getContrastColor(bg);
+            anchor: "center", align: "center", clamp: true, clip: true,
+            font: { weight: "900", size: 11 },
+            formatter: (value, ctx) => {
+                const total = sum(ctx.dataset.data || []);
+                if (!total) return '';
+                const pct = (Number(value) / total) * 100;
+                return pct >= 3 ? `${pct.toFixed(1)}%` : '';
             },
-
-            // subtle stroke only when text is white (helps on bright colors)
-            textStrokeColor: "rgba(0,0,0,0.35)",
-            textStrokeWidth: (ctx) => {
-                const bg = ctx.dataset.backgroundColor?.[ctx.dataIndex];
-                return getContrastColor(bg) === "#FFFFFF" ? 2 : 0;
-            },
-
-            // hide tiny slices (adjust if you want)
+            color: (ctx) => getContrastColor(ctx.dataset.backgroundColor?.[ctx.dataIndex]),
             display: (ctx) => {
                 const v = Number(ctx.dataset.data?.[ctx.dataIndex] || 0);
                 const total = sum(ctx.dataset.data || []);
-                if (!total) return false;
-                return (v / total * 100) >= 3;
+                return total > 0 && (v / total * 100) >= 3;
             }
         }
     },
@@ -250,105 +430,88 @@ const pieLabelOptions = {
     maintainAspectRatio: false
 };
 
+function showNoData(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const wrapper = canvas.parentNode;
+    canvas.style.display = 'none';
+    let nd = wrapper.querySelector('.no-data');
+    if (!nd) {
+        nd = document.createElement('div');
+        nd.className = 'no-data';
+        nd.innerHTML = '<i class="bi bi-inbox"></i><span>No data available</span>';
+        wrapper.appendChild(nd);
+    }
+    nd.style.display = 'flex';
+}
+
 async function loadFacultyPies() {
     try {
         const qs  = window.location.search || "";
-        const res = await fetch(`/api/faculty-pie${qs}`);
-        if (!res.ok) { console.error("API failed:", res.status); return; }
+        const res = await fetch(`/faculty/data/faculty-pie${qs}`);
+        if (!res.ok) { console.error("API error:", res.status); return; }
         const data = await res.json();
 
-        // TENURE PIE
-        if (tenureChart) tenureChart.destroy();
-        tenureChart = new Chart(document.getElementById("tenurePie"), {
-            type: "pie",
-            data: {
-                labels: data.tenure?.labels || [],
-                datasets: [{
-                    data: data.tenure?.values || [],
-                    backgroundColor: colors,
-                    borderColor: "#fff",
-                    borderWidth: 2
-                }]
-            },
-            options: pieLabelOptions
-        });
+        if (!data.tenure?.values?.length) {
+            showNoData('tenurePie');
+        } else {
+            if (tenureChart) tenureChart.destroy();
+            tenureChart = new Chart(document.getElementById("tenurePie"), {
+                type: "pie",
+                data: { labels: data.tenure.labels, datasets: [{ data: data.tenure.values, backgroundColor: COLORS, borderColor: "#fff", borderWidth: 2 }] },
+                options: pieLabelOptions
+            });
+        }
 
-        // RANK PIE
-        if (rankChart) rankChart.destroy();
-        rankChart = new Chart(document.getElementById("rankPie"), {
-            type: "pie",
-            data: {
-                labels: data.rank?.labels || [],
-                datasets: [{
-                    data: data.rank?.values || [],
-                    backgroundColor: colors,
-                    borderColor: "#fff",
-                    borderWidth: 2
-                }]
-            },
-            options: pieLabelOptions
-        });
+        if (!data.rank?.values?.length) {
+            showNoData('rankPie');
+        } else {
+            if (rankChart) rankChart.destroy();
+            rankChart = new Chart(document.getElementById("rankPie"), {
+                type: "pie",
+                data: { labels: data.rank.labels, datasets: [{ data: data.rank.values, backgroundColor: COLORS, borderColor: "#fff", borderWidth: 2 }] },
+                options: pieLabelOptions
+            });
+        }
 
-        if (genderChart) genderChart.destroy();
-        genderChart = new Chart(document.getElementById("genderPie"), {
-            type: "doughnut",
-            data: {
-                labels: data.gender?.labels || [],
-                datasets: [{
-                    data: data.gender?.values || [],
-                    backgroundColor: GenderColor,
-                    borderColor: "#fff",
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                ...pieLabelOptions,
-                cutout: "65%"
-            }
-        });
+        if (!data.gender?.values?.length) {
+            showNoData('genderPie');
+        } else {
+            if (genderChart) genderChart.destroy();
+            genderChart = new Chart(document.getElementById("genderPie"), {
+                type: "doughnut",
+                data: { labels: data.gender.labels, datasets: [{ data: data.gender.values, backgroundColor: GENDER_COLORS, borderColor: "#fff", borderWidth: 2 }] },
+                options: { ...pieLabelOptions, cutout: "65%" }
+            });
+        }
 
         const cctx = document.getElementById("genderCollegeStacked");
-        if (cctx) {
+        if (!cctx || !data.gender_by_college?.labels?.length) {
+            showNoData('genderCollegeStacked');
+        } else {
             if (genderCollegeChart) genderCollegeChart.destroy();
-
-            const labels = data.gender_by_college?.labels || [];
-            const rawDatasets = data.gender_by_college?.datasets || [];
-
-            const datasets = rawDatasets.map((ds, i) => ({
+            const datasets = (data.gender_by_college.datasets || []).map((ds, i) => ({
                 ...ds,
-                backgroundColor: GenderColor[i % GenderColor.length],
+                backgroundColor: GENDER_COLORS[i % GENDER_COLORS.length],
                 borderSkipped: false,
                 datalabels: {
                     formatter: (value, ctx) => {
-                        const xIndex = ctx.dataIndex;
-
-                        // total at this college (sum of all stacks for this label)
-                        const all = ctx.chart.data.datasets.map(d => Number(d.data?.[xIndex]) || 0);
-                        const totalAtCollege = all.reduce((a, b) => a + b, 0);
-
-                        if (!totalAtCollege) return '';
-                        const pct = (Number(value) / totalAtCollege) * 100;
+                        const xi    = ctx.dataIndex;
+                        const total = ctx.chart.data.datasets.reduce((s, d) => s + (Number(d.data?.[xi]) || 0), 0);
+                        if (!total) return '';
+                        const pct = (Number(value) / total) * 100;
                         return pct >= 5 ? `${pct.toFixed(0)}%` : '';
                     },
-                    color: "#FFFFFF",
-                    font: { weight: "900", size: 11 },
-                    anchor: "center",
-                    align: "center",
-                    clamp: true,
-                    clip: true
+                    color: "#FFFFFF", font: { weight: "900", size: 11 },
+                    anchor: "center", align: "center", clamp: true, clip: true
                 }
             }));
-
             genderCollegeChart = new Chart(cctx, {
                 type: "bar",
-                data: { labels, datasets },
+                data: { labels: data.gender_by_college.labels, datasets },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: "bottom" },
-                        datalabels: {} // enabled per-dataset above
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: "bottom" }, datalabels: {} },
                     scales: {
                         x: { stacked: true, grid: { display: false } },
                         y: { stacked: true, beginAtZero: true }
@@ -358,10 +521,9 @@ async function loadFacultyPies() {
         }
 
     } catch (err) {
-        console.error("loadFacultyPies crashed:", err);
+        console.error("loadFacultyPies error:", err);
     }
 }
-
-document.addEventListener("DOMContentLoaded", loadFacultyPies);
 </script>
-
+</body>
+</html>

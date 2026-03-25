@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CLSU Analytica - Research &amp; Non-Teaching Load</title>
+    <title>Siel Metrics</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
     <style>
@@ -25,49 +26,59 @@
             margin-left: 68px;
             max-width: calc(100vw - 68px);
         }
+
+        /* ── Page header ── */
         .header {
             background: #009539;
             color: white;
-            padding: 5px 30px;
-            font-size: 42px;
-            font-weight: bold;
+            padding: 0 30px;
+            font-size: 36px;
+            font-weight: 800;
             height: 75px;
-            font-family: 'Inter', sans-serif;
             display: flex;
             align-items: center;
+            gap: 14px;
+            font-family: 'Bricolage Grotesque', sans-serif;
         }
 
-        /* ── Filter bar ──────────────────────────────────────────────────── */
+        /* ── Filter bar ── */
         .filter-bar {
             display: flex;
             align-items: center;
             gap: 12px;
             background: #c9cec9;
-            padding: 0 30px;
+            padding: 0 24px;
             border-bottom: 1px solid #b0b5b0;
-            height: 50px;
+            height: 52px;
+            min-height: 52px;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
         .filter-bar.is-loading select,
         .filter-bar.is-loading button { pointer-events: none; opacity: 0.5; }
 
         .page-title {
             font-size: 14px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #2d2d2d;
             white-space: nowrap;
             flex-shrink: 0;
         }
         .filter-bar-label {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: #2d2d2d;
             margin-left: auto;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .filter-group {
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
         }
         .filter-group label {
             font-size: 12px;
@@ -77,7 +88,7 @@
         }
         .filter-group select {
             font-size: 12px;
-            padding: 5px 28px 5px 12px;
+            padding: 4px 28px 4px 12px;
             border-radius: 20px;
             border: 1px solid #8a8f8a;
             background-color: #f5f5f5;
@@ -98,13 +109,14 @@
             background: #009539;
             color: white;
             border: none;
-            padding: 5px 16px;
+            padding: 5px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .clear-filters-btn:hover { background: #00802e; }
 
@@ -120,81 +132,140 @@
             padding: 3px 12px;
             border-radius: 20px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .college-badge.visible { display: flex; }
 
-        /* ── Stat cards ──────────────────────────────────────────────────── */
-        .stats-container {
+        /* ── Main content wrapper ── */
+        .main-content {
+            padding: 24px 30px 40px 30px;
+        }
+
+        /* ── Stat Cards (SUC Faculty style) ── */
+        .cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 28px 30px 18px;
+            gap: 16px;
+            margin-bottom: 28px;
         }
-        .stat-card {
-            border-radius: 15px;
-            padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-height: 100px;
-        }
-        .stat-card.green { background: #009539; }
-        .stat-card:not(.green) { background: white; }
-        .icon-box {
-            width: 48px; height: 48px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 16px; left: 16px;
-        }
-        .stat-card.green .icon-box { background: white; }
-        .stat-card.green .icon-box i { font-size: 22px; color: #009539; }
-        .stat-card:not(.green) .icon-box { background: #009539; }
-        .stat-card:not(.green) .icon-box i { font-size: 22px; color: white; }
-        .stat-content {
-            display: flex; flex-direction: column;
-            align-items: flex-end; justify-content: center; flex: 1;
-        }
-        .stat-number { font-size: 46px; font-weight: 700; line-height: 1; }
-        .stat-card.green .stat-number { color: white; }
-        .stat-card:not(.green) .stat-number { color: #1f1f1f; }
-        .stat-label { font-size: 12px; font-weight: 600; margin-top: 4px; }
-        .stat-card.green .stat-label { color: rgba(255,255,255,0.85); }
-        .stat-card:not(.green) .stat-label { color: #777; }
+        @media (max-width: 900px)  { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 580px)  { .cards-grid { grid-template-columns: 1fr; } }
 
-        /* Shimmer while loading */
-        .stat-card.loading .stat-number,
-        .stat-card.loading .stat-label {
-            background: linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);
+        .stat-card {
+            position: relative;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            min-height: 130px;
+        }
+        .stat-card.green {
+            background: linear-gradient(to right, #22c55e, #16a34a);
+            color: white;
+        }
+        .stat-card.white {
+            background: white;
+            color: #111827;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-card-icon {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .stat-card.green .stat-card-icon {
+            background: rgba(255,255,255,0.9);
+            color: #16a34a;
+        }
+        .stat-card.white .stat-card-icon {
+            background: #22c55e;
+            color: white;
+        }
+        .stat-card-body {
+            margin-top: 52px;
+            text-align: right;
+        }
+        .stat-card-number {
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+        }
+        .stat-card.green .stat-card-number { color: white; }
+        .stat-card.white .stat-card-number { color: #111827; }
+        .stat-card-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .stat-card.green .stat-card-label { color: rgba(255,255,255,0.85); }
+        .stat-card.white .stat-card-label { color: #6b7280; }
+
+        /* Shimmer loading */
+        .stat-card.loading .stat-card-number,
+        .stat-card.loading .stat-card-label {
+            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
             background-size: 200% 100%;
             animation: shimmer 1.2s infinite;
             border-radius: 6px;
             color: transparent !important;
             min-width: 60px;
         }
+        .stat-card.green.loading .stat-card-number,
+        .stat-card.green.loading .stat-card-label {
+            background: linear-gradient(90deg, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.15) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-        /* ── Chart cards ─────────────────────────────────────────────────── */
+        /* ── Charts (SUC Faculty style) ── */
         .charts-section {
-            padding: 0 30px 30px;
-            display: flex; flex-direction: column; gap: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        .chart-row { display: grid; gap: 20px; }
-        .two-col   { grid-template-columns: 1fr 1fr; }
+        .chart-row {
+            display: grid;
+            gap: 20px;
+        }
+        .two-col { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
         .chart-card {
             background: white;
-            border-radius: 18px;
-            padding: 22px 26px 14px;
+            border-radius: 16px;
+            padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
+            overflow: hidden;
         }
+        .chart-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 14px 0;
+            color: #111827;
+            line-height: 1.3;
+        }
+
+        /* Loading overlay */
         .loading-overlay {
-            position: absolute; inset: 0;
+            position: absolute;
+            inset: 0;
             background: rgba(255,255,255,0.82);
             border-radius: inherit;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10; opacity: 0; pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity 0.2s ease;
         }
         .loading-overlay.active { opacity: 1; pointer-events: all; }
@@ -206,8 +277,6 @@
             animation: spin 0.75s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .chart-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -216,20 +285,19 @@
 
 <div class="content">
 
+    {{-- Page header --}}
     <div class="header">Research &amp; Non-Teaching Load</div>
 
-    {{-- ── Filter bar ───────────────────────────────────────────────────── --}}
+    {{-- Filter bar --}}
     <div class="filter-bar" id="filterBar">
 
-        <div class="page-title" id="pageTitleMain">
-            <strong>Research &amp; Non-Teaching Load
+        <div class="page-title" id="pageTitle">
+            Research &amp; Non-Teaching Load
             @if(isset($activeSemObj))
                 ({{ $activeSemObj->semester }} {{ $activeSemObj->sy }})
             @endif
-            </strong>
         </div>
 
-        {{-- Badge shown when a college is selected --}}
         <span class="college-badge {{ $filters['college'] !== 'all' && isset($selectedCollegeObj) ? 'visible' : '' }}"
               id="collegeBadge">
             <i class="bi bi-building"></i>
@@ -240,7 +308,6 @@
 
         <div class="filter-bar-label">Filters:</div>
 
-        {{-- Semester --}}
         <div class="filter-group">
             <label>Semester:</label>
             <select id="semesterFilter">
@@ -254,11 +321,6 @@
             </select>
         </div>
 
-        {{--
-            Unit / Office — only the 9 academic colleges from table_college_unit.
-            The $collegeUnits variable is pre-filtered in the controller to only
-            include: CAG, CASS, CBA, CED, CEN, CF, CHSI, COS, CVSM  (c_u_id 1-9).
-        --}}
         <div class="filter-group">
             <label>Unit/Office:</label>
             <select id="collegeFilter">
@@ -277,73 +339,78 @@
         </button>
     </div>
 
-    {{-- ── Stat cards ───────────────────────────────────────────────────── --}}
-    <div class="stats-container">
-        <div class="stat-card green" id="cardResearch">
-            <div class="icon-box"><i class="bi bi-flask"></i></div>
-            <div class="stat-content">
-                <div class="stat-number" id="statResearch">
-                    {{ number_format($researchLoad->sum('research_count')) }}
+    {{-- Main Content --}}
+    <div class="main-content">
+
+        {{-- Stat Cards --}}
+        <div class="cards-grid">
+            <div class="stat-card green" id="cardResearch">
+                <div class="stat-card-icon"><i class="fa-solid fa-flask"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statResearch">
+                        {{ number_format($researchLoad->sum('research_count')) }}
+                    </div>
+                    <div class="stat-card-label">Total Research Assignments</div>
                 </div>
-                <div class="stat-label">Research Assignments</div>
             </div>
-        </div>
-        <div class="stat-card" id="cardPubs">
-            <div class="icon-box"><i class="bi bi-journal-text"></i></div>
-            <div class="stat-content">
-                <div class="stat-number" id="statPubs">
-                    {{ number_format($publications->sum('publication_count')) }}
+            <div class="stat-card white" id="cardEtl">
+                <div class="stat-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statEtl">
+                        {{ number_format($researchLoad->sum('total_etl'), 0) }}
+                    </div>
+                    <div class="stat-card-label">Total Equivalent Teaching Load Hours</div>
                 </div>
-                <div class="stat-label">Publications</div>
             </div>
-        </div>
-        <div class="stat-card" id="cardEtl">
-            <div class="icon-box"><i class="bi bi-clock-history"></i></div>
-            <div class="stat-content">
-                <div class="stat-number" id="statEtl">
-                    {{ number_format($researchLoad->sum('total_etl'), 0) }}
+            <div class="stat-card white" id="cardPubs">
+                <div class="stat-card-icon"><i class="fa-solid fa-newspaper"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statPubs">
+                        {{ number_format($publications->sum('publication_count')) }}
+                    </div>
+                    <div class="stat-card-label">Publications</div>
                 </div>
-                <div class="stat-label">Total ETL Hours</div>
-            </div>
-        </div>
-    </div>
-
-    {{-- ── Charts ───────────────────────────────────────────────────────── --}}
-    <div class="charts-section" style="padding-top:14px;">
-
-        <div class="chart-row two-col">
-            <div class="chart-card">
-                <div class="loading-overlay" id="loadAssignments"><div class="spinner"></div></div>
-                <div class="chart-title">Research Assignments by Department</div>
-                <div id="chart-assignments"></div>
-            </div>
-            <div class="chart-card">
-                <div class="loading-overlay" id="loadPublications"><div class="spinner"></div></div>
-                <div class="chart-title">Publications by Department</div>
-                <div id="chart-publications"></div>
             </div>
         </div>
 
-        <div class="chart-row two-col">
-            <div class="chart-card">
-                <div class="loading-overlay" id="loadEtl"><div class="spinner"></div></div>
-                <div class="chart-title">Total ETL Hours by Department</div>
-                <div id="chart-etl"></div>
-            </div>
-            <div class="chart-card">
-                <div class="loading-overlay" id="loadPubTypes"><div class="spinner"></div></div>
-                <div class="chart-title">Research Publication Types</div>
-                <div id="chart-pub-types"></div>
-            </div>
-        </div>
+        {{-- Charts --}}
+        <div class="charts-section">
 
-    </div>
+            <div class="chart-row two-col">
+                <div class="chart-card">
+                    <div class="loading-overlay" id="loadAssignments"><div class="spinner"></div></div>
+                    <h3>Research Assignments by Department</h3>
+                    <div id="chart-assignments"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="loading-overlay" id="loadEtl"><div class="spinner"></div></div>
+                    <h3>Total Research ETL Hours by Department</h3>
+                    <div id="chart-etl"></div>
+                </div>
+            </div>
+
+            <div class="chart-row two-col">
+                <div class="chart-card">
+                    <div class="loading-overlay" id="loadPublications"><div class="spinner"></div></div>
+                    <h3>Faculty Research Output by Department</h3>
+                    <div id="chart-publications"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="loading-overlay" id="loadPubTypes"><div class="spinner"></div></div>
+                    <h3>Research Output by Types</h3>
+                    <div id="chart-pub-types"></div>
+                </div>
+            </div>
+
+        </div>{{-- /.charts-section --}}
+
+    </div>{{-- /.main-content --}}
 
 </div><!-- /.content -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ── Initial server-rendered data ──────────────────────────────────────────────
+// ── All JS unchanged ──────────────────────────────────────────────────────────
 const INITIAL_DATA = {
     researchLoad             : {!! json_encode($researchLoad) !!},
     publications             : {!! json_encode($publications) !!},
@@ -360,7 +427,6 @@ const INITIAL_DATA = {
 const AJAX_URL   = '{{ route("stzfaculty.research-performance.ajax") }}';
 const CSRF_TOKEN = '{{ csrf_token() }}';
 
-// ── Plotly constants ──────────────────────────────────────────────────────────
 const FONT    = "'Inter', sans-serif";
 const GREEN   = '#009539';
 const PALETTE = ['#009539','#2c7be5','#f6a623','#e74c3c','#9b59b6',
@@ -377,9 +443,8 @@ const CFG = {
     displaylogo: false,
     modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
 };
-const CAP = 10;  // top-N cap only when all units are shown
+const CAP = 10;
 
-// ── Loaders ───────────────────────────────────────────────────────────────────
 function showLoaders() {
     document.getElementById('filterBar').classList.add('is-loading');
     ['loadAssignments','loadPublications','loadEtl','loadPubTypes']
@@ -395,7 +460,6 @@ function hideLoaders() {
         .forEach(id => document.getElementById(id)?.classList.remove('loading'));
 }
 
-// ── No-data placeholder ───────────────────────────────────────────────────────
 function noData(divId) {
     const el = document.getElementById(divId);
     if (!el) return;
@@ -419,10 +483,6 @@ function clearDiv(divId) {
 function capData(arr, collegeFilter) {
     return collegeFilter === 'all' ? arr.slice(0, CAP) : arr;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// CHART RENDERERS
-// ══════════════════════════════════════════════════════════════════════════════
 
 function renderAssignments(researchLoad, collegeFilter) {
     clearDiv('chart-assignments');
@@ -540,7 +600,6 @@ function renderAll(data, collegeFilter) {
     renderPubTypes(data.publicationTypeBreakdown);
 }
 
-// ── Update stat cards ─────────────────────────────────────────────────────────
 function updateStatCards(totals) {
     document.getElementById('statResearch').textContent =
         Number(totals.researchCount).toLocaleString();
@@ -550,7 +609,6 @@ function updateStatCards(totals) {
         Number(totals.etlHours).toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
-// ── Update page title ─────────────────────────────────────────────────────────
 function updatePageTitleSub(semesterText) {
     const el    = document.getElementById('pageTitleMain');
     if (!el) return;
@@ -559,7 +617,6 @@ function updatePageTitleSub(semesterText) {
         + (clean ? ' (' + clean + ')' : '') + '</strong>';
 }
 
-// ── Update college badge ──────────────────────────────────────────────────────
 function updateCollegeBadge(collegeAcro) {
     const badge = document.getElementById('collegeBadge');
     const txt   = document.getElementById('collegeBadgeText');
@@ -573,7 +630,6 @@ function updateCollegeBadge(collegeAcro) {
     }
 }
 
-// ── Build query params ────────────────────────────────────────────────────────
 function buildParams() {
     const params  = new URLSearchParams();
     const sem     = document.getElementById('semesterFilter').value;
@@ -583,7 +639,6 @@ function buildParams() {
     return params;
 }
 
-// ── AJAX fetch → render ───────────────────────────────────────────────────────
 function fetchAndRender() {
     showLoaders();
     const params        = buildParams();
@@ -610,14 +665,12 @@ function fetchAndRender() {
     .finally(()  => hideLoaders());
 }
 
-// ── Clear Filters ─────────────────────────────────────────────────────────────
 function clearFilters() {
     document.getElementById('semesterFilter').value = 'all';
     document.getElementById('collegeFilter').value  = 'all';
     fetchAndRender();
 }
 
-// ── Sidebar reflow ────────────────────────────────────────────────────────────
 function reflowCharts() {
     ['chart-assignments','chart-publications','chart-etl','chart-pub-types']
         .forEach(id => {
@@ -626,7 +679,6 @@ function reflowCharts() {
         });
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     ['semesterFilter','collegeFilter'].forEach(id =>
         document.getElementById(id)?.addEventListener('change', fetchAndRender)

@@ -22,7 +22,7 @@ class FundingController extends Controller
         }
 
         $type = $request->query('type', 'all');
-        $allowed = ['all', 'allotment', 'expenditure', 'suc_income'];
+        $allowed = ['all', 'allotment_expenditure', 'suc_income'];
         if (!in_array($type, $allowed, true)) {
             $type = 'all';
         }
@@ -34,7 +34,7 @@ class FundingController extends Controller
 
         $peso = fn(float $v) => '₱' . number_format($v, 2);
 
-        return view('snormativefunding.dashboard', [  // ← CHANGED HERE
+        return view('snormativefunding.dashboard', [    
             'income' => [
                 'grand_total_income' => $peso((float)$income['grand_total_income']),
                 'tuition_misc_fee'   => $peso((float)$income['tuition_misc_fee']),

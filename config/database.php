@@ -107,7 +107,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('RD_HOST', '127.0.0.1'),
             'port' => env('RD_PORT', '3306'),
-            'database' => env('RD_DATABASE', 'analytica'),
+            'database' => env('RD_DATABASE', 'analytica1'),
             'username' => env('RD_USERNAME', 'root'),
             'password' => env('RD_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),

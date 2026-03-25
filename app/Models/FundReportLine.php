@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FundReportLine extends Model
 {
+    protected $connection = 'normativefunding';
     protected $fillable = [
         'fund_report_id','campus','function','source','category','amount'
     ];

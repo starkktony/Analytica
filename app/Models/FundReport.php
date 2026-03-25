@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FundReport extends Model
 {
+    protected $connection = 'normativefunding';
     protected $fillable = ['year','type','title'];
 
     public function lines(): HasMany
