@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -129,72 +130,81 @@
             50%       { transform: scale(1.55); opacity: 1;    }
         }
 
-        /* ── Stats Cards ── */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 28px 30px 18px 30px;
-        }
-        .stat-card {
-            border-radius: 15px;
-            padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-height: 100px;
-        }
-        .stat-card.green  { background: #009539; }
-        .stat-card.yellow { background: #ffc107; }
-        .stat-card.red    { background: #dc3545; }
-        .stat-card.white  { background: white;   }
+/* ── Stat Cards ── */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 28px 30px 18px 30px;
+    margin-bottom: 0;
+}
+@media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 580px)  { .cards-grid { grid-template-columns: 1fr; } }
 
-        .stat-card .icon-box {
-            width: 48px; height: 48px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 15px; left: 15px;
-        }
-        .stat-card.green  .icon-box              { background: white;   }
-        .stat-card.green  .icon-box i            { font-size: 20px; color: #009539; }
-        .stat-card.yellow .icon-box              { background: white;   }
-        .stat-card.yellow .icon-box i            { font-size: 20px; color: #ffc107; }
-        .stat-card.red    .icon-box              { background: white;   }
-        .stat-card.red    .icon-box i            { font-size: 20px; color: #dc3545; }
-        .stat-card.white  .icon-box              { background: #009539; }
-        .stat-card.white  .icon-box i            { font-size: 20px; color: white;   }
+.stat-card {
+    position: relative;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    min-height: 130px;
+}
+.stat-card.green  { background: linear-gradient(to right, #22c55e, #16a34a); }
+.stat-card.yellow { background: #ffc107; }
+.stat-card.red    { background: #dc3545; }
+.stat-card.card-total {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.stat-card-icon {
+    position: absolute;
+    top: 16px; left: 16px;
+    width: 48px; height: 48px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+}
+.stat-card.green  .stat-card-icon { background: rgba(255,255,255,0.9); }
+.stat-card.green  .stat-card-icon i { color: #16a34a; }
+.stat-card.yellow .stat-card-icon { background: rgba(255,255,255,0.9); }
+.stat-card.yellow .stat-card-icon i { color: #b45309; }
+.stat-card.red    .stat-card-icon { background: rgba(255,255,255,0.9); }
+.stat-card.red    .stat-card-icon i { color: #dc3545; }
+.stat-card.card-total .stat-card-icon { background: #22c55e; }
+.stat-card.card-total .stat-card-icon i { color: white; }
 
-        .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
-        .stat-number  { font-size: 44px; font-weight: 700; line-height: 1; transition: opacity 0.3s; }
-        .stat-label   { font-size: 12px; font-weight: 600; margin-top: 4px; }
+.stat-card-body { margin-top: 52px; text-align: right; }
+.stat-card-number {
+    font-size: 40px; font-weight: 800; line-height: 1;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    transition: opacity 0.3s;
+}
+.stat-card.green  .stat-card-number,
+.stat-card.yellow .stat-card-number,
+.stat-card.red    .stat-card-number { color: white; }
+.stat-card.card-total .stat-card-number { color: #111827; }
 
-        .stat-card.green  .stat-number { color: white; }
-        .stat-card.yellow .stat-number { color: white; }
-        .stat-card.red    .stat-number { color: white; }
-        .stat-card.white  .stat-number { color: #1f1f1f; }
-        .stat-card.green  .stat-label  { color: rgba(255,255,255,0.85); }
-        .stat-card.yellow .stat-label  { color: rgba(255,255,255,0.9);  }
-        .stat-card.red    .stat-label  { color: rgba(255,255,255,0.9);  }
-        .stat-card.white  .stat-label  { color: #666; }
+.stat-card-label { font-size: 14px; font-weight: 600; margin-top: 4px; }
+.stat-card.green  .stat-card-label,
+.stat-card.yellow .stat-card-label,
+.stat-card.red    .stat-card-label { color: rgba(255,255,255,0.88); }
+.stat-card.card-total .stat-card-label { color: #6b7280; }
 
-        /* Shimmer on stat numbers while AJAX is loading */
-        .stat-number.shimmer {
-            background: linear-gradient(90deg,
-                rgba(255,255,255,0.2) 25%,
-                rgba(255,255,255,0.5) 50%,
-                rgba(255,255,255,0.2) 75%);
-            background-size: 200% 100%;
-            animation: shimmer-anim 1.2s infinite;
-            border-radius: 6px;
-            color: transparent !important;
-            min-width: 70px;
-            min-height: 44px;
-            display: inline-block;
-        }
-        .stat-card.white .stat-number.shimmer {
-            background: linear-gradient(90deg, #e8ebe8 25%, #d0d4d0 50%, #e8ebe8 75%);
-            background-size: 200% 100%;
-        }
+.stat-card-number.shimmer {
+    background: linear-gradient(90deg,
+        rgba(255,255,255,0.2) 25%,
+        rgba(255,255,255,0.5) 50%,
+        rgba(255,255,255,0.2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer-anim 1.2s infinite;
+    border-radius: 6px;
+    color: transparent !important;
+    min-width: 70px; min-height: 40px;
+    display: inline-block;
+}
+.stat-card.card-total .stat-card-number.shimmer {
+    background: linear-gradient(90deg, #e8ebe8 25%, #d0d4d0 50%, #e8ebe8 75%);
+    background-size: 200% 100%;
+}
         @keyframes shimmer-anim {
             0%   { background-position: 200% 0; }
             100% { background-position: -200% 0; }
@@ -351,6 +361,7 @@
             </a>
         </div>
 
+<<<<<<< Updated upstream
         {{-- Stats Cards --}}
         <div class="stats-container">
             <div class="stat-card white">
@@ -358,27 +369,36 @@
                 <div class="stat-content">
                     <div class="stat-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
                     <div class="stat-label">Total Documents</div>
+=======
+        {{-- Stat Cards --}}
+        <div class="cards-grid">
+            <div class="stat-card card-total">
+                <div class="stat-card-icon"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
+                    <div class="stat-card-label">Total Documents</div>
+>>>>>>> Stashed changes
                 </div>
             </div>
             <div class="stat-card green">
-                <div class="icon-box"><i class="bi bi-check-circle-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
-                    <div class="stat-label">Approved</div>
+                <div class="stat-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
+                    <div class="stat-card-label">Approved</div>
                 </div>
             </div>
             <div class="stat-card yellow">
-                <div class="icon-box"><i class="bi bi-clock-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
-                    <div class="stat-label">Submitted</div>
+                <div class="stat-card-icon"><i class="fa-solid fa-clock"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
+                    <div class="stat-card-label">Submitted</div>
                 </div>
             </div>
             <div class="stat-card red">
-                <div class="icon-box"><i class="bi bi-x-circle-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statDeclined">{{ number_format($declined) }}</div>
-                    <div class="stat-label">Declined</div>
+                <div class="stat-card-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div class="stat-card-body">
+                    <div class="stat-card-number" id="statDeclined">{{ number_format($declined) }}</div>
+                    <div class="stat-card-label">Declined</div>
                 </div>
             </div>
         </div>
