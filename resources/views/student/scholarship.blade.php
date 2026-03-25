@@ -14,33 +14,12 @@
             margin: 0;
             font-family: 'Bricolage Grotesque', sans-serif;
         }
-        .sidebar {
-            width: 210px;
-            background: #1f1f1f;
-            min-height: 100vh;
-            position: fixed;
-            color: white;
-        }
-        .sidebar a {
-            color: #cfcfcf;
-            text-decoration: none;
-            display: block;
-            padding: 12px 20px;
-        }
-        .sidebar a.active,
-        .sidebar a:hover {
-            background: #0f8f3a;
-            color: white;
-        }
         .header {
             background: #009539;
             color: white;
             padding: 10px;
             font-size: 62px;
             font-weight: bold;
-        }
-        .content {
-            margin-left: 210px;
         }
         .dropdown-menu {
             background: #2a2a2a;
@@ -70,10 +49,6 @@
         .sidebar-link:hover {
             background: #0f8f3a;
             color: white;
-        }
-        .collapse {
-            background: #1f1f1f;
-            padding: 20px;
         }
         .submenu-link {
             display: block;

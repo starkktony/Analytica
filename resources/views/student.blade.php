@@ -12,34 +12,12 @@
         body {
             background: #f5f5f5;
         }
-        .sidebar {
-            width: 210px;
-            background: #1f1f1f;
-            min-height: 100vh;
-            position: fixed;
-            color: white;
-        }
-        .sidebar a {
-            color: #cfcfcf;
-            text-decoration: none;
-            display: block;
-            padding: 12px 20px;
-        }
-        .sidebar a.active,
-        .sidebar a:hover {
-            background: #0f8f3a;
-            color: white;
-        }
         .header {
             background: #009539;
             color: white;
             padding: 10px;
             font-size: 62px;
             font-weight: bold;
-        }
-        .content {
-            margin-left: 210px;
-            font-family: 'buttershine', serif;
         }
         .dropdown-menu {
             background: #2a2a2a;
@@ -65,10 +43,6 @@
             text-decoration: none;
             display: block;
             padding: 12px 20px;
-        }
-        .collapse {
-            background: #1f1f1f;
-            padding: 20px;
         }
         .submenu-link {
             display: block;
