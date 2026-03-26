@@ -92,7 +92,7 @@
                         <form action="{{ route('radiis.presentations') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
                             <input type="hidden" name="year" value="{{ $selectedYear }}">
                             <select name="group_by" onchange="document.getElementById('filterGroup').submit()" 
-                                class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                                class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 <option class="text-xs" value="category" {{ $selectedGroup == 'category' ? 'selected' : '' }}>Per Category</option>
                                 <option class="text-xs" value="level" {{ $selectedGroup == 'level' ? 'selected' : '' }}>Per Level</option>
                                 <option class="text-xs" value="type" {{ $selectedGroup == 'type' ? 'selected' : '' }}>Per Type</option>
@@ -107,7 +107,7 @@
     <div class="px-6 pt-4">
         <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
             <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-4">       
-                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-45 sm:h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
+                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
                     <div class='grid grid-rows-4 h-full'>
                         <div class='bg-green-600/80 col-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                             <i class="fa-solid fa-person-chalkboard text-white text-2xl"></i>
@@ -116,7 +116,7 @@
                             <p class='text-4xl sm:text-5xl text-right font-[750] pr-4 align-bottom text-gray-800'>{{ $stats['new_pres'] }}</p>
                             <p class='text-[12px] md:text-[12px] text-right pr-4 font-medium'><span class="{{ $percentages['year_percent'] > 0 ? 'text-green-600' : 'text-red-500' }}">
                                 {{ $percentages['year_percent'] > 0 ? '▲ ' : '▼ ' }}{{ $percentages['year_percent'] }}%</span></p>
-                            <p class='text-[10px] md:text-[12px] mb-8 text-right font-medium pr-4'>New Presentations in {{ $stats['max_year'] }}</p>
+                            <p class='text-[10px] md:text-[12px] text-right font-medium pr-4'>New Presentations in {{ $stats['max_year'] }}</p>
                         </div>
                     </div>
                 </div>
@@ -160,7 +160,7 @@
         <div id="time-series-section">
             <div class="border-l-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl h-97 sm:h-88 md:h-86 mb-8">
                 <div class="font-[650] text-sm sm:text-lg text-gray-700 pl-6 pt-4">
-                    Annual Presentations Trend (10-year period)
+                    Annual Presentations Trend
                 </div>
                 <div>
                    <div id="presPerYear" style="width: 100%; "></div>

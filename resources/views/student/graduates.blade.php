@@ -11,24 +11,32 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             background: #e8ebe8;
-            margin: 0;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
         }
+
         .content {
             margin-left: 250px;
             transition: margin-left 0.3s ease;
-            max-width: calc(100vw - 250px);
-            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        body.sidebar-collapsed .content {
-            margin-left: 68px;
-            max-width: calc(100vw - 68px);
+        body.sidebar-collapsed .content { margin-left: 68px; }
+
+        .fixed-header-section {
+            flex-shrink: 0;
+            background: #e8ebe8;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        /* ── Header ── */
         .header {
             background: #009539;
             color: white;
@@ -39,9 +47,9 @@
             font-family: 'Inter', sans-serif;
             display: flex;
             align-items: center;
+            line-height: 1;
         }
 
-        /* ── Filter Bar ── */
         .filter-bar {
             font-family: 'Inter', sans-serif;
             display: flex;
@@ -60,25 +68,10 @@
         }
         .filter-bar::-webkit-scrollbar { display: none; }
         .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
-        .filter-bar-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-shrink: 0;
-        }
-        .filter-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2d2d2d;
-            white-space: nowrap;
-        }
+
+        .filter-bar-label { font-size: 12px; font-weight: 700; color: #2d2d2d; white-space: nowrap; flex-shrink: 0; }
+        .filter-group { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+        .filter-group label { font-size: 12px; font-weight: 600; color: #2d2d2d; white-space: nowrap; }
         .filter-group select {
             font-size: 12px;
             padding: 4px 24px 4px 10px;
@@ -94,80 +87,72 @@
             min-width: 110px;
             cursor: pointer;
         }
-        .filter-group select:focus {
-            outline: none;
-            border-color: #009539;
-            background-color: white;
-        }
-        .filter-group select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .filter-group select:focus { outline: none; border-color: #009539; background-color: white; }
+        .filter-group select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* ── Main content ── */
-        .main-content { padding: 0; }
+        .main-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0; }
+        .main-content::-webkit-scrollbar { width: 8px; }
+        .main-content::-webkit-scrollbar-track { background: #d4d9d4; border-radius: 4px; }
+        .main-content::-webkit-scrollbar-thumb { background: #009539; border-radius: 4px; }
+        .main-content::-webkit-scrollbar-thumb:hover { background: #016531; }
 
-        /* ── Page content area ── */
-        .page-content { padding: 24px; }
+        .page-content { padding: 24px; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ── Value boxes ── */
-        .value-boxes-grid {
+        /* ── Programs-style stat cards ── */
+        .stat-cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 24px;
         }
-        @media (max-width: 1024px) { .value-boxes-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px)  { .value-boxes-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .stat-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px)  { .stat-cards-grid { grid-template-columns: 1fr; } }
 
-        .value-box {
-            position: relative;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            min-height: 130px;
-        }
-        .value-box.first {
-            background: linear-gradient(to right, #22c55e, #16a34a);
-            color: white;
-        }
-        .value-box.other {
-            background: white;
-            color: #111827;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .value-box-icon {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            width: 48px;
-            height: 48px;
+        .pcard {
+            border-left: 5px solid #16a34a;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.1);
+            padding: 12px;
+            overflow: hidden;
+            min-height: 144px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .pcard-icon {
+            background: rgba(22, 163, 74, 0.8);
+            border-radius: 8px;
+            width: 64px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            flex-shrink: 0;
         }
-        .value-box.first .value-box-icon { background: rgba(255,255,255,0.9); color: #16a34a; }
-        .value-box.other .value-box-icon { background: #22c55e; color: white; }
-        .value-box-body { margin-top: 52px; text-align: right; }
-        .value-box-number { font-size: 40px; font-weight: 800; line-height: 1; }
-        .value-box.first .value-box-number { color: white; }
-        .value-box.other .value-box-number { color: #111827; }
-        .value-box-label { font-size: 14px; font-weight: 600; margin-top: 4px; }
-        .value-box.first .value-box-label { color: white; }
-        .value-box.other .value-box-label { color: #6b7280; }
+        .pcard-icon i { color: white; font-size: 1.75rem; }
 
-        /* Gender split inside value box */
-        .gender-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: right; }
-        .gender-split-label { font-size: 11px; margin-bottom: 2px; }
-        .value-box.first .gender-split-label { color: rgba(255,255,255,0.8); }
-        .value-box.other .gender-split-label { color: #64748b; }
-        .gender-split-number { font-size: 36px; font-weight: 800; line-height: 1; }
-        .value-box.first .gender-split-number { color: white; }
-        .value-box.other .gender-split-number { color: #111827; }
+        .pcard-body { text-align: right; padding-right: 12px; padding-bottom: 4px; }
+        .pcard-number { font-size: 2.8rem; font-weight: 800; color: #1f2937; line-height: 1; font-family: 'Inter', sans-serif; }
+        .pcard-label { font-size: 11px; font-weight: 500; color: #374151; margin-top: 3px; }
 
-        /* ── Chart cards ── */
+        .pcard-gender-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-right: 12px;
+            margin-top: 4px;
+        }
+        .pcard-gender-sublabel { font-size: 10px; color: #6b7280; font-weight: 500; margin-bottom: 2px; }
+        .pcard-gender-number { font-size: 1.6rem; font-weight: 800; color: #1f2937; line-height: 1; font-family: 'Inter', sans-serif; }
+        .pcard-gender-right { text-align: right; }
+        .pcard-gender-title { font-size: 10px; font-weight: 500; color: #6b7280; text-align: right; padding-right: 12px; margin-top: 4px; }
+
+        /* Chart cards */
         .chart-card {
             background: white;
             border-radius: 16px;
@@ -177,34 +162,23 @@
             margin-bottom: 24px;
         }
         .chart-card h3 { font-size: 15px; font-weight: 700; margin: 0 0 16px 0; color: #111827; }
-        .charts-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+        .charts-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
         @media (max-width: 1024px) { .charts-grid-2 { grid-template-columns: 1fr; } }
 
-        /* ── Section toggle ── */
         .section-hidden { display: none !important; }
 
-        /* ── No data state ── */
-        .no-data-state {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 96px 24px; text-align: center;
-        }
-        .no-data-icon-wrap {
-            width: 96px; height: 96px; border-radius: 50%;
-            background: #f3f4f6; display: flex;
-            align-items: center; justify-content: center;
-            margin-bottom: 24px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
-        }
+        .no-data-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 96px 24px; text-align: center; }
+        .no-data-icon-wrap { width: 96px; height: 96px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.06); }
         .no-data-icon-wrap i { font-size: 40px; color: #9ca3af; }
         .no-data-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 800; color: #374151; margin-bottom: 8px; }
         .no-data-text { color: #9ca3af; font-size: 14px; max-width: 360px; margin-bottom: 24px; }
-        .reset-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: #16a34a; color: white; font-size: 14px;
-            font-weight: 600; padding: 10px 20px; border-radius: 9999px;
-            text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: background 0.2s;
-        }
+        .reset-btn { display: inline-flex; align-items: center; gap: 8px; background: #16a34a; color: white; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 9999px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transition: background 0.2s; }
         .reset-btn:hover { background: #15803d; color: white; }
     </style>
 </head>
@@ -213,122 +187,121 @@
     @include('components.sidebar')
 
     <div class="content">
+        <div class="fixed-header-section">
+            <div class="header">GRADUATES</div>
 
-        {{-- Page Header --}}
-        <div class="header">GRADUATES</div>
+            <div class="filter-bar">
+                <span class="filter-bar-label">Filters:</span>
+                <form method="GET" action="{{ route('graduates.index') }}"
+                      id="graduatesFilterForm"
+                      style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
 
-        @php
-            $firstBoxValue   = $value_boxes[0]['value'] ?? 0;
-            $total_graduates = is_array($firstBoxValue)
-                ? (($firstBoxValue['male'] ?? 0) + ($firstBoxValue['female'] ?? 0))
-                : (int) $firstBoxValue;
-            $has_data = $total_graduates > 0;
-        @endphp
-
-        {{-- Filter Bar — all filters here --}}
-        <div class="filter-bar">
-            <span class="filter-bar-label">Filters:</span>
-
-            <form method="GET" action="{{ route('graduates.index') }}"
-                  id="graduatesFilterForm"
-                  style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
-
-                <div class="filter-group">
-                    <label>View:</label>
-                    <select name="view_type" id="view_type">
-                        <option value="graduate_headcount" {{ $selected_view_type === 'graduate_headcount' ? 'selected' : '' }}>Headcount</option>
-                        <option value="demographic_profile" {{ $selected_view_type === 'demographic_profile' ? 'selected' : '' }}>Demographic</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Level:</label>
-                    <select name="student_level" id="student_level">
-                        <option value="All"           {{ $student_level === 'All'           ? 'selected' : '' }}>All Levels</option>
-                        <option value="Undergraduate" {{ $student_level === 'Undergraduate' ? 'selected' : '' }}>Undergraduate</option>
-                        <option value="Postgraduate"  {{ $student_level === 'Postgraduate'  ? 'selected' : '' }}>Postgraduate</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Semester:</label>
-                    <select name="semester" id="semester">
-                        <option value="All" {{ $semester === 'All' ? 'selected' : '' }}>All</option>
-                        @foreach($semesters as $sem)
-                            <option value="{{ $sem }}" {{ $semester === $sem ? 'selected' : '' }}>{{ $sem }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>College:</label>
-                    <select name="college" id="college">
-                        <option value="All" {{ $selected_college === 'All' ? 'selected' : '' }}>All</option>
-                        @foreach($colleges as $c)
-                            <option value="{{ $c }}" {{ $selected_college === $c ? 'selected' : '' }}>{{ $c }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                @if($selected_college === 'All')
-                    <input type="hidden" name="program" value="All">
-                @endif
-
-                <div class="filter-group">
-                    <label>Program:</label>
-                    <select name="program" id="program"
-                        {{ $selected_college === 'All' ? 'disabled' : '' }}>
-                        <option value="All" {{ $selected_program === 'All' ? 'selected' : '' }}>All</option>
-                        @foreach($programs as $p)
-                            <option value="{{ $p }}" {{ $selected_program === $p ? 'selected' : '' }}>{{ $p }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-            </form>
+                    <div class="filter-group">
+                        <label>View:</label>
+                        <select name="view_type" id="view_type">
+                            <option value="graduate_headcount" {{ $selected_view_type === 'graduate_headcount' ? 'selected' : '' }}>Headcount</option>
+                            <option value="demographic_profile" {{ $selected_view_type === 'demographic_profile' ? 'selected' : '' }}>Demographic</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Level:</label>
+                        <select name="student_level" id="student_level">
+                            <option value="All"           {{ $student_level === 'All'           ? 'selected' : '' }}>All Levels</option>
+                            <option value="Undergraduate" {{ $student_level === 'Undergraduate' ? 'selected' : '' }}>Undergraduate</option>
+                            <option value="Postgraduate"  {{ $student_level === 'Postgraduate'  ? 'selected' : '' }}>Postgraduate</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Semester:</label>
+                        <select name="semester" id="semester">
+                            <option value="All" {{ $semester === 'All' ? 'selected' : '' }}>All</option>
+                            @foreach($semesters as $sem)
+                                <option value="{{ $sem }}" {{ $semester === $sem ? 'selected' : '' }}>{{ $sem }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>College:</label>
+                        <select name="college" id="college">
+                            <option value="All" {{ $selected_college === 'All' ? 'selected' : '' }}>All</option>
+                            @foreach($colleges as $c)
+                                <option value="{{ $c }}" {{ $selected_college === $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @if($selected_college === 'All')
+                        <input type="hidden" name="program" value="All">
+                    @endif
+                    <div class="filter-group">
+                        <label>Program:</label>
+                        <select name="program" id="program" {{ $selected_college === 'All' ? 'disabled' : '' }}>
+                            <option value="All" {{ $selected_program === 'All' ? 'selected' : '' }}>All</option>
+                            @foreach($programs as $p)
+                                <option value="{{ $p }}" {{ $selected_program === $p ? 'selected' : '' }}>{{ $p }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        {{-- Main Content --}}
         <div class="main-content">
             <div class="page-content">
 
+                @php
+                    $firstBoxValue   = $value_boxes[0]['value'] ?? 0;
+                    $total_graduates = is_array($firstBoxValue)
+                        ? (($firstBoxValue['male'] ?? 0) + ($firstBoxValue['female'] ?? 0))
+                        : (int) $firstBoxValue;
+                    $has_data = $total_graduates > 0;
+
+                    $icons = [
+                        'fa-solid fa-chart-line',
+                        'fa-solid fa-users',
+                        'fa-solid fa-user-graduate',
+                        'fa-solid fa-building-columns',
+                        'fa-solid fa-layer-group',
+                        'fa-solid fa-circle-info',
+                    ];
+                @endphp
+
                 @if($has_data)
 
-                    {{-- Value Boxes --}}
-                    <div class="value-boxes-grid">
+                    {{-- Value Boxes — Programs-style (pure CSS, no Tailwind) --}}
+                    <div class="stat-cards-grid">
                         @foreach($value_boxes as $index => $box)
-                            @php
-                                $isFirst = $index === 0;
-                                $icons   = [
-                                    'fa-solid fa-chart-line',
-                                    'fa-solid fa-users',
-                                    'fa-solid fa-user-graduate',
-                                    'fa-solid fa-building-columns',
-                                    'fa-solid fa-layer-group',
-                                    'fa-solid fa-circle-info',
-                                ];
-                                $icon = $icons[$index % count($icons)];
-                            @endphp
-                            <div class="value-box {{ $isFirst ? 'first' : 'other' }}">
-                                <div class="value-box-icon"><i class="{{ $icon }}"></i></div>
-                                <div class="value-box-body">
-                                    @if(is_array($box['value']))
-                                        <div class="gender-split">
-                                            <div>
-                                                <div class="gender-split-label">Male</div>
-                                                <div class="gender-split-number">{{ $box['value']['male'] ?? 0 }}</div>
-                                            </div>
-                                            <div>
-                                                <div class="gender-split-label">Female</div>
-                                                <div class="gender-split-number">{{ $box['value']['female'] ?? 0 }}</div>
-                                            </div>
+                            @php $icon = $icons[$index % count($icons)]; @endphp
+
+                            @if(is_array($box['value']))
+                                {{-- Gender split card --}}
+                                <div class="pcard">
+                                    <div class="pcard-icon">
+                                        <i class="{{ $icon }}"></i>
+                                    </div>
+                                    <div class="pcard-gender-row">
+                                        <div>
+                                            <div class="pcard-gender-sublabel">Male</div>
+                                            <div class="pcard-gender-number">{{ $box['value']['male'] ?? 0 }}</div>
                                         </div>
-                                    @else
-                                        <div class="value-box-number">{{ $box['value'] }}</div>
-                                    @endif
-                                    <div class="value-box-label">{{ $box['title'] }}</div>
+                                        <div class="pcard-gender-right">
+                                            <div class="pcard-gender-sublabel">Female</div>
+                                            <div class="pcard-gender-number">{{ $box['value']['female'] ?? 0 }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="pcard-gender-title">{{ $box['title'] }}</div>
                                 </div>
-                            </div>
+                            @else
+                                {{-- Standard single-value card --}}
+                                <div class="pcard">
+                                    <div class="pcard-icon">
+                                        <i class="{{ $icon }}"></i>
+                                    </div>
+                                    <div class="pcard-body">
+                                        <div class="pcard-number">{{ $box['value'] }}</div>
+                                        <div class="pcard-label">{{ $box['title'] }}</div>
+                                    </div>
+                                </div>
+                            @endif
                         @endforeach
                     </div>
 
@@ -490,9 +463,9 @@
             function renderHeadcountDonut(data) {
                 if (!data?.labels?.length) return;
                 document.getElementById('donutChartTitle').textContent = data.title || 'Graduate Distribution';
-                const formatter      = getLabelFormatter(data);
-                const shortLabels    = data.labels.map(formatter);
-                const programColors  = data.program_colors || {};
+                const formatter         = getLabelFormatter(data);
+                const shortLabels       = data.labels.map(formatter);
+                const programColors     = data.program_colors || {};
                 const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
                 const colors = data.labels.map((label, i) => {
                     if (isCollegeSelected) return programColors[label] || PALETTE[i % PALETTE.length];

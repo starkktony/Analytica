@@ -88,7 +88,7 @@
     <div class="px-6 pt-4">
         <div class="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-3 mb-2 z-0">
             <div class="col-span-4 md:col-span-5 lg:col-span-4">
-                <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
+                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-3 h-full'>
                         <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                             <i class="fa-regular fa-calendar-plus text-white text-3xl"></i>
@@ -104,7 +104,7 @@
 
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2 z-10">
             <div class='col-span-4'>
-                <div class='border-t-6 border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
+                <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
                     <div class='w-full grid grid-cols-12 grid-rows-7'>
                         <div class='col-span-12 row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Researchers per Type</div>
                         <div class='col-span-12 row-span-6'>
@@ -114,7 +114,7 @@
                 </div>
             </div>
             <div class='col-span-4'>
-                <div class='border-t-6 border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
+                <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
                     <div class='w-full grid grid-cols-12 grid-rows-7'>
                         <div class='col-span-12 row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Researchers per Status</div>
                         <div class='col-span-12 row-span-6'>
@@ -124,7 +124,7 @@
                 </div>
             </div>
             <div class='col-span-4'>
-                <div class='border-t-6 border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
+                <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
                     <div class='w-full grid grid-cols-12 grid-rows-7'>
                         <div class='col-span-12 row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Researchers per Degree</div>
                         <div class='col-span-12 row-span-6'>
@@ -136,7 +136,7 @@
         </div>
 
         <div id="time-series-section">
-            <div class="border-l-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl h-[370px] sm:h-[352px] md:h-[354px] mb-8">
+            <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl h-[370px] sm:h-[352px] md:h-[354px] mb-8">
                 <div class="font-[650] text-sm sm:text-lg text-gray-700 pl-4 sm:pl-6 pt-4">
                     Researchers Hired per Year (10-year period)
                 </div>

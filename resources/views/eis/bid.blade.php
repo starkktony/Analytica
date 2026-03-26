@@ -81,7 +81,7 @@
                           <span class="text-xs font-medium">Goods and Services:</span>
                           <form action="{{ route('eis.bid') }}" method="GET" id="filterYear">
                             <input type="hidden" name="infrayear" value="{{ $infraSelectedYear }}">
-                            <select name="bidyear" onchange="document.getElementById('filterYear').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <select name="bidyear" onchange="document.getElementById('filterYear').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                               @foreach($stats['bidyear'] as $year)
                               <option class="text-xs" value="{{ $year }}" {{ $year == $bidSelectedYear ? 'selected' : '' }}>
                                 {{ $year }}
@@ -96,7 +96,7 @@
                           <form action="{{ route('eis.bid') }}" method="GET" id="filterForm" class="m-0">
                             <input type="hidden" name="bidyear" value="{{ $bidSelectedYear }}">
                             <select name="infrayear" onchange="document.getElementById('filterForm').submit()" 
-                              class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs">
+                              class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs">
                               @foreach($stats['infrayear'] as $year)
                                 <option class="text-xs" value="{{ $year }}" {{ $year == $infraSelectedYear ? 'selected' : '' }}>
                                   {{ $year }}

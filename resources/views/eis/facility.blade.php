@@ -81,7 +81,7 @@
                         <span class="text-xs font-medium">Infra. Projects:</span>
                         <form action="{{ route('eis.facility') }}" method="GET" id="filterForm">
                           <input type="hidden" name="gaayear" value="{{ $gaaselectedYear }}">
-                          <select name="infrayear" onchange="document.getElementById('filterForm').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                          <select name="infrayear" onchange="document.getElementById('filterForm').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                             @foreach($stats['inyear'] as $year)
                             <option class="text-xs" value="{{ $year }}" {{ $year == $infraselectedYear ? 'selected' : '' }}>
                               {{ $year }}
@@ -92,10 +92,10 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-medium">Fund 164:</span>
+                        <span class="text-xs font-medium">GAA Projects:</span>
                         <form action="{{ route('eis.facility') }}" method="GET" id="filterYear">
                           <input type="hidden" name="infrayear" value="{{ $infraselectedYear }}">
-                          <select name="gaayear" onchange="document.getElementById('filterYear').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                          <select name="gaayear" onchange="document.getElementById('filterYear').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                             @foreach($stats['gayear'] as $year)
                             <option class="text-xs" value="{{ $year }}" {{ $year == $gaaselectedYear ? 'selected' : '' }}>
                               {{ $year }}
@@ -118,7 +118,7 @@
 
       <div class="grid grid-cols-12 gap-2 mb-2">
           <div class="col-span-12 md:col-span-6 xl:col-span-3 ">
-            <div class="grid grid-rows-2 h-38 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
+            <div class="grid grid-rows-2 h-39 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
               <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                 <i class="fa-solid fa-building text-green-600 text-3xl"></i>
               </div>
@@ -135,7 +135,7 @@
                   <i class="fa-solid fa-money-bill text-white text-3xl"></i>
                 </div>
                 <div class='row-span-1 pt-1 sm: pt-0'>
-                  <p class='text-lg sm:text-2xl md:text-xl lg:text-3xl xl:text-2xl text-right pt-2 font-[650] pr-1 align-bottom text-gray-800'>₱ {{number_format($stats['infra_amount'], 2)}}</p>
+                  <p class='text-lg sm:text-2xl md:text-xl lg:text-3xl xl:text-xl text-right pt-2 font-[650] pr-1 align-bottom text-gray-800'>₱ {{number_format($stats['infra_amount'], 2)}}</p>
                   <p class='text-[10px] md:text-[12px] text-right font-medium pr-1'>Total Contract Amount</p>
                 </div>
               </div>
@@ -273,7 +273,7 @@
                   <i class="fa-solid fa-money-bill text-white text-3xl"></i>
                 </div>
                 <div class='row-span-1 pt-1 sm: pt-0'>
-                  <p class='text-lg sm:text-2xl md:text-xl lg:text-3xl xl:text-2xl text-right pt-2 font-[650] pr-1 align-bottom text-gray-800'>₱ {{number_format($stats['gaa_amount'], 2)}}</p>
+                  <p class='text-lg sm:text-2xl md:text-xl lg:text-3xl xl:text-xl text-right pt-2 font-[650] pr-1 align-bottom text-gray-800'>₱ {{number_format($stats['gaa_amount'], 2)}}</p>
                   <p class='text-[10px] md:text-[12px] text-right font-medium pr-1'>Total Contract Amount</p>
                 </div>
               </div>

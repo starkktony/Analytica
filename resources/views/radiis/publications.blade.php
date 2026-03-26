@@ -92,7 +92,7 @@
                         <form action="{{ route('radiis.publications') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
                             <input type="hidden" name="year" value="{{ $selectedYear }}">
                             <select name="group_by" onchange="document.getElementById('filterGroup').submit()" 
-                                class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                                class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 <option class="text-xs" value="category" {{ $selectedGroup == 'category' ? 'selected' : '' }}>Per Category</option>
                                 <option class="text-xs" value="level" {{ $selectedGroup == 'level' ? 'selected' : '' }}>Per Level</option>
                             </select>

@@ -92,7 +92,7 @@
                         <form action="{{ route('radiis.iprights') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
                             <input type="hidden" name="year" value="{{ $selectedYear }}">
                             <select name="group_by" onchange="document.getElementById('filterGroup').submit()" 
-                                class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                                class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 <option class="text-xs" value="utilization" {{ $selectedGroup == 'utilization' ? 'selected' : '' }}>Per Utilization</option>
                                 <option class="text-xs" value="type" {{ $selectedGroup == 'type' ? 'selected' : '' }}>Per Type</option>
                             </select>
@@ -106,7 +106,7 @@
     <div class="px-6 pt-4">
         <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
             <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-4">       
-                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-45 sm:h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
+                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
                     <div class='grid grid-rows-4 h-full'>
                         <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                             <i class="fa-regular fa-lightbulb text-white text-3xl"></i>
@@ -115,7 +115,7 @@
                             <p class='text-4xl sm:text-5xl text-right font-[750] pr-4 align-bottom text-gray-800'>{{ $stats['new_ipr'] }}</p>
                             <p class='text-[12px] md:text-[12px] text-right pr-4 font-medium'><span class="{{ $percentages['year_percent'] > 0 ? 'text-green-600' : 'text-red-500' }}">
                                 {{ $percentages['year_percent'] > 0 ? '▲ ' : '▼ ' }}{{ $percentages['year_percent'] }}%</span></p>
-                            <p class='text-[10px] md:text-[12px] mb-8 text-right font-medium pr-4'>New IPRs in {{ $stats['max_year'] }}</p>
+                            <p class='text-[10px] md:text-[12px] text-right font-medium pr-4'>New IPRs in {{ $stats['max_year'] }}</p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
         </div>
 
         <div class="grid grid-cols-4 md:grid-cols-12 gap-3">
-            <div class="col-span-4 h-[340px] sm:h-[500px] border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
+            <div class="col-span-4 h-[340px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
                     <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>IPRs per Utilization</div>
                     <div class='row-span-6 h-full w-full'>
@@ -131,7 +131,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-4 h-[340px] sm:h-[500px] border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
+            <div class="col-span-4 h-[340px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
                     <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>IPRs per Type</div>
                     <div class='row-span-6 h-full w-full'>
@@ -139,7 +139,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-4 h-[380px] sm:h-[500px] border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl mb-2">
+            <div class="col-span-4 h-[380px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl mb-2">
                 <div class='grid grid-rows-7 h-full'>
                     <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>IPRs per Unit</div>
                     <div class='row-span-6 h-full w-full'>
@@ -314,11 +314,11 @@
                 totalLine
             ];
             const yearLayout = {
-                height: 275,
+                height: 270,
                 barmode: 'stack',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                margin: { l: 40, r: 50, b: 50, t: 0 },
+                margin: { l: 40, r: 40, b: 45, t: 10 },
                 legend: {
                     font: {size: 10, color: 'black'},
                     orientation: 'h',

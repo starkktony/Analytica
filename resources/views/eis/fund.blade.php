@@ -71,12 +71,12 @@
                 EIS Finances
             </div>
 
-            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                 <div class="hidden xl:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
                     Year Filters
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex flex-wrap items-center gap-1">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Trust Fund:</span>
                         <form action="{{ route('eis.fund') }}" method="GET" id="filterTrust" class="m-0">
@@ -102,7 +102,7 @@
                             <input type="hidden" name="year163" value="{{ $selected163 }}">
                             <input type="hidden" name="year163" value="{{ $selected164 }}">
                             <input type="hidden" name="yeartrust" value="{{ $selectedTrust }}">
-                            <select name="year101" onchange="document.getElementById('filterForm').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <select name="year101" onchange="document.getElementById('filterForm').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 @foreach($stats['all_101year'] as $year)
                                 <option class="text-xs" value="{{ $year }}" {{ $year == $selected101 ? 'selected' : '' }}>
                                 {{ $year }}
@@ -119,7 +119,7 @@
                             <input type="hidden" name="year163" value="{{ $selected163 }}">
                             <input type="hidden" name="year164" value="{{ $selected164 }}">
                             <input type="hidden" name="yeartrust" value="{{ $selectedTrust }}">
-                            <select name="year161" onchange="document.getElementById('filterGroup').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <select name="year161" onchange="document.getElementById('filterGroup').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 @foreach($stats['all_161year'] as $year)
                                 <option class="text-xs" value="{{ $year }}" {{ $year == $selected161 ? 'selected' : '' }}>
                                 {{ $year }}
@@ -136,7 +136,7 @@
                             <input type="hidden" name="year161" value="{{ $selected161 }}">
                             <input type="hidden" name="year164" value="{{ $selected164 }}">
                             <input type="hidden" name="yeartrust" value="{{ $selectedTrust }}">
-                            <select name="year163" onchange="document.getElementById('filter163').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <select name="year163" onchange="document.getElementById('filter163').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 @foreach($stats['all_163year'] as $year)
                                 <option class="text-xs" value="{{ $year }}" {{ $year == $selected163 ? 'selected' : '' }}>
                                 {{ $year }}
@@ -153,7 +153,7 @@
                             <input type="hidden" name="year163" value="{{ $selected163 }}">
                             <input type="hidden" name="year101" value="{{ $selected101 }}">
                             <input type="hidden" name="yeartrust" value="{{ $selectedTrust }}">
-                            <select name="year164" onchange="document.getElementById('filter164').submit()" class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <select name="year164" onchange="document.getElementById('filter164').submit()" class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
                                 @foreach($stats['all_164year'] as $year)
                                 <option class="text-xs" value="{{ $year }}" {{ $year == $selected164 ? 'selected' : '' }}>
                                 {{ $year }}
@@ -175,34 +175,28 @@
 
     <div class="px-6 pt-2">
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
-            <div class="col-span-4 lg:col-span-4 h-80">
-                <div class='grid grid-rows-4'>
-                    <div class='row-span-2'>
-                        <div class="grid grid-rows-8 h-39 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
-                            <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
-                                <i class="fa-solid fa-money-bill-wave text-green-600 text-3xl"></i>
-                            </div>
-                            <div class='row-span-4 pt-2'>
-                                <p class='text-white text-right text-md xs:text-xl sm:text-3xl lg:text-xl xl:text-3xl font-[650] pr-1'>₱ {{number_format($stats['trustcurr_bal'], 2)}}</p>
-                                <p class='text-right text-white text-[9px] xs:text-[10px] sm:text-[12px] md:text-[11px] xl:text-[13px] font-[550] pr-1'>Trust Fund End. Balance ({{$selectedTrust}})</p>
-                            </div>
-                        </div>
+            <div class="col-span-4 lg:col-span-4 h-80">      
+                <div class="grid grid-rows-8 h-39 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
+                    <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
+                        <i class="fa-solid fa-money-bill-wave text-green-600 text-3xl"></i>
                     </div>
-                    <div class='row-span-2'>
-                        <div class='border-l-5 h-39 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 mt-1 overflow-hidden'>
-                            <div class='grid grid-rows-8'>
-                                <div class='bg-green-600/80 row-span-2 rounded-lg h-12 w-16 flex items-center justify-center'>
-                                    <i class="fa-solid fa-money-bill-transfer text-white text-3xl"></i>
-                                </div>
-                                <div class='row-span-6 pt-2'>
-                                    <p class='text-lg xs:text-xl sm:text-3xl lg:text-xl xl:text-3xl text-right font-[550] pr-1'> <span class="{{ $stats['trust_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
-                                        {{$stats['trust_ratio']}}</span></p>
-                                    <p class=' text-right pr-1 font-medium leading-[0.8]'><span class="{{ $stats['trust_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
-                                        <span class="{{ $stats['trust_ratio'] >= 1 ? 'text-[9px] xs:text-[12px] md:text-[11px] lg:text-[9px] xl:text-[10px]' : 'text-[12px] md:text-[11px]' }}">
-                                        {{ $stats['trust_ratio'] >= 1 ? 'Collection exceeded or equal to expenditure ' : 'Expenditure exceeded the collection ' }}</span></span></p>
-                                    <p class='text-[9px] xs:text-[10px] sm:text-[12px] md:text-[11px] xl:text-[13px] text-right font-[550] pr-1 pt-1'>Cash Flow Ratio ({{$selectedTrust}})</p>
-                                </div>
-                            </div>
+                    <div class='row-span-4 pt-2'>
+                        <p class='text-white text-right text-md xs:text-xl sm:text-3xl lg:text-xl xl:text-3xl font-[650] pr-1'>₱ {{number_format($stats['trustcurr_bal'], 2)}}</p>
+                        <p class='text-right text-white text-[9px] xs:text-[10px] sm:text-[12px] md:text-[11px] xl:text-[13px] font-[550] pr-1'>Trust Fund End. Balance ({{$selectedTrust}})</p>
+                    </div>
+                </div>        
+                <div class='border-l-5 h-39 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 mt-1 overflow-hidden'>
+                    <div class='grid grid-rows-1'>
+                        <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
+                            <i class="fa-solid fa-money-bill-transfer text-white text-3xl"></i>
+                        </div>
+                        <div class='row-span-1'>
+                            <p class='text-lg xs:text-xl sm:text-3xl lg:text-3xl text-right font-[550] pr-1'> <span class="{{ $stats['trust_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
+                                {{$stats['trust_ratio']}}</span></p>
+                            <p class=' text-right pr-1 font-medium leading-[0.8]'><span class="{{ $stats['trust_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
+                                <span class="{{ $stats['trust_ratio'] >= 1 ? 'text-[9px] xs:text-[12px] md:text-[11px] lg:text-[9px] xl:text-[10px]' : 'text-[9px] xs:text-[12px] md:text-[11px]' }}">
+                                {{ $stats['trust_ratio'] >= 1 ? 'Collection exceeded or equal to expenditure ' : 'Expenditure exceeded the collection ' }}</span></span></p>
+                            <p class='text-[9px] xs:text-[10px] sm:text-[12px] md:text-[11px] xl:text-[13px] text-right font-[550] pr-1 pt-1'>Cash Flow Ratio ({{$selectedTrust}})</p>
                         </div>
                     </div>
                 </div>
@@ -362,17 +356,17 @@
                 </div> 
             </div>
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">               
-                <div class='grid grid-rows-8 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
-                    <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
+                <div class='grid grid-rows-2 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
+                    <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                         <i class="fa-solid fa-money-bill-transfer text-white text-3xl"></i>
                     </div>
-                    <div class='row-span-4 mb-5'>
+                    <div class='row-span-1'>
                             <p class='text-xl xs:text-xl sm:text-3xl lg:text-2xl xl:text-3xl text-right font-[650] pr-1 align-bottom text-gray-800'> <span class="{{ $stats['f161_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
                             {{$stats['f161_ratio']}}</span></p>
                         <p class='text-[11px] md:text-[11px] text-right pr-1 font-medium leading-[0.8]'><span class="{{ $stats['f161_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
                             <span class="{{ $stats['f161_ratio'] >= 1 ? 'text-[9px] xs:text-[12px] md:text-[11px] lg:text-[12px] xl:text-[8px] ' : 'text-[9px] md:text-[11px]' }}">
                             {{ $stats['f161_ratio'] >= 1 ? 'Collection is greater than or equal to expenditure ' : 'Expenditure exceeded the collection ' }}</span></span></p>
-                        <p class='text-[8px] xs:text-[10px] md:text-[12px] mb-8 text-right font-medium pr-1'>Collections to Expenditures Ratio</p>
+                        <p class='text-[8px] xs:text-[10px] md:text-[12px] text-right font-medium pr-1'>Collections to Expenditures Ratio</p>
                     </div>
                 </div>
             </div>
@@ -418,17 +412,17 @@
                 </div> 
             </div>
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">               
-                <div class='grid grid-rows-8 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
-                    <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
+                <div class='grid grid-rows-2 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
+                    <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                         <i class="fa-solid fa-money-bill-transfer text-white text-3xl"></i>
                     </div>
-                    <div class='row-span-4 mb-5'>
+                    <div class='row-span-1'>
                             <p class='text-xl xs:text-xl sm:text-3xl lg:text-2xl xl:text-3xl text-right font-[650] pr-1 align-bottom text-gray-800'> <span class="{{ $stats['f163_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
                             {{$stats['f163_ratio']}}</span></p>
                         <p class='text-[11px] md:text-[11px] text-right pr-1 font-medium leading-[0.8]'><span class="{{ $stats['f163_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
                             <span class="{{ $stats['f163_ratio'] >= 1 ? 'text-[9px] xs:text-[12px] md:text-[11px] lg:text-[12px] xl:text-[8px] ' : 'text-[9px] md:text-[11px]' }}">
                             {{ $stats['f163_ratio'] >= 1 ? 'Collection is greater than or equal to expenditure ' : 'Expenditure exceeded the collection ' }}</span></span></p>
-                        <p class='text-[8px] xs:text-[10px] md:text-[12px] mb-8 text-right font-medium pr-1'>Collections to Expenditures Ratio</p>
+                        <p class='text-[8px] xs:text-[10px] md:text-[12px] text-right font-medium pr-1'>Collections to Expenditures Ratio</p>
                     </div>
                 </div>
             </div>
@@ -474,17 +468,17 @@
                 </div> 
             </div>
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">               
-                <div class='grid grid-rows-8 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
-                    <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
+                <div class='grid grid-rows-2 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
+                    <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                         <i class="fa-solid fa-money-bill-transfer text-white text-3xl"></i>
                     </div>
-                    <div class='row-span-4 mb-5'>
+                    <div class='row-span-1'>
                             <p class='text-xl xs:text-xl sm:text-3xl lg:text-2xl xl:text-3xl text-right font-[650] pr-1 align-bottom text-gray-800'> <span class="{{ $stats['f164_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
                             {{$stats['f164_ratio']}}</span></p>
                         <p class='text-[11px] md:text-[11px] text-right pr-1 font-medium leading-[0.8]'><span class="{{ $stats['f164_ratio'] >= 1 ? 'text-green-600' : 'text-red-500' }}">
                             <span class="{{ $stats['f164_ratio'] >= 1 ? 'text-[9px] xs:text-[12px] md:text-[11px] lg:text-[12px] xl:text-[8px] ' : 'text-[9px] md:text-[11px]' }}">
                             {{ $stats['f164_ratio'] >= 1 ? 'Collection is greater than or equal to expenditure ' : 'Expenditure exceeded the collection ' }}</span></span></p>
-                        <p class='text-[8px] xs:text-[10px] md:text-[12px] mb-8 text-right font-medium pr-1'>Collections to Expenditures Ratio</p>
+                        <p class='text-[8px] xs:text-[10px] md:text-[12px] text-right font-medium pr-1'>Collections to Expenditures Ratio</p>
                     </div>
                 </div>
             </div>
@@ -527,7 +521,7 @@
         bankData = {   
             x: xData,
             y: yData,
-            hovertemplate: '<b>Balance:</b> %{y} <br><b>Date:</b> %{x}<extra></extra>',
+            hovertemplate: '<b>Balance:</b> ₱%{y:,.2f} <br><b>Date:</b> %{x}<extra></extra>',
             type: 'scatter',
             mode: 'lines',
             line:{width: 2},
@@ -541,7 +535,7 @@
         lastData = {
             x: [xData[0]],
             y: [yData[0]],
-            hovertemplate: '<b>Balance:</b> %{y} <br><b>Date:</b> %{x}<extra></extra>',
+            hovertemplate: '<b>Balance:</b> ₱%{y:,.2f} <br><b>Date:</b> %{x}<extra></extra>',
             mode: 'markers',
             marker: {
                 color: '#00702B', 
@@ -673,7 +667,7 @@
     psexpData = {   
     x: @js($charts['f101_labels']),
     y: @js($charts['f101_psexp']),
-    hovertemplate: '<b>PS Expenditure:</b> %{y}<extra></extra>',
+    hovertemplate: '<b>PS Expenditure:</b> ₱%{y:,.2f}<extra></extra>',
     type: 'scatter',
     mode: 'lines+markers',
     line: { width: 3, color: '#00702B' },
@@ -685,7 +679,7 @@
 coexpData = {   
     x: @js($charts['f101_labels']),
     y: @js($charts['f101_coexp']),
-    hovertemplate: '<b>CO Expenditure:</b> %{y}<extra></extra>',
+    hovertemplate: '<b>CO Expenditure:</b> ₱%{y:,.2f}<extra></extra>',
     type: 'scatter',
     mode: 'lines+markers', 
     line: { width: 3, color: '#F2EA00' },
@@ -697,7 +691,7 @@ coexpData = {
 moexpData = {   
     x: @js($charts['f101_labels']),
     y: @js($charts['f101_mooeexp']),
-    hovertemplate: '<b>MOOE Expenditure:</b> %{y}<extra></extra>',
+    hovertemplate: '<b>MOOE Expenditure:</b> ₱%{y:,.2f}<extra></extra>',
     type: 'scatter',
     mode: 'lines+markers',
     line: { width: 3, color: '#4e98ff' },

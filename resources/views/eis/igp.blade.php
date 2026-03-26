@@ -102,36 +102,30 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
+        <div class="grid grid-cols-4 lg:grid-cols-12 gap-2 mb-2">
             <div class="col-span-4 xl:col-span-3 h-80">
-                <div class='grid grid-rows-4'>
-                    <div class='row-span-2'>
-                        <div class="grid grid-rows-8 h-39 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
-                            <div class='bg-white row-span-3 rounded-lg h-12 w-16 flex items-center justify-center'>
+                        <div class="grid grid-rows-2 h-35 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
+                            <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                                 <i class="fa-solid fa-money-bills text-green-600 text-3xl"></i>
                             </div>
-                            <div class='row-span-5 pt-3 xs:pt-2'>
+                            <div class='row-span-1'>
                                 <p class='text-white text-right text-xl sm:text-3xl lg:text-xl xl:text-2xl font-[650] pr-1'>₱ {{number_format($stats['currbal'])}}</p>
                                 <p class='text-right text-white text-[12px] md:text-[11px] xl:text-[13px] font-[550] pr-1'>Cash on Bank Balance</p>
                                 <p class='text-right text-white text-[10px] md:text-[11px] font-[550] pr-1'>as of {{$stats['currdate']}}</p>
                             </div>
                         </div>
-                    </div>
-                    <div class='row-span-2'>
-                        <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-39 rounded-lg inset-shadow-xs shadow-xl p-3 mt-1 overflow-hidden'>
-                            <div class='grid grid-rows-8 '>
-                                <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
+                        <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-35 rounded-lg mt-2 inset-shadow-xs shadow-xl p-3 overflow-hidden'>
+                            <div class='grid grid-rows-2 '>
+                                <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                                     <i class="fa-solid fa-money-bill-transfer text-white text-3xl"></i>
                                 </div>
-                                <div class='row-span-4'>
+                                <div class='row-span-1 pt-1'>
                                     <p class='text-lg sm:text-2xl lg:text-lg xl:text-2xl text-right pr-1 font-[650] align-bottom text-gray-800'> <span class="{{ $stats['netflow'] > 0 ? 'text-green-600' : 'text-red-500' }}">
-                                        {{ $stats['netflow'] > 0 ? '+ ' : '- ' }} ₱ {{number_format($stats['netflow'])}} </span></p>
-                                    <p class='text-[10px] md:text-[12px] mb-8 text-right font-medium pr-1'>Net Cash Flow</p>
+                                        {{ $stats['netflow'] > 0 ? '+ ' : ' ' }} ₱ {{number_format($stats['netflow'])}} </span></p>
+                                    <p class='text-[10px] md:text-[12px] text-right font-medium pr-1'>Net Cash Flow</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        </div>        
             </div>
             <div class="col-span-4 lg:col-span-8 xl:col-span-9 border-t-[4px] h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-md xl:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
@@ -236,7 +230,7 @@
                         </div>
                         <div class='row-span-1'>
                             <p class='text-white text-right text-4xl xs:text-xl sm:text-4xl font-[650] pr-2'>{{$stats['gov_total']}}</p>
-                            <p class='text-right text-white text-[9px] xs:text-[11px] md:text-[10px] xl:text-[12px] font-[550] pr-2'>Government Agencies Landholdings</p>
+                            <p class='text-right text-white text-[8px] xs:text-[11px] md:text-[10px] xl:text-[12px] font-[550] pr-2'>Government Agencies Landholdings</p>
                         </div>
                     </div>
                 </div>
@@ -257,7 +251,7 @@
                             <i class="fa-solid fa-store text-green-600 text-3xl"></i>
                         </div>
                         <div class='row-span-2'>
-                            <p class='text-white text-right text-2xl xs:text-xl sm:text-3xl font-[650] pr-2'>{{$stats['gateway_total']}}</p>
+                            <p class='text-white text-right text-3xl xs:text-xl sm:text-3xl font-[650] pr-2'>{{$stats['gateway_total']}}</p>
                             <p class='text-right text-white text-[8px] xs:text-[11px] md:text-[10px] xl:text-[12px] font-[550] pr-2'>Number of Stalls in Gateway</p>
                         </div>
                     </div>
@@ -270,7 +264,7 @@
                             <i class="fa-solid fa-store text-green-600 text-3xl"></i>
                         </div>
                         <div class='row-span-1'>
-                            <p class='text-white text-right text-2xl xs:text-xl sm:text-3xl font-[650] pr-2'>{{$stats['marketing_total']}}</p>
+                            <p class='text-white text-right text-3xl xs:text-xl sm:text-3xl font-[650] pr-2'>{{$stats['marketing_total']}}</p>
                             <p class='text-right text-white text-[8px] xs:text-[11px] md:text-[10px] xl:text-[12px] font-[550] pr-2'>Number of Stalls in Marketing Center</p>
                         </div>
                     </div>
@@ -283,7 +277,7 @@
                             <i class="fa-solid fa-store text-green-600 text-3xl"></i>
                         </div>
                         <div class='row-span-1'>
-                            <p class='text-white text-right text-2xl xs:text-xl sm:text-3xl font-[650] pr-2'>{{$stats['commart_total']}}</p>
+                            <p class='text-white text-right text-3xl xs:text-xl sm:text-3xl font-[650] pr-2'>{{$stats['commart_total']}}</p>
                             <p class='text-right text-white text-[8px] xs:text-[11px] md:text-[10px] xl:text-[12px] font-[550] pr-2'>Number of Stals in Community Market</p>
                         </div>
                     </div>
@@ -354,7 +348,7 @@
         bankData = {   
             x: xData,
             y: yData,
-            hovertemplate: '<b>Balance:</b> %{y} <br><b>Date:</b> %{x}<extra></extra>',
+            hovertemplate: '<b>Balance:</b> ₱%{y:,.2f} <br><b>Date:</b> %{x}<extra></extra>',
             type: 'scatter',
             mode: 'lines',
             line:{width: 2},
@@ -368,7 +362,7 @@
         lastData = {
             x: [xData[xData.length - (xData.length )]],
             y: [yData[yData.length - (xData.length )]],
-            hovertemplate: '<b>Balance:</b> %{y} <br><b>Date:</b> %{x}<extra></extra>',
+            hovertemplate: '<b>Balance:</b> ₱%{y:,.2f} <br><b>Date:</b> %{x}<extra></extra>',
             mode: 'markers',
             marker: {
                 color: '#00702B', 

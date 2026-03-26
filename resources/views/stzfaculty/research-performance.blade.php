@@ -11,23 +11,60 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: #e8ebe8;
-            margin: 0;
             font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
         }
+
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 250px;
+            background: #1a2c1a;
+            color: white;
+            transition: width 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        body.sidebar-collapsed .sidebar {
+            width: 68px;
+        }
+
+        /* Main content area */
         .content {
             margin-left: 250px;
             transition: margin-left 0.3s ease;
-            max-width: calc(100vw - 250px);
-            overflow-x: hidden;
-        }
-        body.sidebar-collapsed .content {
-            margin-left: 68px;
-            max-width: calc(100vw - 68px);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* ── Page header ── */
+        body.sidebar-collapsed .content {
+            margin-left: 68px;
+        }
+
+        /* Fixed header section container */
+        .fixed-header-section {
+            flex-shrink: 0;
+            background: #e8ebe8;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Page header */
         .header {
             background: #009539;
             color: white;
@@ -41,7 +78,7 @@
             font-family: 'Bricolage Grotesque', sans-serif;
         }
 
-        /* ── Filter bar ── */
+        /* Filter bar */
         .filter-bar {
             display: flex;
             align-items: center;
@@ -54,10 +91,20 @@
             overflow-x: auto;
             overflow-y: hidden;
         }
-        .filter-bar::-webkit-scrollbar { display: none; }
-        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .filter-bar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
         .filter-bar.is-loading select,
-        .filter-bar.is-loading button { pointer-events: none; opacity: 0.5; }
+        .filter-bar.is-loading button {
+            pointer-events: none;
+            opacity: 0.5;
+        }
 
         .page-title {
             font-size: 14px;
@@ -66,6 +113,7 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+
         .filter-bar-label {
             font-size: 12px;
             font-weight: 700;
@@ -74,18 +122,21 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+
         .filter-group {
             display: flex;
             align-items: center;
             gap: 6px;
             flex-shrink: 0;
         }
+
         .filter-group label {
             font-size: 12px;
             font-weight: 600;
             color: #2d2d2d;
             white-space: nowrap;
         }
+
         .filter-group select {
             font-size: 12px;
             padding: 4px 28px 4px 12px;
@@ -101,10 +152,12 @@
             min-width: 130px;
             cursor: pointer;
         }
+
         .filter-group select:focus {
             outline: none;
             border-color: #009539;
         }
+
         .clear-filters-btn {
             background: #009539;
             color: white;
@@ -118,7 +171,10 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        .clear-filters-btn:hover { background: #00802e; }
+
+        .clear-filters-btn:hover {
+            background: #00802e;
+        }
 
         /* College badge */
         .college-badge {
@@ -134,22 +190,58 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        .college-badge.visible { display: flex; }
 
-        /* ── Main content wrapper ── */
+        .college-badge.visible {
+            display: flex;
+        }
+
+        /* Scrollable main content area */
         .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
             padding: 24px 30px 40px 30px;
         }
 
-        /* ── Stat Cards (SUC Faculty style) ── */
+        /* Custom scrollbar for main content */
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: #d4d9d4;
+            border-radius: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: #009539;
+            border-radius: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: #016531;
+        }
+
+        /* Stat Cards */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 28px;
         }
-        @media (max-width: 900px)  { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 580px)  { .cards-grid { grid-template-columns: 1fr; } }
+
+        @media (max-width: 900px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 580px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
         .stat-card {
             position: relative;
@@ -158,15 +250,18 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
             min-height: 130px;
         }
+
         .stat-card.green {
             background: linear-gradient(to right, #22c55e, #16a34a);
             color: white;
         }
+
         .stat-card.white {
             background: white;
             color: #111827;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+
         .stat-card-icon {
             position: absolute;
             top: 16px;
@@ -179,33 +274,50 @@
             justify-content: center;
             font-size: 22px;
         }
+
         .stat-card.green .stat-card-icon {
             background: rgba(255,255,255,0.9);
             color: #16a34a;
         }
+
         .stat-card.white .stat-card-icon {
             background: #22c55e;
             color: white;
         }
+
         .stat-card-body {
             margin-top: 52px;
             text-align: right;
         }
+
         .stat-card-number {
             font-size: 40px;
             font-weight: 800;
             line-height: 1;
             font-family: 'Inter', sans-serif;
         }
-        .stat-card.green .stat-card-number { color: white; }
-        .stat-card.white .stat-card-number { color: #111827; }
+
+        .stat-card.green .stat-card-number {
+            color: white;
+        }
+
+        .stat-card.white .stat-card-number {
+            color: #111827;
+        }
+
         .stat-card-label {
             font-size: 14px;
             font-weight: 600;
             margin-top: 4px;
         }
-        .stat-card.green .stat-card-label { color: rgba(255,255,255,0.85); }
-        .stat-card.white .stat-card-label { color: #6b7280; }
+
+        .stat-card.green .stat-card-label {
+            color: rgba(255,255,255,0.85);
+        }
+
+        .stat-card.white .stat-card-label {
+            color: #6b7280;
+        }
 
         /* Shimmer loading */
         .stat-card.loading .stat-card-number,
@@ -217,26 +329,44 @@
             color: transparent !important;
             min-width: 60px;
         }
+
         .stat-card.green.loading .stat-card-number,
         .stat-card.green.loading .stat-card-label {
             background: linear-gradient(90deg, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.15) 75%);
             background-size: 200% 100%;
             animation: shimmer 1.2s infinite;
         }
-        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-        /* ── Charts (SUC Faculty style) ── */
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Charts */
         .charts-section {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
+
         .chart-row {
             display: grid;
             gap: 20px;
         }
-        .two-col { grid-template-columns: 1fr 1fr; }
-        @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+        .two-col {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 900px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
 
         .chart-card {
             background: white;
@@ -246,6 +376,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .chart-card h3 {
             font-size: 14px;
             font-weight: 700;
@@ -268,15 +399,42 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
-        .loading-overlay.active { opacity: 1; pointer-events: all; }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
         .spinner {
-            width: 36px; height: 36px;
+            width: 36px;
+            height: 36px;
             border: 4px solid #d4ead4;
             border-top-color: #009539;
             border-radius: 50%;
             animation: spin 0.75s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Animation for page content */
+        .main-content {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -284,64 +442,64 @@
 @include('components.sidebar')
 
 <div class="content">
+    <!-- Fixed Header Section - This stays at the top -->
+    <div class="fixed-header-section">
+        {{-- Page header --}}
+        <div class="header">Research &amp; Non-Teaching Load</div>
 
-    {{-- Page header --}}
-    <div class="header">Research &amp; Non-Teaching Load</div>
+        {{-- Filter bar --}}
+        <div class="filter-bar" id="filterBar">
+            <div class="page-title" id="pageTitle">
+                Research &amp; Non-Teaching Load
+                @if(isset($activeSemObj))
+                    ({{ $activeSemObj->semester }} {{ $activeSemObj->sy }})
+                @endif
+            </div>
 
-    {{-- Filter bar --}}
-    <div class="filter-bar" id="filterBar">
-
-        <div class="page-title" id="pageTitle">
-            Research &amp; Non-Teaching Load
-            @if(isset($activeSemObj))
-                ({{ $activeSemObj->semester }} {{ $activeSemObj->sy }})
-            @endif
-        </div>
-
-        <span class="college-badge {{ $filters['college'] !== 'all' && isset($selectedCollegeObj) ? 'visible' : '' }}"
-              id="collegeBadge">
-            <i class="bi bi-building"></i>
-            <span id="collegeBadgeText">
-                {{ isset($selectedCollegeObj) ? $selectedCollegeObj->college_acro : '' }}
+            <span class="college-badge {{ $filters['college'] !== 'all' && isset($selectedCollegeObj) ? 'visible' : '' }}"
+                  id="collegeBadge">
+                <i class="bi bi-building"></i>
+                <span id="collegeBadgeText">
+                    {{ isset($selectedCollegeObj) ? $selectedCollegeObj->college_acro : '' }}
+                </span>
             </span>
-        </span>
 
-        <div class="filter-bar-label">Filters:</div>
+            <div class="filter-bar-label">Filters:</div>
 
-        <div class="filter-group">
-            <label>Semester:</label>
-            <select id="semesterFilter">
-                <option value="all" {{ $filters['semester'] === 'all' ? 'selected' : '' }}>All</option>
-                @foreach($semesters as $semester)
-                    <option value="{{ $semester->sem_id }}"
-                        {{ (string)$filters['semester'] == (string)$semester->sem_id ? 'selected' : '' }}>
-                        {{ $semester->semester }} {{ $semester->sy }}
-                    </option>
-                @endforeach
-            </select>
+            <div class="filter-group">
+                <label>Semester:</label>
+                <select id="semesterFilter">
+                    <option value="all" {{ $filters['semester'] === 'all' ? 'selected' : '' }}>All</option>
+                    @foreach($semesters as $semester)
+                        <option value="{{ $semester->sem_id }}"
+                            {{ (string)$filters['semester'] == (string)$semester->sem_id ? 'selected' : '' }}>
+                            {{ $semester->semester }} {{ $semester->sy }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Unit/Office:</label>
+                <select id="collegeFilter">
+                    <option value="all">All</option>
+                    @foreach($collegeUnits as $cu)
+                        <option value="{{ $cu->c_u_id }}"
+                            {{ (string)$filters['college'] == (string)$cu->c_u_id ? 'selected' : '' }}>
+                            {{ $cu->college_acro }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button class="clear-filters-btn" id="clearFiltersBtn">
+                <i class="bi bi-x-circle me-1"></i>Clear Filters
+            </button>
         </div>
-
-        <div class="filter-group">
-            <label>Unit/Office:</label>
-            <select id="collegeFilter">
-                <option value="all">All</option>
-                @foreach($collegeUnits as $cu)
-                    <option value="{{ $cu->c_u_id }}"
-                        {{ (string)$filters['college'] == (string)$cu->c_u_id ? 'selected' : '' }}>
-                        {{ $cu->college_acro }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <button class="clear-filters-btn" id="clearFiltersBtn">
-            <i class="bi bi-x-circle me-1"></i>Clear Filters
-        </button>
     </div>
 
-    {{-- Main Content --}}
+    {{-- Scrollable Main Content - This area scrolls --}}
     <div class="main-content">
-
         {{-- Stat Cards --}}
         <div class="cards-grid">
             <div class="stat-card green" id="cardResearch">
@@ -375,7 +533,6 @@
 
         {{-- Charts --}}
         <div class="charts-section">
-
             <div class="chart-row two-col">
                 <div class="chart-card">
                     <div class="loading-overlay" id="loadAssignments"><div class="spinner"></div></div>
@@ -401,16 +558,13 @@
                     <div id="chart-pub-types"></div>
                 </div>
             </div>
-
-        </div>{{-- /.charts-section --}}
-
-    </div>{{-- /.main-content --}}
-
-</div><!-- /.content -->
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ── All JS unchanged ──────────────────────────────────────────────────────────
+// ── All JS remains exactly the same ──────────────────────────────────────────────────────────
 const INITIAL_DATA = {
     researchLoad             : {!! json_encode($researchLoad) !!},
     publications             : {!! json_encode($publications) !!},

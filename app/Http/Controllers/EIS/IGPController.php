@@ -35,20 +35,20 @@ class IGPController extends Controller
 
         $balData = (clone $filteredQuery)
             ->select('id', 'date', 'balance')
-            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         $curr_bal_collection = EISCash::select('balance', 'date')
         ->orderBy('id', 'desc')
         ->get();
 
-        $latest_balance = $curr_bal_collection->first()->balance ?? 0;
-        $latest_date = $curr_bal_collection->first()->date ?? null;
+        $latest_balance = $filteredQuery->select('balance', 'date')->orderBy('id','desc')->first()->balance ?? 0;
+        $latest_date = $filteredQuery->select('balance', 'date')->orderBy('id','desc')->first()->date ?? null;
 
-        $inflow = EISCash::select('deposit')
+        $inflow = $filteredQuery->select('deposit')
         ->sum('deposit');
 
-        $outflow = EISCash::select('withdrawal')
+        $outflow = $filteredQuery->select('withdrawal')
         ->sum('withdrawal');
 
         $netflow = $inflow - $outflow;

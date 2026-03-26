@@ -72,7 +72,7 @@
             <div class="col-span-4 md:col-span-2 xl:col-span-3">       
                 <div class='bg-green-600/80 backdrop-blur-md rounded-lg h-[160px] xl:h-[190px] inset-shadow-xs shadow-xl p-3'>
                     <div class='grid grid-rows-12 h-full'>
-                        <div class='bg-white row-span-4 rounded-lg h-12 w-18 flex items-center justify-center'>
+                        <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
                             <i class="fa-solid fa-building-columns text-green-600 text-3xl"></i>
                         </div>
                         <div class='row-span-8 pt-[8px] xl:pt-[28px] pr-[8px]'>
@@ -83,9 +83,9 @@
                 </div>
             </div>
             <div class="col-span-4 md:col-span-2 xl:col-span-3">
-                <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-[160px] xl:h-[190px] rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
+                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-[160px] xl:h-[190px] rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-12 h-full'>
-                        <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-18 flex items-center justify-center'>
+                        <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
                             <i class="fa-solid fa-money-bills text-white text-3xl"></i>
                         </div>
                         <div class='row-span-8 pt-[16px] xs:pt-[8px] xl:pt-[28px] pr-[8px]'>
@@ -124,7 +124,7 @@
         </div>
 
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-8">
-            <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
+            <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
                     <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Agencies per Category</div>
                     <div class='row-span-6 h-full w-full pt-2'>
@@ -132,7 +132,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
+            <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
                     <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Agencies per Type</div>
                     <div class='row-span-6 h-full w-full pt-2'>
@@ -140,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-6 border-green-600 bg-white rounded-[1vw] mb-2 inset-shadow-xl shadow-xl">
+            <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-[6px] border-green-600 bg-white rounded-[1vw] mb-2 inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
                     <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Agencies per Sector</div>
                     <div class='row-span-6 h-full w-full pt-2'>

@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
         barmode: 'stack',
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: 40, r: 40, b: 10, t: 0 },
+        margin: { l: 40, r: 40, b: 30, t: 0 },
         legend: {
             font: {size: 10, color: 'black'},
             orientation: 'h',
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
         barmode: 'stack',
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: 50, r: 40, b: 10, t: 0 },
+        margin: { l: 50, r: 40, b: 30, t: 0 },
         legend: {
             font: {size: 10, color: 'black'},
             orientation: 'h',

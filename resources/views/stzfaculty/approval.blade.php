@@ -2,69 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siel Metrics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400,600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: #e8ebe8;
             margin: 0;
             font-family: 'Bricolage Grotesque', sans-serif;
-        }
-        body.sidebar-collapsed .content {
-            margin-left: 68px;
-            max-width: calc(100vw - 68px);
+            overflow: hidden;
+            height: 100vh;
         }
 
+        /* Main layout - flex column for proper sticky behavior */
+        .app-wrapper {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── Fixed header section container ── */
+        .fixed-header-section {
+            flex-shrink: 0;
+            background: #e8ebe8;
+            z-index: 100;
+        }
+
+        /* ── Header ── */
         .header {
             background: #009539;
             color: white;
-            padding: 0 30px;
-            font-size: 36px;
+            padding: 5px 30px;
+            font-size: 42px;
             font-weight: bold;
             height: 75px;
+            font-family: 'Bricolage Grotesque', sans-serif;
             display: flex;
             align-items: center;
-            gap: 14px;
         }
-        .content { margin-left: 210px; }
 
-        /* ── Combined filter bar ── */
+        /* ── Filter bar ── */
         .filter-bar {
-            font-family: 'Bricolage Grotesque', sans-serif;
             display: flex;
             align-items: center;
             gap: 12px;
             background: #c9cec9;
-            padding: 0 30px;
+            padding: 0 20px;
             border-bottom: 1px solid #b0b5b0;
-            height: 48px;
+            height: 52px;
+            min-height: 52px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
-        .filter-bar-title {
-            font-size: 13px;
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .page-title {
+            font-size: 15px;
             font-weight: 700;
             color: #2d2d2d;
             white-space: nowrap;
             flex-shrink: 0;
+            margin-right: auto;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
         }
+
+        .filter-loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #009539;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.25s, transform 0.25s;
+        }
+        .filter-loading-dot.active {
+            opacity: 1;
+            transform: scale(1);
+            animation: pulse-dot 0.85s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 0.65; }
+            50%       { transform: scale(1.55); opacity: 1; }
+        }
+
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
         .filter-bar-label {
             font-size: 13px;
             font-weight: 700;
             color: #2d2d2d;
             white-space: nowrap;
-            margin-right: 5px;
-            margin-left: auto;
         }
+
         .filter-group {
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
         }
         .filter-group label {
             font-size: 12px;
@@ -84,15 +150,14 @@
             background-repeat: no-repeat;
             background-position: right 10px center;
             background-size: 8px;
-            min-width: 90px;
+            min-width: 130px;
             cursor: pointer;
-            transition: border-color 0.2s, opacity 0.2s;
         }
         .filter-group select:focus {
             outline: none;
             border-color: #009539;
-            background-color: white;
         }
+
         .clear-filters-btn {
             background: #009539;
             color: white;
@@ -102,133 +167,118 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            margin-left: 8px;
             text-decoration: none;
             display: inline-block;
-        }
-        .clear-filters-btn:hover { background: #00802e; color: white; }
-
-        /* Pulsing dot shown while AJAX is running */
-        .filter-loading-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #009539;
             flex-shrink: 0;
-            opacity: 0;
-            transform: scale(0.5);
-            transition: opacity 0.25s, transform 0.25s;
         }
-        .filter-loading-dot.active {
-            opacity: 1;
-            transform: scale(1);
-            animation: pulse-dot 0.85s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { transform: scale(1);    opacity: 0.65; }
-            50%       { transform: scale(1.55); opacity: 1;    }
+        .clear-filters-btn:hover {
+            background: #00802e;
+            color: white;
         }
 
-        /* ── Stats Cards ── */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 28px 30px 18px 30px;
-        }
-        .stat-card {
-            border-radius: 15px;
-            padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-height: 100px;
-        }
-        .stat-card.green  { background: #009539; }
-        .stat-card.yellow { background: #ffc107; }
-        .stat-card.red    { background: #dc3545; }
-        .stat-card.white  { background: white;   }
-
-        .stat-card .icon-box {
-            width: 48px; height: 48px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; top: 15px; left: 15px;
-        }
-        .stat-card.green  .icon-box              { background: white;   }
-        .stat-card.green  .icon-box i            { font-size: 20px; color: #009539; }
-        .stat-card.yellow .icon-box              { background: white;   }
-        .stat-card.yellow .icon-box i            { font-size: 20px; color: #ffc107; }
-        .stat-card.red    .icon-box              { background: white;   }
-        .stat-card.red    .icon-box i            { font-size: 20px; color: #dc3545; }
-        .stat-card.white  .icon-box              { background: #009539; }
-        .stat-card.white  .icon-box i            { font-size: 20px; color: white;   }
-
-        .stat-content { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1; }
-        .stat-number  { font-size: 44px; font-weight: 700; line-height: 1; transition: opacity 0.3s; }
-        .stat-label   { font-size: 12px; font-weight: 600; margin-top: 4px; }
-
-        .stat-card.green  .stat-number { color: white; }
-        .stat-card.yellow .stat-number { color: white; }
-        .stat-card.red    .stat-number { color: white; }
-        .stat-card.white  .stat-number { color: #1f1f1f; }
-        .stat-card.green  .stat-label  { color: rgba(255,255,255,0.85); }
-        .stat-card.yellow .stat-label  { color: rgba(255,255,255,0.9);  }
-        .stat-card.red    .stat-label  { color: rgba(255,255,255,0.9);  }
-        .stat-card.white  .stat-label  { color: #666; }
-
-        /* Shimmer on stat numbers while AJAX is loading */
-        .stat-number.shimmer {
-            background: linear-gradient(90deg,
-                rgba(255,255,255,0.2) 25%,
-                rgba(255,255,255,0.5) 50%,
-                rgba(255,255,255,0.2) 75%);
-            background-size: 200% 100%;
-            animation: shimmer-anim 1.2s infinite;
-            border-radius: 6px;
-            color: transparent !important;
-            min-width: 70px;
-            min-height: 44px;
-            display: inline-block;
-        }
-        .stat-card.white .stat-number.shimmer {
-            background: linear-gradient(90deg, #e8ebe8 25%, #d0d4d0 50%, #e8ebe8 75%);
-            background-size: 200% 100%;
-        }
-        @keyframes shimmer-anim {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        /* ── Main content (scrollable area) ── */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0 30px 40px 30px;
         }
 
-        /* ── Charts ── */
-        .charts-row {
-            display: grid;
-            gap: 20px;
-            padding: 0 30px 20px 30px;
+        .main-content::-webkit-scrollbar {
+            width: 8px;
         }
-        .charts-row.two-col { grid-template-columns: 1fr 1fr; }
+        .main-content::-webkit-scrollbar-track {
+            background: #d4d9d4;
+            border-radius: 4px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: #009539;
+            border-radius: 4px;
+        }
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: #016531;
+        }
 
-        .chart-card {
+        /* ── Chart sections ── */
+        .chart-section-wrapper {
             background: white;
-            border-radius: 20px;
-            padding: 24px 24px 14px 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 24px;
         }
-        .chart-title { font-size: 14px; font-weight: 700; color: #1f1f1f; margin-bottom: 10px; }
+        .chart-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .chart-grid-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+        @media (max-width: 900px) {
+            .chart-grid-2 { grid-template-columns: 1fr; }
+        }
+        .chart-inner-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.06);
+            overflow: hidden;
+            position: relative;
+        }
+        .chart-inner-card.full-width {
+            grid-column: 1 / -1;
+        }
+        .chart-inner-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .chart-plot-area {
+            position: relative;
+            width: 100%;
+            min-height: 320px;
+            overflow: visible;
+        }
+        .chart-plot-area > div {
+            width: 100%;
+            height: 100%;
+            min-height: 320px;
+        }
 
-        /* Chart wrapper — needed for absolute-positioned loader */
-        .chart-wrapper { position: relative; }
+        /* Inter font styling for stat cards */
+        .stat-card-number {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 2.8rem;
+            line-height: 1;
+            color: #1f2937;
+            text-align: right;
+            margin-bottom: 4px;
+        }
 
-        /* ── Per-chart loading overlay ── */
+        .stat-card-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 11px;
+            color: #6b7280;
+            text-align: right;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Chart loader overlay ── */
         .chart-loader {
             position: absolute;
             inset: 0;
-            background: rgba(255,255,255,0.91);
+            background: rgba(249,250,251,0.92);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 14px;
+            border-radius: 12px;
             z-index: 20;
             gap: 14px;
             opacity: 1;
@@ -239,210 +289,244 @@
             opacity: 0;
             pointer-events: none;
         }
-
-        /* Spinner ring */
         .loader-ring {
-            width: 46px;
-            height: 46px;
-            border: 4px solid #e4e4e4;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e4e4e4;
             border-top-color: #009539;
             border-radius: 50%;
             animation: spin 0.72s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .loader-label {
             font-size: 12px;
             font-weight: 600;
             color: #aaa;
-            letter-spacing: 0.04em;
         }
-
-        /* Skeleton shimmer bars behind spinner */
-        .skeleton-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-            width: 60%;
-        }
+        .skeleton-stack { display: flex; flex-direction: column; gap: 9px; width: 55%; }
         .skel-bar {
-            height: 11px;
+            height: 10px;
             border-radius: 6px;
             background: linear-gradient(90deg, #ececec 25%, #dedede 50%, #ececec 75%);
             background-size: 200% 100%;
             animation: shimmer-anim 1.3s infinite;
         }
-        .skel-bar:nth-child(1) { width: 90%; animation-delay: 0s;    }
-        .skel-bar:nth-child(2) { width: 68%; animation-delay: 0.15s; }
-        .skel-bar:nth-child(3) { width: 80%; animation-delay: 0.3s;  }
-        .skel-bar:nth-child(4) { width: 52%; animation-delay: 0.45s; }
+        .skel-bar:nth-child(1) { width: 90%; }
+        .skel-bar:nth-child(2) { width: 65%; animation-delay: 0.15s; }
+        .skel-bar:nth-child(3) { width: 80%; animation-delay: 0.3s; }
+        @keyframes shimmer-anim {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
 
         .empty-chart {
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            color: #ccc; gap: 8px;
+            width: 100%;
+            height: 100%;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            gap: 8px;
         }
-        .empty-chart i    { font-size: 36px; }
+        .empty-chart i { font-size: 32px; }
         .empty-chart span { font-size: 13px; font-weight: 600; }
-
-        .text-success { color: #009539 !important; }
+        
+        /* Ensure plotly containers maintain proper dimensions */
+        .js-plotly-plot, .plotly-graph-div {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 320px !important;
+        }
     </style>
 </head>
 <body>
-    @include('components.sidebar')
+    <div class="app-wrapper">
+        @include('components.sidebar')
 
-    <div class="content">
+        <div class="content">
+            <div class="fixed-header-section">
+                {{-- Page Header --}}
+                <div class="header">WORKLOAD APPROVAL</div>
 
-        {{-- Page header --}}
-        <div class="header">Workload Approval</div>
+                {{-- Filter Bar --}}
+                <div class="filter-bar">
+                    <div class="page-title">
+                        <span id="barTitle">
+                            Faculty Workload Approval
+                            @if($filters['main_semester'])
+                                @php $sem = $availableSemesters->firstWhere('sem_id', $filters['main_semester']); @endphp
+                                @if($sem) ({{ $sem->semester }} {{ $sem->sy }}) @endif
+                            @endif
+                        </span>
+                        <span class="filter-loading-dot" id="loadingDot"></span>
+                    </div>
+                    <div class="filter-right">
+                        <span class="filter-bar-label">Filters:</span>
 
-        {{-- Combined title + filter bar (no form — AJAX handles changes) --}}
-        <div class="filter-bar" id="filterBar">
-            <div class="filter-bar-title">
-                <span id="barTitle">
-                    Faculty Workload Approval
-                    @if($filters['main_semester'])
-                        @php
-                            $sem = $availableSemesters->firstWhere('sem_id', $filters['main_semester']);
-                        @endphp
-                        @if($sem)
-                            ({{ $sem->semester }} {{ $sem->sy }})
-                        @endif
-                    @endif
-                </span>
-                <span class="filter-loading-dot" id="loadingDot"></span>
-            </div>
-
-            <div class="filter-bar-label">Filters:</div>
-
-            <div class="filter-group">
-                <label>Semester:</label>
-                <select id="mainSemester">
-                    <option value="">All</option>
-                    @foreach($availableSemesters as $sem)
-                        <option value="{{ $sem->sem_id }}"
-                                data-label="{{ $sem->semester }} {{ $sem->sy }}"
-                                {{ $filters['main_semester'] == $sem->sem_id ? 'selected' : '' }}>
-                            {{ $sem->semester }} {{ $sem->sy }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>Office:</label>
-                <select id="mainOffice">
-                    <option value="">All</option>
-                    <option value="dh"       {{ $filters['main_signatory'] == 'dh'       ? 'selected' : '' }}>Dept Head</option>
-                    <option value="dean"     {{ $filters['main_signatory'] == 'dean'     ? 'selected' : '' }}>Dean</option>
-                    <option value="director" {{ $filters['main_signatory'] == 'director' ? 'selected' : '' }}>Director</option>
-                    <option value="dot_uni"  {{ $filters['main_signatory'] == 'dot_uni'  ? 'selected' : '' }}>DOT UNI</option>
-                    <option value="nstp"     {{ $filters['main_signatory'] == 'nstp'     ? 'selected' : '' }}>NSTP</option>
-                    <option value="eteeap"   {{ $filters['main_signatory'] == 'eteeap'   ? 'selected' : '' }}>ETEEAP</option>
-                    <option value="vpaa"     {{ $filters['main_signatory'] == 'vpaa'     ? 'selected' : '' }}>VPAA</option>
-                </select>
-            </div>
-
-            <a href="{{ route('stzfaculty.approval') }}" class="clear-filters-btn" id="clearBtn"
-               style="{{ ($filters['main_semester'] || $filters['main_signatory']) ? '' : 'display:none;' }}">
-                Clear Filters
-            </a>
-        </div>
-
-        {{-- Stats Cards --}}
-        <div class="stats-container">
-            <div class="stat-card white">
-                <div class="icon-box"><i class="bi bi-file-earmark-text-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
-                    <div class="stat-label">Active Faculty</div>
-                </div>
-            </div>
-            <div class="stat-card green">
-                <div class="icon-box"><i class="bi bi-check-circle-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
-                    <div class="stat-label">Approved</div>
-                </div>
-            </div>
-            <div class="stat-card yellow">
-                <div class="icon-box"><i class="bi bi-clock-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
-                    <div class="stat-label">Submitted</div>
-                </div>
-            </div>
-            <div class="stat-card red">
-                <div class="icon-box"><i class="bi bi-x-circle-fill"></i></div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statDeclined">{{ number_format($declined) }}</div>
-                    <div class="stat-label">Declined</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Charts row --}}
-        <div class="charts-row two-col">
-
-            <div class="chart-card">
-                <div class="chart-title">Workload Approval Status</div>
-                <div class="chart-wrapper">
-                    <div id="overallStatusChart" style="height:320px;"></div>
-                    <div class="chart-loader" id="loaderPie">
-                        <div class="loader-ring"></div>
-                        <div class="skeleton-stack">
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
+                        <div class="filter-group">
+                            <label>Semester:</label>
+                            <select id="mainSemester">
+                                <option value="">All</option>
+                                @foreach($availableSemesters as $sem)
+                                    <option value="{{ $sem->sem_id }}"
+                                            data-label="{{ $sem->semester }} {{ $sem->sy }}"
+                                            {{ $filters['main_semester'] == $sem->sem_id ? 'selected' : '' }}>
+                                        {{ $sem->semester }} {{ $sem->sy }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="loader-label">Loading chart…</div>
+
+                        <div class="filter-group">
+                            <label>Office:</label>
+                            <select id="mainOffice">
+                                <option value="">All</option>
+                                <option value="dh"       {{ $filters['main_signatory'] == 'dh'       ? 'selected' : '' }}>Dept Head</option>
+                                <option value="dean"     {{ $filters['main_signatory'] == 'dean'     ? 'selected' : '' }}>Dean</option>
+                                <option value="director" {{ $filters['main_signatory'] == 'director' ? 'selected' : '' }}>Director</option>
+                                <option value="dot_uni"  {{ $filters['main_signatory'] == 'dot_uni'  ? 'selected' : '' }}>DOT UNI</option>
+                                <option value="nstp"     {{ $filters['main_signatory'] == 'nstp'     ? 'selected' : '' }}>NSTP</option>
+                                <option value="eteeap"   {{ $filters['main_signatory'] == 'eteeap'   ? 'selected' : '' }}>ETEEAP</option>
+                                <option value="vpaa"     {{ $filters['main_signatory'] == 'vpaa'     ? 'selected' : '' }}>VPAA</option>
+                            </select>
+                        </div>
+
+                        <a href="{{ route('stzfaculty.approval') }}" class="clear-filters-btn" id="clearBtn"
+                           style="{{ ($filters['main_semester'] || $filters['main_signatory']) ? '' : 'display:none;' }}">
+                            Clear Filters
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="chart-card">
-                <div class="chart-title">Workload Status by Office</div>
-                <div class="chart-wrapper">
-                    <div id="signatoryTypeChart" style="height:320px;"></div>
-                    <div class="chart-loader" id="loaderBar">
-                        <div class="loader-ring"></div>
-                        <div class="skeleton-stack">
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
+            {{-- Main Content (scrollable) --}}
+            <div class="main-content">
+
+                {{-- ── Stat Cards (programs-style with Inter font) ── --}}
+                <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 pt-6 pb-4">
+
+                    {{-- Active Faculty --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden flex flex-col justify-between">
+                            <div class="bg-green-600/80 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="bi bi-file-earmark-text-fill text-white text-3xl"></i>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="stat-card-number" id="statTotal">{{ number_format($totalDocuments) }}</div>
+                                <div class="stat-card-label">Active Faculty</div>
+                            </div>
                         </div>
-                        <div class="loader-label">Loading chart…</div>
+                    </div>
+
+                    {{-- Approved --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden flex flex-col justify-between">
+                            <div class="bg-green-600/80 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="bi bi-check-circle-fill text-white text-3xl"></i>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="stat-card-number" id="statApproved">{{ number_format($fullyApproved) }}</div>
+                                <div class="stat-card-label">Approved</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Submitted --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-yellow-400 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden flex flex-col justify-between">
+                            <div class="bg-yellow-400/80 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="bi bi-clock-fill text-white text-3xl"></i>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="stat-card-number" id="statSubmitted">{{ number_format($pendingApproval) }}</div>
+                                <div class="stat-card-label">Submitted</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Declined --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-red-500 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden flex flex-col justify-between">
+                            <div class="bg-red-500/80 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="bi bi-x-circle-fill text-white text-3xl"></i>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="stat-card-number" id="statDeclined">{{ number_format($declined) }}</div>
+                                <div class="stat-card-label">Declined</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                {{-- ── End Stat Cards ── --}}
+
+                {{-- Charts row 1: Pie + Bar --}}
+                <div class="chart-section-wrapper">
+                    <div class="chart-grid-2">
+
+                        <div class="chart-inner-card">
+                            <div class="chart-inner-title">Workload Approval Status</div>
+                            <div class="chart-plot-area" style="min-height:320px;">
+                                <div id="overallStatusChart" style="width:100%; min-height:320px;"></div>
+                                <div class="chart-loader" id="loaderPie">
+                                    <div class="loader-ring"></div>
+                                    <div class="skeleton-stack">
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                    </div>
+                                    <div class="loader-label">Loading chart…</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-inner-card">
+                            <div class="chart-inner-title">Workload Status by Office</div>
+                            <div class="chart-plot-area" style="min-height:320px;">
+                                <div id="signatoryTypeChart" style="width:100%; min-height:320px;"></div>
+                                <div class="chart-loader" id="loaderBar">
+                                    <div class="loader-ring"></div>
+                                    <div class="skeleton-stack">
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                    </div>
+                                    <div class="loader-label">Loading chart…</div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
 
-        </div>
-
-        {{-- Timeline --}}
-        <div style="padding: 0 30px 30px 30px;">
-            <div class="chart-card">
-                <div class="chart-title">
-                    <i class="bi bi-graph-up-arrow me-2"></i>Annual Faculty Workload Status Breakdown
-                </div>
-                <div class="chart-wrapper">
-                    <div id="timelineStackedChart" style="height:420px;"></div>
-                    <div class="chart-loader" id="loaderTimeline">
-                        <div class="loader-ring"></div>
-                        <div class="skeleton-stack">
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
-                            <div class="skel-bar"></div>
+                {{-- Chart row 2: Timeline --}}
+                <div class="chart-section-wrapper">
+                    <div class="chart-grid-1">
+                        <div class="chart-inner-card full-width">
+                            <div class="chart-inner-title">Annual Faculty Workload Status Breakdown</div>
+                            <div class="chart-plot-area" style="min-height:420px;">
+                                <div id="timelineStackedChart" style="width:100%; min-height:420px;"></div>
+                                <div class="chart-loader" id="loaderTimeline">
+                                    <div class="loader-ring"></div>
+                                    <div class="skeleton-stack">
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                        <div class="skel-bar"></div>
+                                    </div>
+                                    <div class="loader-label">Loading chart…</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="loader-label">Loading chart…</div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-    </div><!-- /.content -->
+            </div>{{-- /.main-content --}}
+        </div>{{-- /.content --}}
+    </div>{{-- /.app-wrapper --}}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -478,14 +562,14 @@
     let currentSem    = '{{ $filters['main_semester'] }}';
 
     // ─────────────────────────────────────────────────────────────
-    // Theme constants
+    // Theme
     // ─────────────────────────────────────────────────────────────
     const FONT   = { family: "'Bricolage Grotesque', sans-serif", size: 12, color: '#444' };
     const GREEN  = '#009539';
     const YELLOW = '#ffc107';
     const RED    = '#dc3545';
     const GRAY   = '#adb5bd';
-    const cfg    = { responsive: true, displayModeBar: false };
+    const cfg    = { responsive: true, displayModeBar: false, staticPlot: false };
 
     // ─────────────────────────────────────────────────────────────
     // Loader helpers
@@ -502,15 +586,8 @@
         document.getElementById('loadingDot').classList.remove('active');
     }
 
-    // Shimmer / un-shimmer the stat number elements
-    function shimmerStats(on) {
-        ['statTotal','statApproved','statSubmitted','statDeclined'].forEach(id => {
-            document.getElementById(id)?.classList.toggle('shimmer', on);
-        });
-    }
-
     // ─────────────────────────────────────────────────────────────
-    // Chart renderers
+    // Chart renderers with proper container management
     // ─────────────────────────────────────────────────────────────
     function renderPieChart() {
         const keys = ['dh','dean','director','dot_uni','nstp','eteeap','vpaa'];
@@ -531,28 +608,51 @@
         const notYet   = Math.max(0, total - approved - submitted - declined);
         const pieTotal = approved + submitted + declined + notYet;
 
+        const container = document.getElementById('overallStatusChart');
+        
         if (pieTotal === 0) {
-            document.getElementById('overallStatusChart').innerHTML =
-                '<div class="empty-chart"><i class="bi bi-pie-chart"></i><span>No data available</span></div>';
+            // Clear any existing plot and show empty message
+            if (container && container.data) {
+                Plotly.purge(container);
+            }
+            container.innerHTML = '<div class="empty-chart"><i class="bi bi-pie-chart"></i><span>No data available</span></div>';
             hideLoader('loaderPie');
             return;
         }
 
-        Plotly.react('overallStatusChart', [{
+        // Purge the container to ensure clean slate
+        if (container && container.data) {
+            Plotly.purge(container);
+        }
+
+        const pieData = [{
             type: 'pie',
             values: [approved, submitted, declined, notYet],
             labels: ['Approved', 'Submitted', 'Declined', 'Not Yet Submitted'],
-            marker: { colors: [GREEN, YELLOW, RED, GRAY] },
+            marker: { colors: [GREEN, YELLOW, RED, GRAY], line: { color: '#fff', width: 2 } },
             textinfo: 'label+percent',
             textfont: { size: 11 },
-            hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>'
-        }], {
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>',
+            domain: { x: [0.05, 0.95], y: [0, 0.85] }
+        }];
+
+        const layout = {
             font: FONT,
-            paper_bgcolor: 'white',
-            margin: { t: 40, r: 20, b: 10, l: 20 },
-            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12, font: { size: 11 } },
-            showlegend: true
-        }, cfg).then(() => hideLoader('loaderPie'));
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            margin: { t: 30, r: 20, b: 20, l: 20 },
+            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.05, yanchor: 'bottom', font: { size: 11 } },
+            showlegend: true,
+            autosize: true,
+            height: null,
+            width: null
+        };
+
+        Plotly.newPlot(container, pieData, layout, cfg).then(() => {
+            hideLoader('loaderPie');
+            // Force resize after render to ensure proper dimensions
+            setTimeout(() => Plotly.Plots.resize(container), 100);
+        });
     }
 
     function renderBarChart() {
@@ -573,11 +673,19 @@
             } else { aP.push(0); sP.push(0); dP.push(0); nP.push(0); }
         });
 
+        const container = document.getElementById('signatoryTypeChart');
+        
         if (totals.reduce((a,b) => a+b, 0) === 0) {
-            document.getElementById('signatoryTypeChart').innerHTML =
-                '<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>';
+            if (container && container.data) {
+                Plotly.purge(container);
+            }
+            container.innerHTML = '<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>';
             hideLoader('loaderBar');
             return;
+        }
+
+        if (container && container.data) {
+            Plotly.purge(container);
         }
 
         const selIdx = currentFilter && keys.includes(currentFilter) ? keys.indexOf(currentFilter) : -1;
@@ -589,19 +697,32 @@
         const yTickColors = labels.map((_, i) =>
             selIdx === -1 ? '#444' : i === selIdx ? '#009539' : '#bbb');
 
-        Plotly.react('signatoryTypeChart', [
-            { name:'Approved',          type:'bar', orientation:'h', x:aP, y:labels, marker:{color:mkCol(GREEN)},  hovertemplate:'<b>%{y}</b><br>Approved: %{x:.1f}%<extra></extra>' },
-            { name:'Submitted',         type:'bar', orientation:'h', x:sP, y:labels, marker:{color:mkCol(YELLOW)}, hovertemplate:'<b>%{y}</b><br>Submitted: %{x:.1f}%<extra></extra>' },
-            { name:'Declined',          type:'bar', orientation:'h', x:dP, y:labels, marker:{color:mkCol(RED)},    hovertemplate:'<b>%{y}</b><br>Declined: %{x:.1f}%<extra></extra>' },
-            { name:'Not Yet Submitted', type:'bar', orientation:'h', x:nP, y:labels, marker:{color:mkCol(GRAY)},   hovertemplate:'<b>%{y}</b><br>Not Yet Submitted: %{x:.1f}%<extra></extra>' }
-        ], {
-            font: FONT, paper_bgcolor:'white', plot_bgcolor:'white', barmode:'stack',
-            margin: { t:50, b:40, l:90, r:20 },
+        const barData = [
+            { name:'Approved', type:'bar', orientation:'h', x:aP, y:labels, marker:{color:mkCol(GREEN)}, hovertemplate:'<b>%{y}</b><br>Approved: %{x:.1f}%<extra></extra>' },
+            { name:'Submitted', type:'bar', orientation:'h', x:sP, y:labels, marker:{color:mkCol(YELLOW)}, hovertemplate:'<b>%{y}</b><br>Submitted: %{x:.1f}%<extra></extra>' },
+            { name:'Declined', type:'bar', orientation:'h', x:dP, y:labels, marker:{color:mkCol(RED)}, hovertemplate:'<b>%{y}</b><br>Declined: %{x:.1f}%<extra></extra>' },
+            { name:'Not Yet Submitted', type:'bar', orientation:'h', x:nP, y:labels, marker:{color:mkCol(GRAY)}, hovertemplate:'<b>%{y}</b><br>Not Yet Submitted: %{x:.1f}%<extra></extra>' }
+        ];
+
+        const layout = {
+            font: FONT,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            barmode: 'stack',
+            margin: { t: 50, b: 40, l: 100, r: 20 },
             showlegend: true,
-            legend: { orientation:'h', x:0.5, xanchor:'center', y:1.15, font:{size:11} },
-            xaxis: { title:{text:'Percent (%)',font:{size:11}}, range:[0,100], ticksuffix:'%', gridcolor:'#efefef', zeroline:false },
-            yaxis: { title:{text:'Office',font:{size:11}}, tickfont:{size:11, color:yTickColors}, tickcolor: selIdx !== -1 ? '#009539' : '#444' }
-        }, cfg).then(() => hideLoader('loaderBar'));
+            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12, font: { size: 11 } },
+            xaxis: { title: { text: 'Percent (%)', font: { size: 11 } }, range: [0,100], ticksuffix: '%', gridcolor: '#efefef', zeroline: false },
+            yaxis: { title: { text: 'Office', font: { size: 11 } }, tickfont: { size: 11, color: yTickColors } },
+            autosize: true,
+            height: null,
+            width: null
+        };
+
+        Plotly.newPlot(container, barData, layout, cfg).then(() => {
+            hideLoader('loaderBar');
+            setTimeout(() => Plotly.Plots.resize(container), 100);
+        });
     }
 
     function renderTimelineChart() {
@@ -612,34 +733,55 @@
         const total  = timeline.documentCounts || years.map(()=>0);
         const notYet = years.map((_,i) => Math.max(0,(total[i]||0)-(appr[i]||0)-(subm[i]||0)-(decl[i]||0)));
 
+        const container = document.getElementById('timelineStackedChart');
+        
         if (total.reduce((a,b)=>a+b,0) === 0) {
-            document.getElementById('timelineStackedChart').innerHTML =
-                '<div class="empty-chart"><i class="bi bi-graph-up"></i><span>No timeline data available</span></div>';
+            if (container && container.data) {
+                Plotly.purge(container);
+            }
+            container.innerHTML = '<div class="empty-chart"><i class="bi bi-graph-up"></i><span>No timeline data available</span></div>';
             hideLoader('loaderTimeline');
             return;
         }
 
-        Plotly.react('timelineStackedChart', [
-            { name:'Approved',          type:'bar',     x:years, y:appr,   marker:{color:GREEN},  hovertemplate:'<b>%{x}</b><br>Approved: %{y}<extra></extra>' },
-            { name:'Submitted',         type:'bar',     x:years, y:subm,   marker:{color:YELLOW}, hovertemplate:'<b>%{x}</b><br>Submitted: %{y}<extra></extra>' },
-            { name:'Declined',          type:'bar',     x:years, y:decl,   marker:{color:RED},    hovertemplate:'<b>%{x}</b><br>Declined: %{y}<extra></extra>' },
-            { name:'Not Yet Submitted', type:'bar',     x:years, y:notYet, marker:{color:GRAY},   hovertemplate:'<b>%{x}</b><br>Not Yet Submitted: %{y}<extra></extra>' },
-            { name:'Total Documents',   type:'scatter', mode:'lines+markers', x:years, y:total,
+        if (container && container.data) {
+            Plotly.purge(container);
+        }
+
+        const timelineData = [
+            { name:'Approved', type:'bar', x:years, y:appr, marker:{color:GREEN}, hovertemplate:'<b>%{x}</b><br>Approved: %{y}<extra></extra>' },
+            { name:'Submitted', type:'bar', x:years, y:subm, marker:{color:YELLOW}, hovertemplate:'<b>%{x}</b><br>Submitted: %{y}<extra></extra>' },
+            { name:'Declined', type:'bar', x:years, y:decl, marker:{color:RED}, hovertemplate:'<b>%{x}</b><br>Declined: %{y}<extra></extra>' },
+            { name:'Not Yet Submitted', type:'bar', x:years, y:notYet, marker:{color:GRAY}, hovertemplate:'<b>%{x}</b><br>Not Yet Submitted: %{y}<extra></extra>' },
+            { name:'Total Documents', type:'scatter', mode:'lines+markers', x:years, y:total,
               line:{color:'#006400',width:3}, marker:{color:'#006400',size:8},
               hovertemplate:'<b>%{x}</b><br>Total: %{y}<extra></extra>' }
-        ], {
-            font: FONT, paper_bgcolor:'white', plot_bgcolor:'#fafafa', barmode:'stack',
-            margin: { t:60, b:100, l:60, r:40 },
+        ];
+
+        const layout = {
+            font: FONT,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: '#fafafa',
+            barmode: 'stack',
+            margin: { t: 60, b: 100, l: 60, r: 40 },
             showlegend: true,
-            legend: { orientation:'h', x:0.5, xanchor:'center', y:1.12, font:{size:11} },
-            xaxis: { title:{text:'Semester',font:{size:11}}, tickangle:-30, gridcolor:'#e0e0e0', automargin:true },
-            yaxis: { title:{text:'Document Count',font:{size:11}}, gridcolor:'#e0e0e0', zeroline:false },
-            hovermode: 'closest'
-        }, cfg).then(() => hideLoader('loaderTimeline'));
+            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.08, font: { size: 11 } },
+            xaxis: { title: { text: 'Semester', font: { size: 11 } }, tickangle: -30, gridcolor: '#e0e0e0', automargin: true },
+            yaxis: { title: { text: 'Document Count', font: { size: 11 } }, gridcolor: '#e0e0e0', zeroline: false },
+            hovermode: 'closest',
+            autosize: true,
+            height: null,
+            width: null
+        };
+
+        Plotly.newPlot(container, timelineData, layout, cfg).then(() => {
+            hideLoader('loaderTimeline');
+            setTimeout(() => Plotly.Plots.resize(container), 100);
+        });
     }
 
     // ─────────────────────────────────────────────────────────────
-    // AJAX — fires on every filter change, no full page reload
+    // AJAX — fires on every filter change
     // ─────────────────────────────────────────────────────────────
     function fetchAndRefresh() {
         const semVal    = document.getElementById('mainSemester').value;
@@ -653,17 +795,13 @@
         document.getElementById('clearBtn').style.display = (semVal || officeVal) ? '' : 'none';
 
         showAllLoaders();
-        shimmerStats(true);
 
         const params = new URLSearchParams();
         if (semVal)    params.set('main_semester',  semVal);
         if (officeVal) params.set('main_signatory', officeVal);
 
         fetch(`{{ route('stzfaculty.approval') }}?${params.toString()}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept':           'application/json'
-            }
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
         })
         .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
         .then(data => {
@@ -677,7 +815,6 @@
             animateStat('statApproved',  data.overallStats.fullyApproved);
             animateStat('statSubmitted', data.overallStats.pendingApproval);
             animateStat('statDeclined',  data.overallStats.declined);
-            shimmerStats(false);
 
             renderPieChart();
             renderBarChart();
@@ -685,16 +822,13 @@
         })
         .catch(err => {
             console.error('Approval AJAX error:', err);
-            shimmerStats(false);
             hideAllLoaders();
         });
     }
 
-    // Count-up animation for stat numbers
     function animateStat(id, target) {
         const el = document.getElementById(id);
         if (!el) return;
-        el.classList.remove('shimmer');
         const duration = 600;
         const startTs  = performance.now();
         function step(ts) {
@@ -706,16 +840,39 @@
         requestAnimationFrame(step);
     }
 
-    // Bind selects
     document.getElementById('mainSemester').addEventListener('change', fetchAndRefresh);
     document.getElementById('mainOffice').addEventListener('change',   fetchAndRefresh);
 
     // ─────────────────────────────────────────────────────────────
-    // Initial render (PHP data, no AJAX needed)
+    // Initial render
     // ─────────────────────────────────────────────────────────────
     renderPieChart();
     renderBarChart();
     renderTimelineChart();
+
+    // Debounced resize handler to prevent excessive calls
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            ['overallStatusChart', 'signatoryTypeChart', 'timelineStackedChart'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.data && !el.innerHTML.includes('empty-chart')) {
+                    Plotly.Plots.resize(el);
+                }
+            });
+        }, 200);
+    });
+    
+    // Additional resize after any layout changes
+    setTimeout(() => {
+        ['overallStatusChart', 'signatoryTypeChart', 'timelineStackedChart'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.data && !el.innerHTML.includes('empty-chart')) {
+                Plotly.Plots.resize(el);
+            }
+        });
+    }, 500);
     </script>
 </body>
 </html>
