@@ -261,6 +261,11 @@
             <span class="menu-label">About Analytica</span>
         </a>
 
+        <a href="{{ route('user_manage') }}" class="sidebar-menu-item" data-label="User Management">
+            <span class="menu-icon"><i class="bi bi-person-fill-gear"></i></span>
+            <span class="menu-label">User Management</span>
+        </a>
+
     </div>{{-- end sidebar-scrollable --}}
 
     {{-- Profile Section --}}

@@ -21,6 +21,7 @@ use App\Http\Controllers\Radiis\LinkagesController;
 use App\Http\Controllers\Radiis\StudyController;
 use App\Http\Controllers\Radiis\ResearcherController;
 use App\Http\Controllers\EIS\FundController;
+use App\Http\Controllers\UserManagementController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -130,6 +131,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard/faculty-overview', function () {
         return redirect()->route('stzfaculty.overview');
+    });
+
+    // ====================================================
+    // USER MANAGEMENT ROUTES
+    // ====================================================
+
+    Route::prefix('user/management')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index'])->name('user_manage');
+        Route::post('/store', [UserManagementController::class, 'store'])->name('users.store');
+        Route::put('/update/{id}', [UserManagementController::class, 'update'])->name('users.update');
+        Route::delete('/delete/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     });
 
 });
