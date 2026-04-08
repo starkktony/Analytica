@@ -1,364 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Siel Metrics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <title>Siel Metrics</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #e8ebe8;
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Sidebar styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            width: 250px;
-            background: #1a2c1a;
-            color: white;
-            transition: width 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        body.sidebar-collapsed .sidebar {
-            width: 68px;
-        }
-
-        /* Main content area */
         .content {
             margin-left: 250px;
-            transition: margin-left 0.3s ease;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            transition: margin-left 0.3s ease, max-width 0.3s ease;
+            max-width: calc(100vw - 250px);
+            overflow-x: clip;
         }
 
         body.sidebar-collapsed .content {
             margin-left: 68px;
+            max-width: calc(100vw - 68px);
         }
 
-        /* Fixed header section container */
-        .fixed-header-section {
-            flex-shrink: 0;
+        .collapse.show {
+            visibility: visible !important;
+        }
+
+        body {
             background: #e8ebe8;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        /* Page header */
-        .header {
-            background: #009539;
-            color: white;
-            padding: 0 30px;
-            font-size: 36px;
-            font-weight: 800;
-            height: 75px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            font-family: 'Bricolage Grotesque', sans-serif;
-        }
-
-        /* Filter Bar */
-        .filter-bar {
+            margin: 0;
             font-family: 'Inter', sans-serif;
+            overflow-x: clip;
+        }
+
+        header {
+            height: 70px;
+            padding: 2rem 3rem;
+            background-color: #009539;
+            box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            background: #c9cec9;
-            padding: 0 24px;
-            border-bottom: 1px solid #b0b5b0;
-            height: 52px;
-            min-height: 52px;
-            width: 100%;
-            box-sizing: border-box;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
         }
 
-        .filter-bar::-webkit-scrollbar {
-            display: none;
-        }
-        .filter-bar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .filter-bar-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .filter-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2d2d2d;
-            white-space: nowrap;
-        }
-
-        .filter-group select {
-            font-size: 12px;
-            padding: 4px 28px 4px 12px;
-            border-radius: 20px;
-            border: 1px solid #8a8f8a;
-            background-color: #f5f5f5;
-            color: #2d2d2d;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%232d2d2d' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 8px;
-            min-width: 80px;
-            max-width: 160px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .filter-group select:focus {
-            outline: none;
-            border-color: #009539;
-            background-color: white;
-        }
-
-        .page-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-            flex-shrink: 0;
-            margin-right: auto;
-        }
-
-        .filter-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .clear-filters-btn {
-            background: #009539;
-            color: white;
-            border: none;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .clear-filters-btn:hover {
-            background: #00802e;
-        }
-
-        /* Scrollable main content area */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 24px 30px 40px 30px;
-        }
-
-        /* Custom scrollbar for main content */
-        .main-content::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        .main-content::-webkit-scrollbar-track {
-            background: #d4d9d4;
-            border-radius: 4px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb {
-            background: #009539;
-            border-radius: 4px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb:hover {
-            background: #016531;
-        }
-
-        /* Stat Cards */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        @media (max-width: 1200px) {
-            .cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-card {
-            position: relative;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            min-height: 130px;
-        }
-
-        .stat-card.green {
-            background: linear-gradient(to right, #22c55e, #16a34a);
-            color: white;
-        }
-
-        .stat-card.white {
-            background: white;
-            color: #111827;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        .stat-card-icon {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .stat-card.green .stat-card-icon {
-            background: rgba(255,255,255,0.9);
-            color: #16a34a;
-        }
-
-        .stat-card.white .stat-card-icon {
-            background: #22c55e;
-            color: white;
-        }
-
-        .stat-card-body {
-            margin-top: 52px;
+        /* ── Stat card numbers ── */
+        .stat-card-number {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 2.8rem;
+            line-height: 1;
+            color: #1f2937;
             text-align: right;
         }
-
-        .stat-card-number {
-            font-size: 40px;
-            font-weight: 800;
-            line-height: 1;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .stat-card.green .stat-card-number {
-            color: white;
-        }
-
-        .stat-card.white .stat-card-number {
-            color: #111827;
-        }
-
-        .stat-card-label {
-            font-size: 14px;
+        .stat-card-pct {
+            font-size: 12px;
             font-weight: 600;
-            margin-top: 4px;
+            text-align: right;
         }
-
-        .stat-card.green .stat-card-label {
-            color: rgba(255,255,255,0.85);
-        }
-
-        .stat-card.white .stat-card-label {
+        .stat-card-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 11px;
             color: #6b7280;
+            text-align: right;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
         }
 
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 1100px) {
-            .charts-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        /* ── Chart card container ── */
         .chart-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
             overflow: hidden;
         }
-
-        .chart-card.full-width {
-            grid-column: 1 / -1;
-        }
-
         .chart-card h3 {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
-            margin: 0 0 14px 0;
-            color: #111827;
-            line-height: 1.3;
+            color: #374151;
+            margin: 0;
+            padding: 14px 18px 0;
             word-break: break-word;
+            line-height: 1.4;
         }
 
-        .chart-height {
-            height: 380px;
-            width: 100%;
-            position: relative;
-        }
-
-        .chart-height > div {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Loading overlay */
+        /* ── Loading overlay ── */
         .loading-overlay {
             position: absolute;
             inset: 0;
@@ -372,12 +101,10 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
-
         .loading-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
-
         .spinner {
             width: 36px;
             height: 36px;
@@ -386,40 +113,9 @@
             border-radius: 50%;
             animation: spin 0.75s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Loading skeleton for stat cards */
-        .stat-card.loading .stat-card-number,
-        .stat-card.loading .stat-card-label {
-            background: linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-            border-radius: 6px;
-            color: transparent !important;
-            min-width: 60px;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        .filter-bar.is-loading select,
-        .filter-bar.is-loading button {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-
-        /* No data */
+        /* ── No-data overlay ── */
         .no-data-overlay {
             position: absolute;
             inset: 0;
@@ -432,60 +128,50 @@
             z-index: 5;
             gap: 10px;
         }
+        .no-data-overlay i   { font-size: 40px; color: #ccc; }
+        .no-data-overlay span { font-size: 13px; font-weight: 600; color: #999; }
 
-        .no-data-overlay i {
-            font-size: 40px;
-            color: #ccc;
+        /* ── Stat shimmer ── */
+        .stat-shimmer .stat-card-number,
+        .stat-shimmer .stat-card-label {
+            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 4px;
+            color: transparent !important;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
-        .no-data-overlay span {
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: #999;
-        }
-
-        /* Animation for page content */
-        .main-content {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* ── Filter bar loading ── */
+        .filter-bar-loading select,
+        .filter-bar-loading button {
+            pointer-events: none;
+            opacity: 0.5;
         }
     </style>
+
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-
     @include('components.sidebar')
 
     <div class="content">
-        <!-- Fixed Header Section - This stays at the top -->
-        <div class="fixed-header-section">
-            {{-- Page Header --}}
-            <div class="header" id="pageHeader">
-                FACULTY PROFILE
-            </div>
 
-            {{-- Filter Bar --}}
-            <div class="filter-bar" id="filterBar">
-                <div class="page-title" id="dynamicTitle">
+        {{-- ── Sticky header + filter bar ── --}}
+        <div class="sticky top-0 z-50">
+            <header>
+                <span class="text-lg md:text-2xl font-[650] text-white">Faculty Profile</span>
+            </header>
+
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4" id="filterBar">
+                <div class="font-[650] text-sm md:text-lg" id="dynamicTitle">
                     @php
                         $selectedSemesterObj = $semesters->firstWhere('sem_id', $filters['semester']);
                         $semesterDisplay = $selectedSemesterObj ? $selectedSemesterObj->semester . ' ' . $selectedSemesterObj->sy : '';
-
-                        if ($filters['college'] != 'all' && $filters['department'] != 'all') {
-                            $selectedDept = $departments->firstWhere('department_id', $filters['department']);
-                            $deptDisplay  = $selectedDept ? $selectedDept->department_acro : '';
-                            echo $deptDisplay . ' Faculty Profile (' . $semesterDisplay . ')';
-                        } elseif ($filters['college'] != 'all') {
+                        if ($filters['college'] != 'all') {
                             $selectedUnit = $colleges->firstWhere('c_u_id', $filters['college']);
                             $unitDisplay  = $selectedUnit ? $selectedUnit->college_acro : '';
                             echo $unitDisplay . ' Faculty Profile (' . $semesterDisplay . ')';
@@ -495,12 +181,15 @@
                     @endphp
                 </div>
 
-                <div class="filter-right">
-                    <div class="filter-bar-label">Filters:</div>
+                <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                    <div class="hidden sm:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
+                        Filter
+                    </div>
 
-                    <div class="filter-group">
-                        <label>Semester:</label>
-                        <select id="semesterFilter">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Semester:</span>
+                        <select id="semesterFilter"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
                             @foreach($semesters as $semester)
                                 <option value="{{ $semester->sem_id }}" {{ $filters['semester'] == $semester->sem_id ? 'selected' : '' }}>
                                     {{ $semester->semester }} {{ $semester->sy }}
@@ -509,9 +198,10 @@
                         </select>
                     </div>
 
-                    <div class="filter-group">
-                        <label>Unit/Office:</label>
-                        <select id="collegeFilter">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Unit/Office:</span>
+                        <select id="collegeFilter"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
                             <option value="all">All</option>
                             @foreach($colleges as $college)
                                 <option value="{{ $college->c_u_id }}" {{ $filters['college'] == $college->c_u_id ? 'selected' : '' }}>
@@ -521,53 +211,84 @@
                         </select>
                     </div>
 
-                    <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
                 </div>
             </div>
         </div>
+        {{-- ── End sticky header ── --}}
 
-        {{-- Scrollable Main Content - This area scrolls --}}
-        <div class="main-content">
-            {{-- ── Stat Cards ── --}}
-            <div class="cards-grid">
-                <div class="stat-card green" id="statTotal">
-                    <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statTotalNum">{{ $totalFaculty }}</div>
-                        <div class="stat-card-label">Total EWMS Faculty</div>
+        <div class="px-6">
+
+            {{-- ── Stat Cards — 4 cards like publications single-card row ── --}}
+            <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
+
+                {{-- Total EWMS Faculty --}}
+                <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
+                    <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardTotal">
+                        <div class="grid grid-rows-4 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-users text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-3 pt-4">
+                                <p class="stat-card-number pr-4" id="statTotalNum">{{ $totalFaculty }}</p>
+                                <p class="stat-card-label pr-4">Total EWMS Faculty</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card white" id="statActive">
-                    <div class="stat-card-icon"><i class="fa-solid fa-user-check"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statActiveNum">{{ $activeCount }}</div>
-                        <div class="stat-card-label">Active Faculty</div>
+                {{-- Active Faculty --}}
+                <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
+                    <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardActive">
+                        <div class="grid grid-rows-4 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-user-check text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-3 pt-4">
+                                <p class="stat-card-number pr-4" id="statActiveNum">{{ $activeCount }}</p>
+                                <p class="stat-card-label pr-4">Active Faculty</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card white" id="statPhd">
-                    <div class="stat-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statPhdNum">{{ $phdHolders }}</div>
-                        <div class="stat-card-label">PhD Holders</div>
+                {{-- PhD Holders --}}
+                <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
+                    <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardPhd">
+                        <div class="grid grid-rows-4 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-user-graduate text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-3 pt-4">
+                                <p class="stat-card-number pr-4" id="statPhdNum">{{ $phdHolders }}</p>
+                                <p class="stat-card-label pr-4">PhD Holders</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card white" id="statMasters">
-                    <div class="stat-card-icon"><i class="fa-solid fa-book-open"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statMastersNum">{{ $mastersHolders }}</div>
-                        <div class="stat-card-label">Masters Holders</div>
+                {{-- Masters Holders --}}
+                <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
+                    <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardMasters">
+                        <div class="grid grid-rows-4 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-book-open text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-3 pt-4">
+                                <p class="stat-card-number pr-4" id="statMastersNum">{{ $mastersHolders }}</p>
+                                <p class="stat-card-label pr-4">Masters Holders</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
+            {{-- ── End Stat Cards ── --}}
 
-            {{-- ── Charts ── --}}
-            <div class="charts-grid">
+            {{-- ── Charts: 3 columns matching publications layout ── --}}
+            <div class="grid grid-cols-4 xl:grid-cols-12 gap-3">
+
                 {{-- ① Submitted Faculty Workload --}}
-                <div class="chart-card" id="cardRanking">
-                    <div class="loading-overlay" id="loadRanking"><div class="spinner"></div></div>
+                <div class="col-span-4 h-[340px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card" id="cardRanking">
                     <h3 id="rankingTitle">
                         @if($filters['college'] != 'all')
                             @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
@@ -576,12 +297,14 @@
                             Submitted Faculty Workload per College
                         @endif
                     </h3>
-                    <div class="chart-height"><div id="facultyRankingChart"></div></div>
+                    <div style="height: calc(100% - 46px); width: 100%;">
+                        <div id="facultyRankingChart" style="width:100%; height:100%;"></div>
+                    </div>
+                    <div class="loading-overlay" id="loadRanking"><div class="spinner"></div></div>
                 </div>
 
                 {{-- ② Employment Status --}}
-                <div class="chart-card" id="cardEmployment">
-                    <div class="loading-overlay" id="loadEmployment"><div class="spinner"></div></div>
+                <div class="col-span-4 h-[300px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card" id="cardEmployment">
                     <h3 id="employmentTitle">
                         @if($filters['college'] != 'all')
                             @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
@@ -590,12 +313,14 @@
                             Faculty Employment Status
                         @endif
                     </h3>
-                    <div class="chart-height"><div id="employmentChart"></div></div>
+                    <div style="height: calc(100% - 46px); width: 100%;">
+                        <div id="employmentChart" style="width:100%; height:100%;"></div>
+                    </div>
+                    <div class="loading-overlay" id="loadEmployment"><div class="spinner"></div></div>
                 </div>
 
                 {{-- ③ Faculty Availability --}}
-                <div class="chart-card" id="cardStatus">
-                    <div class="loading-overlay" id="loadStatus"><div class="spinner"></div></div>
+                <div class="col-span-4 h-[300px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card" id="cardStatus">
                     <h3 id="statusTitle">
                         @if($filters['college'] != 'all')
                             @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
@@ -604,571 +329,542 @@
                             Faculty Availability Status
                         @endif
                     </h3>
-                    <div class="chart-height"><div id="statusChart"></div></div>
+                    <div style="height: calc(100% - 46px); width: 100%;">
+                        <div id="statusChart" style="width:100%; height:100%;"></div>
+                    </div>
+                    <div class="loading-overlay" id="loadStatus"><div class="spinner"></div></div>
                 </div>
 
-                {{-- ④ Faculty Qualification Distribution (full width) --}}
-                <div class="chart-card full-width" id="cardQual">
-                    <div class="loading-overlay" id="loadQual"><div class="spinner"></div></div>
-                    <h3 id="qualificationTitle">
-                        @if($filters['college'] != 'all')
-                            @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
-                            {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Qualification Distribution
-                        @else
-                            Faculty Qualification Distribution
-                        @endif
-                    </h3>
-                    <div class="chart-height"><div id="qualificationChart"></div></div>
-                </div>
             </div>
+
+            {{-- ── Full-width chart: Qualification Distribution (mirrors publications trend row) ── --}}
+            <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[380px] sm:h-[420px] mt-3 mb-8 chart-card" id="cardQual">
+                <h3 id="qualificationTitle" class="font-[750] text-sm sm:text-lg text-gray-700 pl-5 sm:pl-7 pt-4">
+                    @if($filters['college'] != 'all')
+                        @php $collegeName = $colleges->where('c_u_id', $filters['college'])->first(); @endphp
+                        {{ $collegeName ? $collegeName->college_acro : '' }} Faculty Qualification Distribution
+                    @else
+                        Faculty Qualification Distribution
+                    @endif
+                </h3>
+                <div style="height: calc(100% - 54px); width: 100%;">
+                    <div id="qualificationChart" style="width:100%; height:100%;"></div>
+                </div>
+                <div class="loading-overlay" id="loadQual"><div class="spinner"></div></div>
+            </div>
+            {{-- ── End Charts ── --}}
+
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ── All JavaScript remains exactly the same ──────────────────────────────────
+    // ── All JavaScript unchanged from original ────────────────────────────────
+    const INITIAL_DATA = {
+        totalFaculty      : {{ $totalFaculty }},
+        activeCount       : {{ $activeCount }},
+        phdHolders        : {{ $phdHolders }},
+        mastersHolders    : {{ $mastersHolders }},
+        categoryLabels    : {!! json_encode($categories->pluck('category')) !!},
+        categoryData      : {!! json_encode($categories->pluck('count')) !!},
+        onLeaveCount      : {{ $onLeaveCount }},
+        rankingLabels     : {!! json_encode($rankingLabels) !!},
+        rankingCounts     : {!! json_encode($rankingCounts) !!},
+        rankingTotals     : {!! json_encode($rankingTotals) !!},
+        selectedDept      : @json($selectedDeptAcro),
+        qualLabels        : {!! json_encode($qualLabels) !!},
+        phdPct            : {!! json_encode($phdPercentages) !!},
+        mastersPct        : {!! json_encode($mastersPercentages) !!},
+        bachelorsPct      : {!! json_encode($bachelorsPercentages) !!},
+        phdCounts         : {!! json_encode($phdCounts) !!},
+        mastersCounts     : {!! json_encode($mastersCounts) !!},
+        bachelorsCounts   : {!! json_encode($bachelorsCounts) !!},
+        collegeAcro       : @json(optional($colleges->firstWhere('c_u_id', $filters['college']))->college_acro ?? ''),
+        semesterText      : @json(optional($semesters->firstWhere('sem_id', $filters['semester']))->semester . ' ' . optional($semesters->firstWhere('sem_id', $filters['semester']))->sy),
+        collegeFilterValue: @json($filters['college']),
+    };
 
-        const INITIAL_DATA = {
-            totalFaculty      : {{ $totalFaculty }},
-            activeCount       : {{ $activeCount }},
-            phdHolders        : {{ $phdHolders }},
-            mastersHolders    : {{ $mastersHolders }},
-            categoryLabels    : {!! json_encode($categories->pluck('category')) !!},
-            categoryData      : {!! json_encode($categories->pluck('count')) !!},
-            onLeaveCount      : {{ $onLeaveCount }},
-            rankingLabels     : {!! json_encode($rankingLabels) !!},
-            rankingCounts     : {!! json_encode($rankingCounts) !!},
-            rankingTotals     : {!! json_encode($rankingTotals) !!},
-            selectedDept      : @json($selectedDeptAcro),
-            qualLabels        : {!! json_encode($qualLabels) !!},
-            phdPct            : {!! json_encode($phdPercentages) !!},
-            mastersPct        : {!! json_encode($mastersPercentages) !!},
-            bachelorsPct      : {!! json_encode($bachelorsPercentages) !!},
-            phdCounts         : {!! json_encode($phdCounts) !!},
-            mastersCounts     : {!! json_encode($mastersCounts) !!},
-            bachelorsCounts   : {!! json_encode($bachelorsCounts) !!},
-            collegeAcro       : @json(optional($colleges->firstWhere('c_u_id', $filters['college']))->college_acro ?? ''),
-            semesterText      : @json(optional($semesters->firstWhere('sem_id', $filters['semester']))->semester . ' ' . optional($semesters->firstWhere('sem_id', $filters['semester']))->sy),
-            collegeFilterValue: @json($filters['college']),
-        };
+    const AJAX_URL   = '{{ route("stzfaculty.overview.ajax") }}';
+    const CSRF_TOKEN = '{{ csrf_token() }}';
 
-        const AJAX_URL   = '{{ route("stzfaculty.overview.ajax") }}';
-        const CSRF_TOKEN = '{{ csrf_token() }}';
+    function showLoaders() {
+        document.getElementById('filterBar').classList.add('filter-bar-loading');
+        ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
+            document.getElementById(id)?.classList.add('active');
+        });
+        ['cardTotal','cardActive','cardPhd','cardMasters'].forEach(id => {
+            document.getElementById(id)?.classList.add('stat-shimmer');
+        });
+    }
 
-        function showLoaders() {
-            document.querySelector('.filter-bar').classList.add('is-loading');
-            ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('active');
-            });
-            ['statTotal','statActive','statPhd','statMasters'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('loading');
-            });
-        }
+    function hideLoaders() {
+        document.getElementById('filterBar').classList.remove('filter-bar-loading');
+        ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
+            document.getElementById(id)?.classList.remove('active');
+        });
+        ['cardTotal','cardActive','cardPhd','cardMasters'].forEach(id => {
+            document.getElementById(id)?.classList.remove('stat-shimmer');
+        });
+    }
 
-        function hideLoaders() {
-            document.querySelector('.filter-bar').classList.remove('is-loading');
-            ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('active');
-            });
-            ['statTotal','statActive','statPhd','statMasters'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('loading');
-            });
-        }
-
-        function donutLayout() {
-            return {
-                font: { family: 'Inter' },
-                autosize: true,
-                margin: { l: 20, r: 20, t: 70, b: 20 },
-                annotations: [],
-                paper_bgcolor: 'white',
-                plot_bgcolor : 'white',
-                showlegend   : true,
-                legend: {
-                    orientation    : 'h',
-                    x              : 0.5,
-                    y              : 1.05,
-                    xanchor        : 'center',
-                    yanchor        : 'bottom',
-                    font           : { family: 'Inter', size: 11 },
-                    itemclick      : false,
-                    itemdoubleclick: false
-                }
-            };
-        }
-
-        function showNoData(div) {
-            let overlay = div.parentNode.querySelector('.no-data-overlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.className = 'no-data-overlay';
-                overlay.innerHTML =
-                    '<i class="bi bi-inbox"></i>' +
-                    '<span>No record found</span>';
-                div.parentNode.appendChild(overlay);
+    function donutLayout() {
+        return {
+            font: { family: 'Inter' },
+            autosize: true,
+            margin: { l: 20, r: 20, t: 70, b: 20 },
+            annotations: [],
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor : 'rgba(0,0,0,0)',
+            showlegend   : true,
+            legend: {
+                orientation    : 'h',
+                x              : 0.5,
+                y              : 1.05,
+                xanchor        : 'center',
+                yanchor        : 'bottom',
+                font           : { family: 'Inter', size: 11 },
+                itemclick      : false,
+                itemdoubleclick: false
             }
-            overlay.style.display = 'flex';
-            div.style.visibility = 'hidden';
-        }
-
-        function clearNoData(div) {
-            const overlay = div.parentNode.querySelector('.no-data-overlay');
-            if (overlay) overlay.style.display = 'none';
-            div.style.visibility = 'visible';
-        }
-
-        function colorWithOpacity(baseColor, opacities) {
-            const r = parseInt(baseColor.slice(1,3), 16);
-            const g = parseInt(baseColor.slice(3,5), 16);
-            const b = parseInt(baseColor.slice(5,7), 16);
-            return opacities.map(o => `rgba(${r},${g},${b},${o})`);
-        }
-
-        const plotCfg = {
-            responsive: true,
-            displaylogo: false,
-            modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
         };
+    }
 
-        function renderRanking(d) {
-            const div = document.getElementById('facultyRankingChart');
-            if (!div) return;
+    function showNoData(div) {
+        let overlay = div.parentNode.querySelector('.no-data-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'no-data-overlay';
+            overlay.innerHTML = '<i class="bi bi-inbox"></i><span>No record found</span>';
+            div.parentNode.appendChild(overlay);
+        }
+        overlay.style.display = 'flex';
+        div.style.visibility = 'hidden';
+    }
 
-            if (!d.rankingLabels || d.rankingLabels.length === 0) {
-                showNoData(div); return;
-            }
+    function clearNoData(div) {
+        const overlay = div.parentNode.querySelector('.no-data-overlay');
+        if (overlay) overlay.style.display = 'none';
+        div.style.visibility = 'visible';
+    }
 
-            const hasTotals = Array.isArray(d.rankingTotals)
-                && d.rankingTotals.length === d.rankingLabels.length
-                && d.rankingTotals.some(v => v > 0);
+    function colorWithOpacity(baseColor, opacities) {
+        const r = parseInt(baseColor.slice(1,3), 16);
+        const g = parseInt(baseColor.slice(3,5), 16);
+        const b = parseInt(baseColor.slice(5,7), 16);
+        return opacities.map(o => `rgba(${r},${g},${b},${o})`);
+    }
 
-            const isEmpty = hasTotals
-                ? !d.rankingTotals.some(v => v > 0)
-                : !d.rankingCounts.some(v => v > 0);
+    const plotCfg = {
+        responsive: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
+    };
 
-            if (isEmpty) { showNoData(div); return; }
-            clearNoData(div);
+    function renderRanking(d) {
+        const div = document.getElementById('facultyRankingChart');
+        if (!div) return;
 
-            if (hasTotals) {
-                const labels  = [...d.rankingLabels].reverse();
-                const counts  = [...d.rankingCounts].reverse();
-                const totals  = [...d.rankingTotals].reverse();
-                const maxVal  = Math.max(...totals, ...counts, 1);
+        if (!d.rankingLabels || d.rankingLabels.length === 0) { showNoData(div); return; }
 
-                Plotly.react(div, [
-                    {
-                        name          : 'Submitted Workload',
-                        x             : counts,
-                        y             : labels,
-                        type          : 'bar',
-                        orientation   : 'h',
-                        marker        : { color: '#009539', line: { color: 'rgba(0,0,0,0.08)', width: 1 } },
-                        text          : counts,
-                        textposition  : 'outside',
-                        textfont      : { family: 'Inter', size: 11, color: '#1f1f1f' },
-                        hovertemplate : '<b>%{y}</b><br>Submitted Workload: %{x}<extra></extra>'
-                    },
-                    {
-                        name          : 'Total Faculty',
-                        x             : totals,
-                        y             : labels,
-                        type          : 'bar',
-                        orientation   : 'h',
-                        marker        : { color: '#a8d5b8', line: { color: 'rgba(0,149,57,0.25)', width: 1 } },
-                        text          : totals,
-                        textposition  : 'outside',
-                        textfont      : { family: 'Inter', size: 11, color: '#555' },
-                        hovertemplate : '<b>%{y}</b><br>Total Faculty: %{x}<extra></extra>'
-                    }
-                ], {
-                    font        : { family: 'Inter' },
-                    autosize    : true,
-                    barmode     : 'group',
-                    margin      : { l: 65, r: 55, t: 50, b: 40 },
-                    xaxis: {
-                        title    : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
-                        range    : [0, maxVal * 1.25],
-                        gridcolor: '#e0e0e0',
-                        zeroline : false,
-                        tickfont : { family: 'Inter', size: 10, color: '#666' }
-                    },
-                    yaxis: {
-                        gridcolor: 'transparent',
-                        autorange: true,
-                        tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
-                    },
-                    paper_bgcolor: 'white',
-                    plot_bgcolor : 'white',
-                    showlegend   : true,
-                    legend: {
-                        orientation: 'h',
-                        x: 0.5, y: 1.08,
-                        xanchor: 'center',
-                        yanchor: 'bottom',
-                        font: { family: 'Inter', size: 11 }
-                    },
-                    bargap      : 0.25,
-                    bargroupgap : 0.08
-                }, plotCfg);
+        const hasTotals = Array.isArray(d.rankingTotals)
+            && d.rankingTotals.length === d.rankingLabels.length
+            && d.rankingTotals.some(v => v > 0);
 
-            } else {
-                const labels = [...d.rankingLabels].reverse();
-                const counts = [...d.rankingCounts].reverse();
-                const maxVal = Math.max(...counts, 1);
+        const isEmpty = hasTotals
+            ? !d.rankingTotals.some(v => v > 0)
+            : !d.rankingCounts.some(v => v > 0);
 
-                const colors = labels.map(l =>
-                    (d.selectedDept && l === d.selectedDept) ? '#FFA500' : '#009539'
-                );
+        if (isEmpty) { showNoData(div); return; }
+        clearNoData(div);
 
-                Plotly.react(div, [{
+        if (hasTotals) {
+            const labels = [...d.rankingLabels].reverse();
+            const counts = [...d.rankingCounts].reverse();
+            const totals = [...d.rankingTotals].reverse();
+            const maxVal = Math.max(...totals, ...counts, 1);
+
+            Plotly.react(div, [
+                {
+                    name          : 'Submitted Workload',
                     x             : counts,
                     y             : labels,
                     type          : 'bar',
                     orientation   : 'h',
-                    marker        : { color: colors, line: { color: 'rgba(0,0,0,0.1)', width: 1 } },
+                    marker        : { color: '#009539', line: { color: 'rgba(0,0,0,0.08)', width: 1 } },
                     text          : counts,
                     textposition  : 'outside',
                     textfont      : { family: 'Inter', size: 11, color: '#1f1f1f' },
-                    hovertemplate : '<b>%{y}</b><br>Submitted: %{x}<extra></extra>'
-                }], {
-                    font        : { family: 'Inter' },
-                    autosize    : true,
-                    margin      : { l: 60, r: 50, t: 20, b: 40 },
-                    xaxis: {
-                        title    : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
-                        range    : [0, maxVal * 1.25],
-                        gridcolor: '#e0e0e0',
-                        zeroline : false,
-                        tickfont : { family: 'Inter', size: 10, color: '#666' }
-                    },
-                    yaxis: {
-                        gridcolor: 'transparent',
-                        autorange: true,
-                        tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
-                    },
-                    paper_bgcolor: 'white',
-                    plot_bgcolor : 'white',
-                    showlegend   : false,
-                    bargap       : 0.3
-                }, plotCfg);
+                    hovertemplate : '<b>%{y}</b><br>Submitted Workload: %{x}<extra></extra>'
+                },
+                {
+                    name          : 'Total Faculty',
+                    x             : totals,
+                    y             : labels,
+                    type          : 'bar',
+                    orientation   : 'h',
+                    marker        : { color: '#a8d5b8', line: { color: 'rgba(0,149,57,0.25)', width: 1 } },
+                    text          : totals,
+                    textposition  : 'outside',
+                    textfont      : { family: 'Inter', size: 11, color: '#555' },
+                    hovertemplate : '<b>%{y}</b><br>Total Faculty: %{x}<extra></extra>'
+                }
+            ], {
+                font     : { family: 'Inter' },
+                autosize : true,
+                barmode  : 'group',
+                margin   : { l: 65, r: 55, t: 50, b: 40 },
+                xaxis: {
+                    title    : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
+                    range    : [0, maxVal * 1.25],
+                    gridcolor: '#e0e0e0',
+                    zeroline : false,
+                    tickfont : { family: 'Inter', size: 10, color: '#666' }
+                },
+                yaxis: {
+                    gridcolor: 'transparent',
+                    autorange: true,
+                    tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor : 'rgba(0,0,0,0)',
+                showlegend   : true,
+                legend: {
+                    orientation: 'h', x: 0.5, y: 1.08,
+                    xanchor: 'center', yanchor: 'bottom',
+                    font: { family: 'Inter', size: 11 }
+                },
+                bargap      : 0.25,
+                bargroupgap : 0.08
+            }, plotCfg);
+
+        } else {
+            const labels = [...d.rankingLabels].reverse();
+            const counts = [...d.rankingCounts].reverse();
+            const maxVal = Math.max(...counts, 1);
+            const colors = labels.map(l =>
+                (d.selectedDept && l === d.selectedDept) ? '#FFA500' : '#009539'
+            );
+
+            Plotly.react(div, [{
+                x             : counts,
+                y             : labels,
+                type          : 'bar',
+                orientation   : 'h',
+                marker        : { color: colors, line: { color: 'rgba(0,0,0,0.1)', width: 1 } },
+                text          : counts,
+                textposition  : 'outside',
+                textfont      : { family: 'Inter', size: 11, color: '#1f1f1f' },
+                hovertemplate : '<b>%{y}</b><br>Submitted: %{x}<extra></extra>'
+            }], {
+                font     : { family: 'Inter' },
+                autosize : true,
+                margin   : { l: 60, r: 50, t: 20, b: 40 },
+                xaxis: {
+                    title    : { text: 'Number of Faculty', font: { family: 'Inter', size: 11 } },
+                    range    : [0, maxVal * 1.25],
+                    gridcolor: '#e0e0e0',
+                    zeroline : false,
+                    tickfont : { family: 'Inter', size: 10, color: '#666' }
+                },
+                yaxis: {
+                    gridcolor: 'transparent',
+                    autorange: true,
+                    tickfont : { family: 'Inter', size: 11, color: '#1f1f1f' }
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor : 'rgba(0,0,0,0)',
+                showlegend   : false,
+                bargap       : 0.3
+            }, plotCfg);
+        }
+    }
+
+    function renderEmployment(d) {
+        const div = document.getElementById('employmentChart');
+        if (!div) return;
+        const colorMap = ['#009539','#2c7be5','#f6c343','#e74c3c'];
+        const vals=[], labels=[], colors=[];
+        d.categoryData.forEach((v, i) => {
+            if (v > 0) { vals.push(v); labels.push(d.categoryLabels[i]); colors.push(colorMap[i % colorMap.length]); }
+        });
+        if (vals.length === 0) { showNoData(div); return; }
+        clearNoData(div);
+        Plotly.react(div, [{
+            values       : vals,
+            labels       : labels,
+            type         : 'pie',
+            hole         : 0.50,
+            domain       : { x: [0, 1], y: [0, 1] },
+            marker       : { colors: colors },
+            textinfo     : 'percent',
+            textposition : 'inside',
+            insidetextorientation: 'horizontal',
+            textfont     : { family: 'Inter', size: 11, color: 'white' },
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>',
+            showlegend   : true,
+            direction    : 'clockwise',
+            sort         : false
+        }], donutLayout(), plotCfg);
+    }
+
+    function renderStatus(d) {
+        const div = document.getElementById('statusChart');
+        if (!div) return;
+        const raw  = [d.activeCount, d.onLeaveCount];
+        const lbl  = ['Active', 'On Leave'];
+        const clr  = ['#009539', '#e74c3c'];
+        const vals=[], labels=[], colors=[];
+        raw.forEach((v, i) => {
+            if (v > 0) { vals.push(v); labels.push(lbl[i]); colors.push(clr[i]); }
+        });
+        if (vals.length === 0) { showNoData(div); return; }
+        clearNoData(div);
+        Plotly.react(div, [{
+            values       : vals,
+            labels       : labels,
+            type         : 'pie',
+            hole         : 0.50,
+            domain       : { x: [0, 1], y: [0, 1] },
+            marker       : { colors: colors },
+            textinfo     : 'percent',
+            textposition : 'inside',
+            insidetextorientation: 'horizontal',
+            textfont     : { family: 'Inter', size: 11, color: 'white' },
+            hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>',
+            showlegend   : true
+        }], donutLayout(), plotCfg);
+    }
+
+    function normalizeQualPct(phdArr, mastersArr, bachelorsArr) {
+        const normPhd=[], normMasters=[], normBachelors=[];
+        phdArr.forEach((_, i) => {
+            const total = (phdArr[i] || 0) + (mastersArr[i] || 0) + (bachelorsArr[i] || 0);
+            if (total === 0) {
+                normPhd.push(0); normMasters.push(0); normBachelors.push(0);
+            } else {
+                const scale = 100 / total;
+                const p = parseFloat((phdArr[i]    * scale).toFixed(4));
+                const m = parseFloat((mastersArr[i] * scale).toFixed(4));
+                const b = parseFloat((100 - p - m).toFixed(4));
+                normPhd.push(p); normMasters.push(m); normBachelors.push(b < 0 ? 0 : b);
+            }
+        });
+        return { normPhd, normMasters, normBachelors };
+    }
+
+    function renderQual(d) {
+        const div = document.getElementById('qualificationChart');
+        if (!div) return;
+
+        const filteredQualLabels=[], filteredPhdPct=[], filteredMastersPct=[], filteredBachelorsPct=[];
+        const filteredPhdCounts=[], filteredMastersCounts=[], filteredBachelorsCounts=[];
+
+        for (let i = 0; i < d.qualLabels.length; i++) {
+            const totalCount = (d.phdCounts[i] || 0) + (d.mastersCounts[i] || 0) + (d.bachelorsCounts[i] || 0);
+            if (totalCount > 0) {
+                filteredQualLabels.push(d.qualLabels[i]);
+                filteredPhdPct.push(d.phdPct[i]);
+                filteredMastersPct.push(d.mastersPct[i]);
+                filteredBachelorsPct.push(d.bachelorsPct[i]);
+                filteredPhdCounts.push(d.phdCounts[i]);
+                filteredMastersCounts.push(d.mastersCounts[i]);
+                filteredBachelorsCounts.push(d.bachelorsCounts[i]);
             }
         }
 
-        function renderEmployment(d) {
-            const div = document.getElementById('employmentChart');
-            if (!div) return;
-            const colorMap = ['#009539','#2c7be5','#f6c343','#e74c3c'];
-            const vals=[], labels=[], colors=[];
-            d.categoryData.forEach((v, i) => {
-                if (v > 0) {
-                    vals.push(v);
-                    labels.push(d.categoryLabels[i]);
-                    colors.push(colorMap[i % colorMap.length]);
-                }
-            });
-            if (vals.length === 0) { showNoData(div); return; }
-            clearNoData(div);
-            Plotly.react(div, [{
-                values       : vals,
-                labels       : labels,
-                type         : 'pie',
-                hole         : 0.50,
-                domain       : { x: [0, 1], y: [0, 1] },
-                marker       : { colors: colors },
-                textinfo     : 'percent',
-                textposition : 'inside',
-                insidetextorientation: 'horizontal',
-                textfont     : { family: 'Inter', size: 11, color: 'white' },
-                hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>',
-                showlegend   : true,
-                direction    : 'clockwise',
-                sort         : false
-            }], donutLayout(), plotCfg);
-        }
+        const totalQual = [...filteredPhdCounts, ...filteredMastersCounts, ...filteredBachelorsCounts]
+            .reduce((a, b) => a + b, 0);
+        if (!filteredQualLabels.length || totalQual === 0) { showNoData(div); return; }
+        clearNoData(div);
 
-        function renderStatus(d) {
-            const div = document.getElementById('statusChart');
-            if (!div) return;
-            const raw  = [d.activeCount, d.onLeaveCount];
-            const lbl  = ['Active', 'On Leave'];
-            const clr  = ['#009539', '#e74c3c'];
-            const vals=[], labels=[], colors=[];
-            raw.forEach((v, i) => {
-                if (v > 0) { vals.push(v); labels.push(lbl[i]); colors.push(clr[i]); }
-            });
-            if (vals.length === 0) { showNoData(div); return; }
-            clearNoData(div);
-            Plotly.react(div, [{
-                values       : vals,
-                labels       : labels,
-                type         : 'pie',
-                hole         : 0.50,
-                domain       : { x: [0, 1], y: [0, 1] },
-                marker       : { colors: colors },
-                textinfo     : 'percent',
-                textposition : 'inside',
-                insidetextorientation: 'horizontal',
-                textfont     : { family: 'Inter', size: 11, color: 'white' },
-                hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>',
-                showlegend   : true
-            }], donutLayout(), plotCfg);
-        }
+        const sel = d.selectedDept;
+        const opacities = sel
+            ? filteredQualLabels.map(l => l === sel ? 1 : 0.4)
+            : filteredQualLabels.map(() => 1);
 
-        function normalizeQualPct(phdArr, mastersArr, bachelorsArr) {
-            const normPhd=[], normMasters=[], normBachelors=[];
-            phdArr.forEach((_, i) => {
-                const total = (phdArr[i] || 0) + (mastersArr[i] || 0) + (bachelorsArr[i] || 0);
-                if (total === 0) {
-                    normPhd.push(0); normMasters.push(0); normBachelors.push(0);
-                } else {
-                    const scale = 100 / total;
-                    const p = parseFloat((phdArr[i]    * scale).toFixed(4));
-                    const m = parseFloat((mastersArr[i] * scale).toFixed(4));
-                    const b = parseFloat((100 - p - m).toFixed(4));
-                    normPhd.push(p);
-                    normMasters.push(m);
-                    normBachelors.push(b < 0 ? 0 : b);
-                }
-            });
-            return { normPhd, normMasters, normBachelors };
-        }
+        const { normPhd, normMasters, normBachelors } =
+            normalizeQualPct(filteredPhdPct, filteredMastersPct, filteredBachelorsPct);
 
-function renderQual(d) {
-    const div = document.getElementById('qualificationChart');
-    if (!div) return;
-
-    // Filter out categories where total faculty count is zero
-    const validIndices = [];
-    const filteredQualLabels = [];
-    const filteredPhdPct = [];
-    const filteredMastersPct = [];
-    const filteredBachelorsPct = [];
-    const filteredPhdCounts = [];
-    const filteredMastersCounts = [];
-    const filteredBachelorsCounts = [];
-
-    // Check each category and only include if total > 0
-    for (let i = 0; i < d.qualLabels.length; i++) {
-        const totalCount = (d.phdCounts[i] || 0) + (d.mastersCounts[i] || 0) + (d.bachelorsCounts[i] || 0);
-        if (totalCount > 0) {
-            validIndices.push(i);
-            filteredQualLabels.push(d.qualLabels[i]);
-            filteredPhdPct.push(d.phdPct[i]);
-            filteredMastersPct.push(d.mastersPct[i]);
-            filteredBachelorsPct.push(d.bachelorsPct[i]);
-            filteredPhdCounts.push(d.phdCounts[i]);
-            filteredMastersCounts.push(d.mastersCounts[i]);
-            filteredBachelorsCounts.push(d.bachelorsCounts[i]);
-        }
+        Plotly.react(div, [
+            {
+                name : 'PhD',
+                x    : filteredQualLabels,
+                y    : normPhd,
+                type : 'bar',
+                marker: { color: colorWithOpacity('#1565c0', opacities) },
+                text : filteredPhdCounts,
+                textposition: 'none',
+                hovertemplate: '<b>%{x}</b><br>PhD: %{y:.1f}% (%{text})<extra></extra>'
+            },
+            {
+                name : 'Masters',
+                x    : filteredQualLabels,
+                y    : normMasters,
+                type : 'bar',
+                marker: { color: colorWithOpacity('#009539', opacities) },
+                text : filteredMastersCounts,
+                textposition: 'none',
+                hovertemplate: '<b>%{x}</b><br>Masters: %{y:.1f}% (%{text})<extra></extra>'
+            },
+            {
+                name : 'Bachelors',
+                x    : filteredQualLabels,
+                y    : normBachelors,
+                type : 'bar',
+                marker: { color: colorWithOpacity('#f6c343', opacities) },
+                text : filteredBachelorsCounts,
+                textposition: 'none',
+                hovertemplate: '<b>%{x}</b><br>Bachelors: %{y:.1f}% (%{text})<extra></extra>'
+            }
+        ], {
+            font    : { family: 'Inter' },
+            autosize: true,
+            barmode : 'stack',
+            margin  : { l: 50, r: 20, t: 60, b: 80 },
+            xaxis: {
+                tickfont : { family: 'Inter', size: 10, color: '#1f1f1f' },
+                tickangle: -30,
+                gridcolor: 'transparent'
+            },
+            yaxis: {
+                title    : { text: 'Percentage (%)', font: { family: 'Inter', size: 11 } },
+                range    : [0, 100],
+                tickfont : { family: 'Inter', size: 10, color: '#666' },
+                gridcolor: '#e0e0e0'
+            },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor : 'rgba(0,0,0,0)',
+            showlegend   : true,
+            legend: {
+                orientation: 'h', x: 0.5, y: 1.18,
+                xanchor: 'center', yanchor: 'top',
+                font: { family: 'Inter', size: 11 }
+            }
+        }, plotCfg);
     }
 
-    const totalQual = [...filteredPhdCounts, ...filteredMastersCounts, ...filteredBachelorsCounts]
-        .reduce((a, b) => a + b, 0);
-        
-    if (!filteredQualLabels || filteredQualLabels.length === 0 || totalQual === 0) {
-        showNoData(div); 
-        return;
+    function updateStatCards(d) {
+        document.getElementById('statTotalNum').textContent   = d.totalFaculty;
+        document.getElementById('statActiveNum').textContent  = d.activeCount;
+        document.getElementById('statPhdNum').textContent     = d.phdHolders;
+        document.getElementById('statMastersNum').textContent = d.mastersHolders;
     }
-    
-    clearNoData(div);
-    
-    const sel = d.selectedDept;
-    const opacities = sel
-        ? filteredQualLabels.map(l => l === sel ? 1 : 0.4)
-        : filteredQualLabels.map(() => 1);
 
-    const { normPhd, normMasters, normBachelors } =
-        normalizeQualPct(filteredPhdPct, filteredMastersPct, filteredBachelorsPct);
+    function updateTitles(d, filters) {
+        const col     = filters.college || d.collegeFilterValue || 'all';
+        const sem     = filters.semesterText || d.semesterText  || '';
+        const colAcro = d.collegeAcro || '';
 
-    Plotly.react(div, [
-        {
-            name : 'PhD',
-            x    : filteredQualLabels,
-            y    : normPhd,
-            type : 'bar',
-            marker: { color: colorWithOpacity('#1565c0', opacities) },
-            text : filteredPhdCounts,
-            textposition: 'none',
-            hovertemplate: '<b>%{x}</b><br>PhD: %{y:.1f}% (%{text})<extra></extra>'
-        },
-        {
-            name : 'Masters',
-            x    : filteredQualLabels,
-            y    : normMasters,
-            type : 'bar',
-            marker: { color: colorWithOpacity('#009539', opacities) },
-            text : filteredMastersCounts,
-            textposition: 'none',
-            hovertemplate: '<b>%{x}</b><br>Masters: %{y:.1f}% (%{text})<extra></extra>'
-        },
-        {
-            name : 'Bachelors',
-            x    : filteredQualLabels,
-            y    : normBachelors,
-            type : 'bar',
-            marker: { color: colorWithOpacity('#f6c343', opacities) },
-            text : filteredBachelorsCounts,
-            textposition: 'none',
-            hovertemplate: '<b>%{x}</b><br>Bachelors: %{y:.1f}% (%{text})<extra></extra>'
-        }
-    ], {
-        font    : { family: 'Inter' },
-        autosize: true,
-        barmode : 'stack',
-        margin  : { l: 50, r: 20, t: 60, b: 80 },
-        xaxis: {
-            tickfont : { family: 'Inter', size: 10, color: '#1f1f1f' },
-            tickangle: -30,
-            gridcolor: 'transparent'
-        },
-        yaxis: {
-            title    : { text: 'Percentage (%)', font: { family: 'Inter', size: 11 } },
-            range    : [0, 100],
-            tickfont : { family: 'Inter', size: 10, color: '#666' },
-            gridcolor: '#e0e0e0'
-        },
-        paper_bgcolor: 'white',
-        plot_bgcolor : 'white',
-        showlegend   : true,
-        legend: {
-            orientation: 'h',
-            x          : 0.5,
-            y          : 1.18,
-            xanchor    : 'center',
-            yanchor    : 'top',
-            font       : { family: 'Inter', size: 11 }
-        }
-    }, plotCfg);
-}
+        document.getElementById('dynamicTitle').textContent = col !== 'all'
+            ? colAcro + ' Faculty Profile (' + sem + ')'
+            : 'Faculty Profile (' + sem + ')';
 
-        function updateStatCards(d) {
-            document.getElementById('statTotalNum').textContent   = d.totalFaculty;
-            document.getElementById('statActiveNum').textContent  = d.activeCount;
-            document.getElementById('statPhdNum').textContent     = d.phdHolders;
-            document.getElementById('statMastersNum').textContent = d.mastersHolders;
-        }
+        const prefix = col !== 'all' ? colAcro + ' ' : '';
 
-        function updateTitles(d, filters) {
-            const col     = filters.college      || d.collegeFilterValue || 'all';
-            const sem     = filters.semesterText || d.semesterText       || '';
-            const colAcro = d.collegeAcro || '';
+        document.getElementById('rankingTitle').textContent = col !== 'all'
+            ? colAcro + ' Submitted Faculty Workload by Department'
+            : 'Submitted Faculty Workload per College';
 
-            const barTitle = col !== 'all'
-                ? colAcro + ' Faculty Profile (' + sem + ')'
-                : 'Faculty Profile (' + sem + ')';
-            document.getElementById('dynamicTitle').textContent = barTitle;
+        document.getElementById('employmentTitle').textContent    = prefix + 'Faculty Employment Status';
+        document.getElementById('statusTitle').textContent        = prefix + 'Faculty Availability Status';
+        document.getElementById('qualificationTitle').textContent = prefix + 'Faculty Qualification Distribution';
+    }
 
-            const prefix = col !== 'all' ? colAcro + ' ' : '';
-
-            document.getElementById('rankingTitle').textContent = col !== 'all'
-                ? colAcro + ' Submitted Faculty Workload by Department'
-                : 'Submitted Faculty Workload per College';
-
-            document.getElementById('employmentTitle').textContent    = prefix + 'Faculty Employment Status';
-            document.getElementById('statusTitle').textContent        = prefix + 'Faculty Availability Status';
-            document.getElementById('qualificationTitle').textContent = prefix + 'Faculty Qualification Distribution';
-        }
-
-        function fetchAndRender(params) {
-            showLoaders();
-
-            fetch(AJAX_URL + '?' + params.toString(), {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN'    : CSRF_TOKEN
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                updateStatCards(data);
-                updateTitles(data, {
-                    college     : params.get('college')    || 'all',
-                    department  : params.get('department') || 'all',
-                    semesterText: data.semesterText
-                });
-                renderRanking(data);
-                renderEmployment(data);
-                renderStatus(data);
-                renderQual(data);
-
-                const url = new URL(window.location.href);
-                url.search = params.toString();
-                window.history.replaceState({}, '', url.toString());
-            })
-            .catch(err => console.error('Faculty filter error:', err))
-            .finally(()  => hideLoaders());
-        }
-
-        function buildParams() {
-            const params   = new URLSearchParams();
-            const semester = document.getElementById('semesterFilter').value;
-            const college  = document.getElementById('collegeFilter').value;
-            params.set('semester', semester);
-            params.set('college',  college);
-            params.set('department', 'all');
-            return params;
-        }
-
-        function applyFilters() {
-            updateDynamicTitle();
-            fetchAndRender(buildParams());
-        }
-
-        function updateDepartments() {
-            updateDynamicTitle();
-            fetchAndRender(buildParams());
-        }
-
-        function clearFilters() {
-            window.location.href = '{{ route("stzfaculty.overview") }}';
-        }
-
-        function updateDynamicTitle() {
-            const semEl   = document.getElementById('semesterFilter');
-            const semText = semEl.options[semEl.selectedIndex].text;
-            const colEl   = document.getElementById('collegeFilter');
-            const colText = colEl.options[colEl.selectedIndex].text;
-            const titleEl = document.getElementById('dynamicTitle');
-
-            titleEl.textContent = colEl.value !== 'all'
-                ? colText + ' Faculty Profile (' + semText + ')'
-                : 'Faculty Profile (' + semText + ')';
-        }
-
-        function reflowCharts() {
-            ['facultyRankingChart','employmentChart','statusChart','qualificationChart']
-                .forEach(id => {
-                    const div = document.getElementById(id);
-                    if (div && div.data) Plotly.relayout(div, { autosize: true });
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('semesterFilter').addEventListener('change', applyFilters);
-            document.getElementById('collegeFilter').addEventListener('change', updateDepartments);
-
-            const sidebarBtn = document.getElementById('sidebarToggle');
-            if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
-
-            updateTitles(INITIAL_DATA, {
-                college     : INITIAL_DATA.collegeFilterValue,
-                semesterText: INITIAL_DATA.semesterText
+    function fetchAndRender(params) {
+        showLoaders();
+        fetch(AJAX_URL + '?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF_TOKEN }
+        })
+        .then(r => r.json())
+        .then(data => {
+            updateStatCards(data);
+            updateTitles(data, {
+                college     : params.get('college')    || 'all',
+                department  : params.get('department') || 'all',
+                semesterText: data.semesterText
             });
-            renderRanking(INITIAL_DATA);
-            renderEmployment(INITIAL_DATA);
-            renderStatus(INITIAL_DATA);
-            renderQual(INITIAL_DATA);
+            renderRanking(data);
+            renderEmployment(data);
+            renderStatus(data);
+            renderQual(data);
 
-            let resizeTimeout;
-            window.addEventListener('resize', function () {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(reflowCharts, 250);
+            const url = new URL(window.location.href);
+            url.search = params.toString();
+            window.history.replaceState({}, '', url.toString());
+        })
+        .catch(err => console.error('Faculty filter error:', err))
+        .finally(()  => hideLoaders());
+    }
+
+    function buildParams() {
+        const params = new URLSearchParams();
+        params.set('semester',   document.getElementById('semesterFilter').value);
+        params.set('college',    document.getElementById('collegeFilter').value);
+        params.set('department', 'all');
+        return params;
+    }
+
+    function applyFilters() {
+        updateDynamicTitle();
+        fetchAndRender(buildParams());
+    }
+
+    function updateDepartments() {
+        updateDynamicTitle();
+        fetchAndRender(buildParams());
+    }
+
+    function clearFilters() {
+        window.location.href = '{{ route("stzfaculty.overview") }}';
+    }
+
+    function updateDynamicTitle() {
+        const semEl   = document.getElementById('semesterFilter');
+        const semText = semEl.options[semEl.selectedIndex].text;
+        const colEl   = document.getElementById('collegeFilter');
+        const colText = colEl.options[colEl.selectedIndex].text;
+        document.getElementById('dynamicTitle').textContent = colEl.value !== 'all'
+            ? colText + ' Faculty Profile (' + semText + ')'
+            : 'Faculty Profile (' + semText + ')';
+    }
+
+    function reflowCharts() {
+        ['facultyRankingChart','employmentChart','statusChart','qualificationChart']
+            .forEach(id => {
+                const div = document.getElementById(id);
+                if (div && div.data) Plotly.relayout(div, { autosize: true });
             });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('semesterFilter').addEventListener('change', applyFilters);
+        document.getElementById('collegeFilter').addEventListener('change',  updateDepartments);
+
+        const sidebarBtn = document.getElementById('sidebarToggle');
+        if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
+
+        updateTitles(INITIAL_DATA, {
+            college     : INITIAL_DATA.collegeFilterValue,
+            semesterText: INITIAL_DATA.semesterText
         });
+        renderRanking(INITIAL_DATA);
+        renderEmployment(INITIAL_DATA);
+        renderStatus(INITIAL_DATA);
+        renderQual(INITIAL_DATA);
+
+        // ResizeObserver mirrors programs page pattern
+        const contentDiv = document.querySelector('.content');
+        if (contentDiv) {
+            const ro = new ResizeObserver(() => reflowCharts());
+            ro.observe(contentDiv);
+        }
+
+        let resizeTimeout;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(reflowCharts, 250);
+        });
+    });
     </script>
 </body>
 </html>

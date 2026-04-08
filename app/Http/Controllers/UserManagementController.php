@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class UserManagementController extends Controller
 {
@@ -18,16 +18,21 @@ class UserManagementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|ends_with:@clsu.edu.ph|unique:users,email',
-            'role' => 'required',
+            'name'     => 'required|string|max:255',
+            'email'    => [
+                'required',
+                'email',
+                'ends_with:@clsu.edu.ph',
+                Rule::unique('users', 'email'),
+            ],
+            'role'     => ['required', 'string', Rule::in($this->validRoles())],
             'password' => 'required|min:6',
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'role'     => $request->role,
             'password' => Hash::make($request->password),
         ]);
 
@@ -39,21 +44,19 @@ class UserManagementController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name' => 'required',
-            // 'email' => "required|email|unique:users,email,$id",
+            'name'  => 'required|string|max:255',
             'email' => [
-                    'required',
-                    'email',
-                    'ends_with:@clsu.edu.ph',
-                    Rule::unique('users', 'email')->ignore($id),
-                ],
-            'role' => 'required',
+                'required',
+                'email',
+                'ends_with:@clsu.edu.ph',
+                Rule::unique('users', 'email')->ignore($id),
+            ],
         ]);
 
         $user->update([
-            'name' => $request->name,
+            'name'  => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
+            // role intentionally excluded — locked after creation
         ]);
 
         return redirect()->back()->with('success', 'User updated successfully!');
@@ -62,8 +65,24 @@ class UserManagementController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        $user->delete();
 
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
         return redirect()->back()->with('success', 'User deleted successfully!');
+    }
+
+    private function validRoles(): array
+    {
+        return [
+            'Admin',
+            'Executive',
+            'Director',
+            'Chief',
+            'Employee-Teaching',
+            'Employee-Non-Teaching',
+        ];
     }
 }

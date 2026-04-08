@@ -1,389 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siel Metrics</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <title>Siel Metrics</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            background: #e8ebe8;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-        }
-
-        /* Sidebar styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            width: 210px;
-            background: #1a2c1a;
-            color: white;
-            transition: width 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        body.sidebar-collapsed .sidebar {
-            width: 68px;
-        }
-
-        /* Main content area */
         .content {
-            margin-left: 210px;
-            transition: margin-left 0.3s ease;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            margin-left: 250px;
+            transition: margin-left 0.3s ease, max-width 0.3s ease;
+            max-width: calc(100vw - 250px);
+            overflow-x: clip;
         }
 
         body.sidebar-collapsed .content {
             margin-left: 68px;
+            max-width: calc(100vw - 68px);
         }
 
-        /* Fixed header section container */
-        .fixed-header-section {
-            flex-shrink: 0;
+        .collapse.show {
+            visibility: visible !important;
+        }
+
+        body {
             background: #e8ebe8;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        /* Page header */
-        .header {
-            background: #009539;
-            color: white;
-            padding: 0 30px;
-            font-size: 36px;
-            font-weight: 800;
-            height: 75px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-shrink: 0;
-            font-family: 'Bricolage Grotesque', sans-serif;
-        }
-
-        .drill-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.22);
-            border: 1px solid rgba(255,255,255,0.45);
-            border-radius: 20px;
-            padding: 3px 14px 3px 10px;
-            font-size: 14px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .drill-badge i {
-            font-size: 13px;
-        }
-
-        /* Filter Bar */
-        .filter-bar {
+            margin: 0;
             font-family: 'Inter', sans-serif;
+            overflow-x: clip;
+        }
+
+        header {
+            height: 70px;
+            padding: 2rem 3rem;
+            background-color: #009539;
+            box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            background: #c9cec9;
-            padding: 0 24px;
-            border-bottom: 1px solid #b0b5b0;
-            height: 52px;
-            min-height: 52px;
-            flex-shrink: 0;
-            overflow-x: auto;
-            overflow-y: hidden;
         }
 
-        .filter-bar::-webkit-scrollbar {
-            display: none;
-        }
-        .filter-bar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .filter-bar.is-loading select,
-        .filter-bar.is-loading button {
-            pointer-events: none;
-            opacity: 0.55;
-        }
-
-        .page-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-        }
-
-        .filter-bar-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-            margin-left: auto;
-            flex-shrink: 0;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .filter-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2d2d2d;
-            white-space: nowrap;
-        }
-
-        .filter-group select {
-            font-size: 12px;
-            padding: 4px 28px 4px 12px;
-            border-radius: 20px;
-            border: 1px solid #8a8f8a;
-            background-color: #f5f5f5;
-            color: #2d2d2d;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%232d2d2d' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 8px;
-            min-width: 90px;
-            cursor: pointer;
-        }
-
-        .filter-group select:focus {
-            outline: none;
-            border-color: #009539;
-            background-color: white;
-        }
-
-        .clear-filters-btn {
-            background: #009539;
-            color: white;
-            border: none;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-
-        .clear-filters-btn:hover {
-            background: #00802e;
-        }
-
-        /* Scrollable main content area */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 24px 30px 40px 30px;
-        }
-
-        /* Custom scrollbar for main content */
-        .main-content::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        .main-content::-webkit-scrollbar-track {
-            background: #d4d9d4;
-            border-radius: 4px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb {
-            background: #009539;
-            border-radius: 4px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb:hover {
-            background: #016531;
-        }
-
-        /* Stat Cards */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-
-        @media (max-width: 900px) {
-            .cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 580px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-card {
-            position: relative;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            min-height: 130px;
-        }
-
-        .stat-card.green {
-            background: linear-gradient(to right, #22c55e, #16a34a);
-            color: white;
-        }
-
-        .stat-card.white {
-            background: white;
-            color: #111827;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        .stat-card-icon {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .stat-card.green .stat-card-icon {
-            background: rgba(255,255,255,0.9);
-            color: #16a34a;
-        }
-
-        .stat-card.white .stat-card-icon {
-            background: #22c55e;
-            color: white;
-        }
-
-        .stat-card-body {
-            margin-top: 52px;
+        /* ── Stat numbers ── */
+        .stat-card-number {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 2.8rem;
+            line-height: 1;
+            color: #1f2937;
             text-align: right;
         }
-
-        .stat-card-number {
-            font-size: 40px;
-            font-weight: 800;
-            line-height: 1;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .stat-card.green .stat-card-number {
-            color: white;
-        }
-
-        .stat-card.white .stat-card-number {
-            color: #111827;
-        }
-
         .stat-card-label {
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        .stat-card.green .stat-card-label {
-            color: rgba(255,255,255,0.85);
-        }
-
-        .stat-card.white .stat-card-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 11px;
             color: #6b7280;
+            text-align: right;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
         }
 
-        /* Shimmer loading */
-        .stat-card.loading .stat-card-number,
-        .stat-card.loading .stat-card-label {
-            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-            border-radius: 6px;
-            color: transparent !important;
-            min-width: 60px;
-        }
-
-        .stat-card.green.loading .stat-card-number,
-        .stat-card.green.loading .stat-card-label {
-            background: linear-gradient(90deg, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.15) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        /* Charts */
-        .charts-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .charts-grid.two-col {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .charts-grid.one-col {
-            grid-template-columns: 1fr;
-        }
-
-        @media (max-width: 900px) {
-            .charts-grid.two-col {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chart-card h3 {
-            font-size: 14px;
-            font-weight: 700;
-            margin: 0 0 14px 0;
-            color: #111827;
-            line-height: 1.3;
-        }
-
-        /* Loading overlay */
+        /* ── Loading overlay ── */
         .loading-overlay {
             position: absolute;
             inset: 0;
@@ -397,12 +84,10 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
-
         .loading-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
-
         .spinner {
             width: 36px;
             height: 36px;
@@ -411,16 +96,13 @@
             border-radius: 50%;
             animation: spin 0.75s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
+        /* ── Empty chart state ── */
         .empty-chart {
             width: 100%;
-            height: 320px;
+            height: 100%;
+            min-height: 280px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -428,451 +110,529 @@
             color: #ccc;
             gap: 8px;
         }
+        .empty-chart i    { font-size: 32px; }
+        .empty-chart span { font-size: 13px; font-weight: 600; }
 
-        .empty-chart i {
-            font-size: 36px;
+        /* ── Stat shimmer ── */
+        .stat-loading .stat-card-number,
+        .stat-loading .stat-card-label {
+            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 4px;
+            color: transparent !important;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
-        .empty-chart span {
+        /* ── Drill badge in header ── */
+        .drill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 999px;
+            padding: 4px 12px;
             font-size: 13px;
             font-weight: 600;
-        }
-
-        /* Animation for page content */
-        .main-content {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            color: white;
         }
     </style>
+
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     @include('components.sidebar')
 
-    <div class="content">
-        <!-- Fixed Header Section - This stays at the top -->
-        <div class="fixed-header-section">
-            {{-- Page header --}}
-            <div class="header">
-                Teaching Load
-                @if($drillDown && $selectedCollege)
-                    <span class="drill-badge">
-                        <i class="bi bi-building"></i>
-                        {{ $selectedCollege->college_acro }}
-                        @if($filters['department'] !== 'all')
-                            &rsaquo; {{ $departments->firstWhere('department_id', $filters['department'])?->department_acro }}
-                        @endif
-                    </span>
-                @endif
-            </div>
+    <div class="content w-100">
 
-            {{-- Filter Bar --}}
-            <div class="filter-bar" id="filterBar">
-                <span class="page-title" id="pageTitle">
+        {{-- ── Sticky header + filter bar ── --}}
+        <div class="sticky top-0 z-50">
+            <header>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="text-lg md:text-2xl font-[650] text-white">Teaching Load</span>
+
+                    @if($drillDown && $selectedCollege)
+                        <span class="drill-badge">
+                            <i class="bi bi-building"></i>
+                            {{ $selectedCollege->college_acro }}
+                            @if($filters['department'] !== 'all')
+                                <span>&rsaquo; {{ $departments->firstWhere('department_id', $filters['department'])?->department_acro }}</span>
+                            @endif
+                        </span>
+                    @endif
+                </div>
+            </header>
+
+            <div id="filterBar" class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4">
+                <div class="font-[650] text-sm md:text-lg" id="pageTitle">
                     @php
                         $selectedSem = $semesters->firstWhere('sem_id', $filters['semester']);
-                        $titleText   = $selectedSem
+                        echo $selectedSem
                             ? 'Faculty Teaching Load (' . $selectedSem->semester . ' ' . $selectedSem->sy . ')'
                             : 'Faculty Teaching Load';
                     @endphp
-                    {{ $titleText }}
-                </span>
-
-                <div class="filter-bar-label">Filters:</div>
-
-                <div class="filter-group">
-                    <label>Semester:</label>
-                    <select id="semesterFilter">
-                        @foreach($semesters as $semester)
-                            <option value="{{ $semester->sem_id }}"
-                                {{ $filters['semester'] == $semester->sem_id ? 'selected' : '' }}>
-                                {{ $semester->semester }} {{ $semester->sy }}
-                            </option>
-                        @endforeach
-                    </select>
                 </div>
 
-                <div class="filter-group">
-                    <label>Unit/Office:</label>
-                    <select id="collegeFilter">
-                        <option value="all" {{ $filters['college'] === 'all' ? 'selected' : '' }}>All</option>
-                        @foreach($colleges as $college)
-                            <option value="{{ $college->c_u_id }}"
-                                {{ $filters['college'] == $college->c_u_id ? 'selected' : '' }}>
-                                {{ $college->college_acro }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                    <div class="hidden sm:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
+                        Filter
+                    </div>
 
-                <div class="filter-group" id="departmentFilterGroup"
-                     style="{{ !$drillDown ? 'display:none;' : '' }}">
-                    <label>Department:</label>
-                    <select id="departmentFilter">
-                        <option value="all">All</option>
-                        @if($drillDown)
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->department_id }}"
-                                    {{ $filters['department'] == $dept->department_id ? 'selected' : '' }}>
-                                    {{ $dept->department_acro }}
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Semester:</span>
+                        <select id="semesterFilter"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
+                            @foreach($semesters as $semester)
+                                <option value="{{ $semester->sem_id }}"
+                                    {{ $filters['semester'] == $semester->sem_id ? 'selected' : '' }}>
+                                    {{ $semester->semester }} {{ $semester->sy }}
                                 </option>
                             @endforeach
-                        @endif
-                    </select>
-                </div>
+                        </select>
+                    </div>
 
-                <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Unit/Office:</span>
+                        <select id="collegeFilter"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
+                            <option value="all" {{ $filters['college'] === 'all' ? 'selected' : '' }}>All</option>
+                            @foreach($colleges as $college)
+                                <option value="{{ $college->c_u_id }}"
+                                    {{ $filters['college'] == $college->c_u_id ? 'selected' : '' }}>
+                                    {{ $college->college_acro }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2" id="departmentFilterGroup"
+                        style="{{ !$drillDown ? 'display:none;' : '' }}">
+                        <span class="text-sm font-medium">Department:</span>
+                        <select id="departmentFilter"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
+                            <option value="all">All</option>
+                            @if($drillDown)
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->department_id }}"
+                                        {{ $filters['department'] == $dept->department_id ? 'selected' : '' }}>
+                                        {{ $dept->department_acro }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <button onclick="clearFilters()"
+                        class="text-xs font-semibold bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition">
+                        Clear Filters
+                    </button>
+                </div>
             </div>
         </div>
+        {{-- ── End sticky header ── --}}
 
-        {{-- Scrollable Main Content - This area scrolls --}}
-        <div class="main-content">
-            {{-- Stat Cards --}}
-            <div class="cards-grid">
-                <div class="stat-card green" id="cardAvgAtl">
-                    <div class="stat-card-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statAvgAtl">{{ number_format($avgAtl, 1) }}</div>
-                        <div class="stat-card-label">Average Actual Teaching Load</div>
+        <div class="px-6 pt-4 pb-8">
+
+            {{-- ── Stat Cards — 3 cards across 12-col grid ── --}}
+            <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
+
+                {{-- Average ATL --}}
+                <div class="col-span-4">
+                    <div id="cardAvgAtl" class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 mt-2 overflow-hidden">
+                        <div class="grid grid-rows-3 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-chart-line text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-2 pb-3">
+                                <p id="statAvgAtl" class="stat-card-number pr-4 pt-2">{{ number_format($avgAtl, 1) }}</p>
+                                <p class="stat-card-label pr-4">Average Actual Teaching Load</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card white" id="cardFaculty">
-                    <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statFaculty">{{ number_format($totalFaculty) }}</div>
-                        <div class="stat-card-label">Total Faculty</div>
+
+                {{-- Total Faculty --}}
+                <div class="col-span-4">
+                    <div id="cardFaculty" class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 mt-2 overflow-hidden">
+                        <div class="grid grid-rows-3 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-users text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-2 pb-3">
+                                <p id="statFaculty" class="stat-card-number pr-4 pt-2">{{ number_format($totalFaculty) }}</p>
+                                <p class="stat-card-label pr-4">Total Faculty</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card white" id="cardSubjects">
-                    <div class="stat-card-icon"><i class="fa-solid fa-book-open"></i></div>
-                    <div class="stat-card-body">
-                        <div class="stat-card-number" id="statSubjects">{{ number_format($totalSubjects) }}</div>
-                        <div class="stat-card-label">Total Teaching Units</div>
+
+                {{-- Total Teaching Units --}}
+                <div class="col-span-4">
+                    <div id="cardSubjects" class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 mt-2 overflow-hidden">
+                        <div class="grid grid-rows-3 h-full">
+                            <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                <i class="fa-solid fa-book-open text-white text-2xl"></i>
+                            </div>
+                            <div class="row-span-2 pb-3">
+                                <p id="statSubjects" class="stat-card-number pr-4 pt-2">{{ number_format($totalSubjects) }}</p>
+                                <p class="stat-card-label pr-4">Total Teaching Units</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
+            {{-- ── End Stat Cards ── --}}
 
-            {{-- Row 1: ATL Ranking + Workload Pie --}}
-            <div class="charts-grid two-col" style="margin-bottom: 20px;">
-                <div class="chart-card">
+            {{-- ── Charts ── --}}
+            <div class="grid grid-cols-6 md:grid-cols-12 gap-3 mb-3">
+
+                {{-- ATL Ranking — border-l --}}
+                <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl relative">
                     <div class="loading-overlay" id="loadAtlRank"><div class="spinner"></div></div>
-                    <h3>Average ATL Ranking by <span class="group-label-text">{{ $chartGroupLabel }}</span></h3>
-                    <div id="chart-atl-rank"></div>
+                    <div class="grid grid-rows-7 h-full">
+                        <div class="row-span-1 font-[750] text-sm sm:text-lg text-gray-700 pt-4 pl-5 sm:pl-7">
+                            Average ATL Ranking by <span class="group-label-text">{{ $chartGroupLabel }}</span>
+                        </div>
+                        <div class="row-span-6 h-full w-full">
+                            <div id="chart-atl-rank" style="width:100%; height:100%;"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="chart-card">
-                    <div class="loading-overlay" id="loadWorkload"><div class="spinner"></div></div>
-                    <h3>Faculty Workload Distribution</h3>
-                    <div id="chart-workload-pie"></div>
-                </div>
-            </div>
 
-            {{-- Row 2: Units Offered --}}
-            <div class="charts-grid one-col">
-                <div class="chart-card">
-                    <div class="loading-overlay" id="loadSubjects"><div class="spinner"></div></div>
-                    <h3>Units Offered by <span class="group-label-text">{{ $chartGroupLabel }}</span></h3>
-                    <div id="chart-subjects"></div>
+                {{-- Workload Distribution Pie — border-t like pies across the system --}}
+                <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl relative">
+                    <div class="loading-overlay" id="loadWorkload"><div class="spinner"></div></div>
+                    <div class="grid grid-rows-7 h-full">
+                        <div class="row-span-1 font-[750] text-sm sm:text-lg text-gray-700 pt-4 pl-5 sm:pl-7">
+                            Faculty Workload Distribution
+                        </div>
+                        <div class="row-span-6 h-full w-full">
+                            <div id="chart-workload-pie" style="width:100%; height:100%;"></div>
+                        </div>
+                    </div>
                 </div>
+
+                {{-- Units Offered — full-width, border-l like programs trend charts --}}
+                <div class="col-span-6 md:col-span-12 h-[350px] md:h-[400px] lg:h-[500px] border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl relative mb-2">
+                    <div class="loading-overlay" id="loadSubjects"><div class="spinner"></div></div>
+                    <div class="grid grid-rows-7 h-full">
+                        <div class="row-span-1 font-[750] text-sm sm:text-lg text-gray-700 pt-4 pl-5 sm:pl-7">
+                            Units Offered by <span class="group-label-text">{{ $chartGroupLabel }}</span>
+                        </div>
+                        <div class="row-span-6 h-full w-full">
+                            <div id="chart-subjects" style="width:100%; height:100%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-[8px] sm:text-[10px] text-gray-500/90 pl-6 pb-2">
+                        <i>Note: Total units are estimated based on per-college credit unit multipliers.</i>
+                    </div>
+                </div>
+
             </div>
+            {{-- ── End Charts ── --}}
+
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ── All JS remains exactly the same ──────────────────────────────────────────────────────
-        const INITIAL_DATA = {
-            chartStats      : {!! json_encode($chartStats) !!},
-            workloadDist    : {!! json_encode($workloadDistribution) !!},
-            avgAtl          : {{ $avgAtl ?? 0 }},
-            totalFaculty    : {{ $totalFaculty ?? 0 }},
-            totalSubjects   : {{ $totalSubjects ?? 0 }},
-            chartGroupLabel : '{{ $chartGroupLabel }}',
-            semesterText    : '{{ $selectedSem ? $selectedSem->semester . " " . $selectedSem->sy : "" }}',
-        };
+    // ── All JavaScript unchanged from original ────────────────────────────────
+    const INITIAL_DATA = {
+        chartStats      : {!! json_encode($chartStats) !!},
+        workloadDist    : {!! json_encode($workloadDistribution) !!},
+        avgAtl          : {{ $avgAtl ?? 0 }},
+        totalFaculty    : {{ $totalFaculty ?? 0 }},
+        totalSubjects   : {{ $totalSubjects ?? 0 }},
+        chartGroupLabel : '{{ $chartGroupLabel }}',
+        semesterText    : '{{ $selectedSem ? $selectedSem->semester . " " . $selectedSem->sy : "" }}',
+    };
 
-        const AJAX_URL    = '{{ route("stzfaculty.teaching-load.ajax") }}';
-        const DEPTS_URL   = '{{ url("/stzfaculty/departments-by-college") }}';
-        const CSRF_TOKEN  = '{{ csrf_token() }}';
+    const AJAX_URL   = '{{ route("stzfaculty.teaching-load.ajax") }}';
+    const DEPTS_URL  = '{{ url("/stzfaculty/departments-by-college") }}';
+    const CSRF_TOKEN = '{{ csrf_token() }}';
 
-        const FONT  = { family: "'Inter', sans-serif", size: 12, color: '#444' };
-        const GREEN = '#009539';
-        const BLUE  = '#2c7be5';
-        const CFG   = {
-            responsive: true,
-            displaylogo: false,
-            modeBarButtonsToRemove: ['lasso2d', 'select2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d']
-        };
-        const CHART_H = 380;
+    const FONT  = { family: "'Inter', sans-serif", size: 12, color: '#444' };
+    const GREEN = '#009539';
+    const BLUE  = '#2c7be5';
+    const CFG   = {
+        responsive: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
+    };
+    const CHART_H = 380;
 
-        const UNIT_MULTIPLIERS = {
-            'CED'  : 3.2,
-            'COS'  : 3.5,
-            'CASS' : 3.0,
-            'CEN'  : 3.8,
-            'CAG'  : 3.3,
-            'CHSI' : 3.1,
-            'CVSM' : 3.4,
-            'CBA'  : 3.0,
-            'CF'   : 3.2,
-        };
-        const DEFAULT_MULTIPLIER = 3.0;
+    const UNIT_MULTIPLIERS = {
+        'CED' : 3.2, 'COS'  : 3.5, 'CASS': 3.0,
+        'CEN' : 3.8, 'CAG'  : 3.3, 'CHSI': 3.1,
+        'CVSM': 3.4, 'CBA'  : 3.0, 'CF'  : 3.2,
+    };
+    const DEFAULT_MULTIPLIER = 3.0;
 
-        function showLoaders() {
-            document.getElementById('filterBar').classList.add('is-loading');
-            ['loadAtlRank','loadWorkload','loadSubjects']
-                .forEach(id => document.getElementById(id)?.classList.add('active'));
-            ['cardAvgAtl','cardFaculty','cardSubjects']
-                .forEach(id => document.getElementById(id)?.classList.add('loading'));
-        }
-        function hideLoaders() {
-            document.getElementById('filterBar').classList.remove('is-loading');
-            ['loadAtlRank','loadWorkload','loadSubjects']
-                .forEach(id => document.getElementById(id)?.classList.remove('active'));
-            ['cardAvgAtl','cardFaculty','cardSubjects']
-                .forEach(id => document.getElementById(id)?.classList.remove('loading'));
-        }
+    function showLoaders() {
+        ['loadAtlRank','loadWorkload','loadSubjects']
+            .forEach(id => document.getElementById(id)?.classList.add('active'));
+        ['cardAvgAtl','cardFaculty','cardSubjects']
+            .forEach(id => document.getElementById(id)?.classList.add('stat-loading'));
+    }
 
-        function showEmpty(id) {
-            try { Plotly.purge(id); } catch(e) {}
-            document.getElementById(id).innerHTML =
-                `<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>`;
-        }
-        function clearDiv(id) {
-            try { Plotly.purge(id); } catch(e) {}
-            const el = document.getElementById(id);
-            el.innerHTML  = '';
-            el.style.cssText = '';
-        }
-        function setH(id) { document.getElementById(id).style.height = CHART_H + 'px'; }
+    function hideLoaders() {
+        ['loadAtlRank','loadWorkload','loadSubjects']
+            .forEach(id => document.getElementById(id)?.classList.remove('active'));
+        ['cardAvgAtl','cardFaculty','cardSubjects']
+            .forEach(id => document.getElementById(id)?.classList.remove('stat-loading'));
+    }
 
-        function renderAtlRank(chartStats) {
-            const data = [...chartStats]
-                .filter(d => parseFloat(d.avg_atl || 0) > 0)
-                .sort((a, b) => parseFloat(a.avg_atl) - parseFloat(b.avg_atl));
+    function showEmpty(id) {
+        try { Plotly.purge(id); } catch(e) {}
+        document.getElementById(id).innerHTML =
+            `<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>`;
+    }
 
-            if (!data.length) { showEmpty('chart-atl-rank'); return; }
-            clearDiv('chart-atl-rank'); setH('chart-atl-rank');
+    function clearDiv(id) {
+        try { Plotly.purge(id); } catch(e) {}
+        const el = document.getElementById(id);
+        el.innerHTML   = '';
+        el.style.cssText = '';
+    }
 
-            Plotly.react('chart-atl-rank', [{
-                type: 'bar', orientation: 'h',
-                x: data.map(d => parseFloat(d.avg_atl).toFixed(1)),
-                y: data.map(d => d.group_label),
-                text: data.map(d => `${parseFloat(d.avg_atl).toFixed(1)} hrs`),
-                textposition: 'outside',
-                textfont: { size: 11, color: '#333' },
-                marker: { color: GREEN },
-                hovertemplate: '<b>%{y}</b><br>Avg ATL: %{x} hrs<extra></extra>',
-            }], {
-                font: FONT, paper_bgcolor: 'white', plot_bgcolor: 'white',
-                margin: { t: 10, r: 90, b: 40, l: 80 },
-                xaxis: {
-                    title: { text: 'ATL (hours)', font: { size: 11 } },
-                    gridcolor: '#efefef', zeroline: false,
-                    range: [0, Math.max(...data.map(d => parseFloat(d.avg_atl))) * 1.25],
-                },
-                yaxis: { tickfont: { size: 11 }, automargin: true },
-            }, CFG);
-        }
+    function setH(id) { document.getElementById(id).style.height = CHART_H + 'px'; }
 
-        function renderWorkloadPie(workloadDist) {
-            const raw = [
-                { label: 'Low (<10 hrs)',    value: parseInt(workloadDist.low       || 0), color: BLUE      },
-                { label: 'Moderate (10–15)', value: parseInt(workloadDist.moderate  || 0), color: GREEN     },
-                { label: 'High (15–20)',     value: parseInt(workloadDist.high      || 0), color: '#f6c343' },
-                { label: 'Very High (>20)',  value: parseInt(workloadDist.very_high || 0), color: '#e74c3c' },
-            ].filter(d => d.value > 0);
+    function renderAtlRank(chartStats) {
+        const data = [...chartStats]
+            .filter(d => parseFloat(d.avg_atl || 0) > 0)
+            .sort((a, b) => parseFloat(a.avg_atl) - parseFloat(b.avg_atl));
 
-            if (!raw.length) { showEmpty('chart-workload-pie'); return; }
-            clearDiv('chart-workload-pie'); setH('chart-workload-pie');
+        if (!data.length) { showEmpty('chart-atl-rank'); return; }
+        clearDiv('chart-atl-rank'); setH('chart-atl-rank');
 
-            Plotly.react('chart-workload-pie', [{
-                type: 'pie',
-                labels: raw.map(d => d.label),
-                values: raw.map(d => d.value),
-                marker: { colors: raw.map(d => d.color) },
-                textinfo: 'label+percent',
-                textposition: 'outside',
-                textfont: { size: 11, color: '#333' },
-                hovertemplate: '<b>%{label}</b><br>%{value} faculty (%{percent})<extra></extra>',
-                automargin: true,
-            }], {
-                font: FONT, paper_bgcolor: 'white',
-                legend: {
-                    orientation: 'h', x: 0.5, xanchor: 'center',
-                    y: 1.18, yanchor: 'top', font: { size: 11 },
-                },
-                margin: { t: 12, r: 20, b: 20, l: 20 },
-            }, CFG);
-        }
+        Plotly.react('chart-atl-rank', [{
+            type: 'bar', orientation: 'h',
+            x: data.map(d => parseFloat(d.avg_atl).toFixed(1)),
+            y: data.map(d => d.group_label),
+            text: data.map(d => `${parseFloat(d.avg_atl).toFixed(1)} hrs`),
+            textposition: 'outside',
+            textfont: { size: 11, color: '#333' },
+            marker: { color: GREEN },
+            hovertemplate: '<b>%{y}</b><br>Avg ATL: %{x} hrs<extra></extra>',
+        }], {
+            font: FONT, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+            margin: { t: 10, r: 90, b: 40, l: 80 },
+            xaxis: {
+                title: { text: 'ATL (hours)', font: { size: 11 } },
+                gridcolor: '#efefef', zeroline: false,
+                range: [0, Math.max(...data.map(d => parseFloat(d.avg_atl))) * 1.25],
+            },
+            yaxis: { tickfont: { size: 11 }, automargin: true },
+        }, CFG);
+    }
 
-        function renderSubjects(chartStats) {
-            const data = [...chartStats]
-                .filter(d => parseInt(d.total_subjects || 0) > 0)
-                .map(d => {
-                    const subjects   = parseInt(d.total_subjects);
-                    const multiplier = UNIT_MULTIPLIERS[d.group_label] ?? DEFAULT_MULTIPLIER;
-                    const totalUnits = Math.round(subjects * multiplier);
-                    return { ...d, _totalUnits: totalUnits };
-                })
-                .sort((a, b) => b._totalUnits - a._totalUnits);
+    function renderWorkloadPie(workloadDist) {
+        const raw = [
+            { label: 'Low (<10 hrs)',    value: parseInt(workloadDist.low       || 0), color: BLUE      },
+            { label: 'Moderate (10–15)', value: parseInt(workloadDist.moderate  || 0), color: GREEN     },
+            { label: 'High (15–20)',     value: parseInt(workloadDist.high      || 0), color: '#f6c343' },
+            { label: 'Very High (>20)',  value: parseInt(workloadDist.very_high || 0), color: '#e74c3c' },
+        ].filter(d => d.value > 0);
 
-            if (!data.length) { showEmpty('chart-subjects'); return; }
-            clearDiv('chart-subjects'); setH('chart-subjects');
+        if (!raw.length) { showEmpty('chart-workload-pie'); return; }
+        clearDiv('chart-workload-pie'); setH('chart-workload-pie');
 
-            const maxUnits = Math.max(...data.map(d => d._totalUnits));
+        Plotly.react('chart-workload-pie', [{
+            type: 'pie',
+            labels: raw.map(d => d.label),
+            values: raw.map(d => d.value),
+            marker: { colors: raw.map(d => d.color) },
+            textinfo: 'label+percent',
+            textposition: 'outside',
+            textfont: { size: 11, color: '#333' },
+            hovertemplate: '<b>%{label}</b><br>%{value} faculty (%{percent})<extra></extra>',
+            automargin: true,
+        }], {
+            font: FONT,
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor:  'rgba(0,0,0,0)',
+            legend: {
+                orientation: 'h', x: 0.5, xanchor: 'center',
+                y: 1.18, yanchor: 'top', font: { size: 11 },
+            },
+            margin: { t: 12, r: 20, b: 20, l: 20 },
+        }, CFG);
+    }
 
-            Plotly.react('chart-subjects', [{
-                type: 'bar',
-                x: data.map(d => d.group_label),
-                y: data.map(d => d._totalUnits),
-                text: data.map(d => d._totalUnits.toLocaleString()),
-                textposition: 'outside',
-                textfont: { size: 11, color: '#333' },
-                marker: { color: GREEN },
-                hovertemplate: '<b>%{x}</b><br>Total Units: %{y}<extra></extra>',
-            }], {
-                font: FONT, paper_bgcolor: 'white', plot_bgcolor: 'white',
-                margin: { t: 30, r: 20, b: 70, l: 70 },
-                xaxis: { tickangle: -30, tickfont: { size: 11 }, automargin: true },
-                yaxis: {
-                    title: { text: 'Total Units Offered', font: { size: 11 } },
-                    gridcolor: '#efefef', zeroline: false,
-                    range: [0, maxUnits * 1.2],
-                },
-            }, CFG);
-        }
-
-        function renderAll(data) {
-            renderAtlRank(data.chartStats);
-            renderWorkloadPie(data.workloadDist);
-            renderSubjects(data.chartStats);
-        }
-
-        function updateStatCards(data) {
-            document.getElementById('statAvgAtl').textContent   = parseFloat(data.avgAtl).toFixed(1);
-            document.getElementById('statFaculty').textContent  = Number(data.totalFaculty).toLocaleString();
-            document.getElementById('statSubjects').textContent = Number(data.totalSubjects).toLocaleString();
-        }
-
-        function updateGroupLabels(label) {
-            document.querySelectorAll('.group-label-text').forEach(el => el.textContent = label);
-        }
-
-        function updatePageTitle(semesterText) {
-            document.getElementById('pageTitle').textContent = semesterText
-                ? `Faculty Teaching Load (${semesterText})`
-                : 'Faculty Teaching Load';
-        }
-
-        function loadDepartments(collegeId, callback) {
-            const group  = document.getElementById('departmentFilterGroup');
-            const select = document.getElementById('departmentFilter');
-
-            if (collegeId === 'all') {
-                group.style.display = 'none';
-                select.innerHTML    = '<option value="all">All</option>';
-                if (callback) callback();
-                return;
-            }
-
-            group.style.display = 'flex';
-            select.innerHTML    = '<option value="all">Loading…</option>';
-            select.disabled     = true;
-
-            fetch(`${DEPTS_URL}/${collegeId}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF_TOKEN }
+    function renderSubjects(chartStats) {
+        const data = [...chartStats]
+            .filter(d => parseInt(d.total_subjects || 0) > 0)
+            .map(d => {
+                const subjects   = parseInt(d.total_subjects);
+                const multiplier = UNIT_MULTIPLIERS[d.group_label] ?? DEFAULT_MULTIPLIER;
+                const totalUnits = Math.round(subjects * multiplier);
+                return { ...d, _totalUnits: totalUnits };
             })
-            .then(r => r.json())
-            .then(depts => {
-                select.innerHTML = '<option value="all">All</option>';
-                depts.forEach(d => {
-                    const opt       = document.createElement('option');
-                    opt.value       = d.department_id;
-                    opt.textContent = d.department_acro;
-                    select.appendChild(opt);
-                });
-            })
-            .catch(() => { select.innerHTML = '<option value="all">All</option>'; })
-            .finally(() => {
-                select.disabled = false;
-                if (callback) callback();
+            .sort((a, b) => b._totalUnits - a._totalUnits);
+
+        if (!data.length) { showEmpty('chart-subjects'); return; }
+        clearDiv('chart-subjects'); setH('chart-subjects');
+
+        const maxUnits = Math.max(...data.map(d => d._totalUnits));
+
+        Plotly.react('chart-subjects', [{
+            type: 'bar',
+            x: data.map(d => d.group_label),
+            y: data.map(d => d._totalUnits),
+            text: data.map(d => d._totalUnits.toLocaleString()),
+            textposition: 'outside',
+            textfont: { size: 11, color: '#333' },
+            marker: { color: GREEN },
+            hovertemplate: '<b>%{x}</b><br>Total Units: %{y}<extra></extra>',
+        }], {
+            font: FONT, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+            margin: { t: 30, r: 20, b: 70, l: 70 },
+            xaxis: { tickangle: -30, tickfont: { size: 11 }, automargin: true },
+            yaxis: {
+                title: { text: 'Total Units Offered', font: { size: 11 } },
+                gridcolor: '#efefef', zeroline: false,
+                range: [0, maxUnits * 1.2],
+            },
+        }, CFG);
+    }
+
+    function renderAll(data) {
+        renderAtlRank(data.chartStats);
+        renderWorkloadPie(data.workloadDist);
+        renderSubjects(data.chartStats);
+    }
+
+    function updateStatCards(data) {
+        document.getElementById('statAvgAtl').textContent   = parseFloat(data.avgAtl).toFixed(1);
+        document.getElementById('statFaculty').textContent  = Number(data.totalFaculty).toLocaleString();
+        document.getElementById('statSubjects').textContent = Number(data.totalSubjects).toLocaleString();
+    }
+
+    function updateGroupLabels(label) {
+        document.querySelectorAll('.group-label-text').forEach(el => el.textContent = label);
+    }
+
+    function updatePageTitle(semesterText) {
+        document.getElementById('pageTitle').textContent = semesterText
+            ? `Faculty Teaching Load (${semesterText})`
+            : 'Faculty Teaching Load';
+    }
+
+    function loadDepartments(collegeId, callback) {
+        const group  = document.getElementById('departmentFilterGroup');
+        const select = document.getElementById('departmentFilter');
+
+        if (collegeId === 'all') {
+            group.style.display = 'none';
+            select.innerHTML    = '<option value="all">All</option>';
+            if (callback) callback();
+            return;
+        }
+
+        group.style.display = 'flex';
+        select.innerHTML    = '<option value="all">Loading…</option>';
+        select.disabled     = true;
+
+        fetch(`${DEPTS_URL}/${collegeId}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF_TOKEN }
+        })
+        .then(r => r.json())
+        .then(depts => {
+            select.innerHTML = '<option value="all">All</option>';
+            depts.forEach(d => {
+                const opt       = document.createElement('option');
+                opt.value       = d.department_id;
+                opt.textContent = d.department_acro;
+                select.appendChild(opt);
             });
-        }
-
-        function buildParams() {
-            const params  = new URLSearchParams();
-            const sem     = document.getElementById('semesterFilter').value;
-            const college = document.getElementById('collegeFilter').value;
-            const dept    = document.getElementById('departmentFilter').value;
-            if (sem)               params.set('semester',   sem);
-            if (college !== 'all') params.set('college',    college);
-            if (dept    !== 'all') params.set('department', dept);
-            return params;
-        }
-
-        function fetchAndRender() {
-            showLoaders();
-            const params = buildParams();
-
-            fetch(`${AJAX_URL}?${params.toString()}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN'    : CSRF_TOKEN,
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                updateStatCards(data);
-                updateGroupLabels(data.chartGroupLabel);
-                updatePageTitle(data.semesterText);
-                renderAll(data);
-
-                const url = new URL(window.location.href);
-                url.search = params.toString();
-                window.history.replaceState({}, '', url.toString());
-            })
-            .catch(err => console.error('Teaching Load AJAX error:', err))
-            .finally(()  => hideLoaders());
-        }
-
-        function clearFilters() {
-            window.location.href = '{{ route("stzfaculty.teaching-load") }}';
-        }
-
-        function reflowCharts() {
-            ['chart-atl-rank','chart-workload-pie','chart-subjects'].forEach(id => {
-                try { Plotly.relayout(id, { autosize: true }); } catch(e) {}
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            renderAll(INITIAL_DATA);
-
-            document.getElementById('collegeFilter').addEventListener('change', function () {
-                loadDepartments(this.value, fetchAndRender);
-            });
-
-            document.getElementById('semesterFilter').addEventListener('change', fetchAndRender);
-            document.getElementById('departmentFilter').addEventListener('change', fetchAndRender);
-
-            const sidebarBtn = document.getElementById('sidebarToggle');
-            if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
-
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(reflowCharts, 250);
-            });
+        })
+        .catch(() => { select.innerHTML = '<option value="all">All</option>'; })
+        .finally(() => {
+            select.disabled = false;
+            if (callback) callback();
         });
+    }
+
+    function buildParams() {
+        const params  = new URLSearchParams();
+        const sem     = document.getElementById('semesterFilter').value;
+        const college = document.getElementById('collegeFilter').value;
+        const dept    = document.getElementById('departmentFilter').value;
+        if (sem)               params.set('semester',   sem);
+        if (college !== 'all') params.set('college',    college);
+        if (dept    !== 'all') params.set('department', dept);
+        return params;
+    }
+
+    function fetchAndRender() {
+        showLoaders();
+        const params = buildParams();
+
+        fetch(`${AJAX_URL}?${params.toString()}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF_TOKEN }
+        })
+        .then(r => r.json())
+        .then(data => {
+            updateStatCards(data);
+            updateGroupLabels(data.chartGroupLabel);
+            updatePageTitle(data.semesterText);
+            renderAll(data);
+
+            const url = new URL(window.location.href);
+            url.search = params.toString();
+            window.history.replaceState({}, '', url.toString());
+        })
+        .catch(err => console.error('Teaching Load AJAX error:', err))
+        .finally(()  => hideLoaders());
+    }
+
+    function clearFilters() {
+        window.location.href = '{{ route("stzfaculty.teaching-load") }}';
+    }
+
+    function reflowCharts() {
+        ['chart-atl-rank','chart-workload-pie','chart-subjects'].forEach(id => {
+            try { Plotly.relayout(id, { autosize: true }); } catch(e) {}
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        renderAll(INITIAL_DATA);
+
+        document.getElementById('collegeFilter').addEventListener('change', function () {
+            loadDepartments(this.value, fetchAndRender);
+        });
+
+        document.getElementById('semesterFilter').addEventListener('change', fetchAndRender);
+        document.getElementById('departmentFilter').addEventListener('change', fetchAndRender);
+
+        const sidebarBtn = document.getElementById('sidebarToggle');
+        if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
+
+        // ResizeObserver mirrors programs page pattern
+        const charts     = ['chart-atl-rank','chart-workload-pie','chart-subjects'];
+        const contentDiv = document.querySelector('.content');
+        if (contentDiv) {
+            const ro = new ResizeObserver(() => {
+                charts.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.data) Plotly.Plots.resize(el);
+                });
+            });
+            ro.observe(contentDiv);
+        }
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(reflowCharts, 250);
+        });
+    });
     </script>
 </body>
 </html>

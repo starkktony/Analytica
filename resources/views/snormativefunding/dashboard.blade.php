@@ -1,468 +1,426 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Siel Metrics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <title>Siel Metrics</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease, max-width 0.3s ease;
+            max-width: calc(100vw - 250px);
+            overflow-x: clip;
+        }
+
+        body.sidebar-collapsed .content {
+            margin-left: 68px;
+            max-width: calc(100vw - 68px);
+        }
+
+        .collapse.show {
+            visibility: visible !important;
         }
 
         body {
             background: #e8ebe8;
             margin: 0;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            overflow: hidden;
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overflow-x: clip;
         }
 
-        /* Main layout - flex column for proper fixed header */
-        .app-wrapper {
+        header {
+            height: 70px;
+            padding: 2rem 3rem;
+            background-color: #009539;
+            box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+        /* ── Stat card numbers — Inter heavy, right-aligned ── */
+        .stat-number-lg {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            line-height: 1.2;
+            color: #1f2937;
+            text-align: right;
+        }
+        .stat-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 10px;
+            color: #6b7280;
+            text-align: right;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        /* ── Budget utilization card sub-rows ── */
+        .budget-card-sub-label {
+            font-size: 10px;
+            font-weight: 500;
+            color: #9ca3af;
+            margin-bottom: 2px;
+        }
+        .budget-card-allotment {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1f2937;
+            line-height: 1.2;
+        }
+        .budget-card-expenditure {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #ef4444;
+            line-height: 1.2;
+            text-align: right;
+        }
+
+        /* ── Chart card wrapper ── */
+        .chart-card {
             position: relative;
-        }
-
-        /* ── Fixed header section container ── */
-        .fixed-header-section {
-            flex-shrink: 0;
-            background: #e8ebe8;
-            z-index: 100;
-        }
-
-        /* ── Header ── */
-        .header {
-            background: #009539;
-            color: white;
-            padding: 5px 30px;
-            font-size: 42px;
-            font-weight: bold;
-            height: 75px;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            display: flex;
-            align-items: center;
-        }
-
-        /* ── Filter bar ── */
-        .filter-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #c9cec9;
-            padding: 0 20px;
-            border-bottom: 1px solid #b0b5b0;
-            height: 52px;
-            min-height: 52px;
-            width: 100%;
-            box-sizing: border-box;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-        }
-        .filter-bar::-webkit-scrollbar { display: none; }
-        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
-        .page-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-            flex-shrink: 0;
-            margin-right: auto;
-        }
-        .filter-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
-        }
-        .filter-bar-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: #2d2d2d;
-            white-space: nowrap;
-        }
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .filter-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2d2d2d;
-            white-space: nowrap;
-        }
-        .filter-group select {
-            font-size: 12px;
-            padding: 5px 28px 5px 12px;
-            border-radius: 20px;
-            border: 1px solid #8a8f8a;
-            background-color: #f5f5f5;
-            color: #2d2d2d;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%232d2d2d' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 8px;
-            min-width: 130px;
-            cursor: pointer;
-        }
-        .filter-group select:focus {
-            outline: none;
-            border-color: #009539;
-        }
-
-        /* ── Main content (scrollable area) ── */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 24px 30px 40px 30px;
-        }
-
-        .main-content::-webkit-scrollbar {
-            width: 8px;
-        }
-        .main-content::-webkit-scrollbar-track {
-            background: #d4d9d4;
-            border-radius: 4px;
-        }
-        .main-content::-webkit-scrollbar-thumb {
-            background: #009539;
-            border-radius: 4px;
-        }
-        .main-content::-webkit-scrollbar-thumb:hover {
-            background: #016531;
-        }
-
-        /* ── Chart sections ── */
-        .chart-section-wrapper {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-        .chart-grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-        .chart-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        @media (max-width: 1100px) {
-            .chart-grid-3 { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 768px) {
-            .chart-grid-3, .chart-grid-2 { grid-template-columns: 1fr; }
-        }
-
-        .chart-inner-card {
-            background: #f9fafb;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.06);
             overflow: hidden;
         }
-        .chart-inner-card.full-width {
-            grid-column: 1 / -1;
-        }
-        .chart-inner-title {
+        .chart-card-title {
             font-size: 13px;
             font-weight: 700;
             color: #374151;
-            margin-bottom: 12px;
-            text-align: center;
+            padding: 14px 18px 0;
         }
         .chart-plot-area {
             position: relative;
             width: 100%;
             min-height: 420px;
-            overflow: hidden;
         }
         .chart-plot-area > div {
             width: 100%;
             height: 100%;
+            min-height: 420px;
         }
     </style>
+
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+    @include('components.sidebar')
 
-    <div class="app-wrapper">
-        @include('components.sidebar')
+    <div class="content w-100">
 
-        <div class="content">
-            <div class="fixed-header-section">
-                {{-- Page Header --}}
-                <div class="header">
-                    NORMATIVE FUNDING
+        {{-- ── Sticky header + filter bar ── --}}
+        <div class="sticky top-0 z-50">
+            <header>
+                <span class="text-lg md:text-2xl font-[650] text-white">Normative Funding</span>
+            </header>
+
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4">
+                <div class="font-[650] text-sm md:text-lg">
+                    @if($filter_type === 'allotment_expenditure')
+                        Budget Utilization ({{ $year }})
+                    @elseif($filter_type === 'suc_income')
+                        SUC Income ({{ $year }})
+                    @else
+                        University Financial Overview ({{ $year }})
+                    @endif
                 </div>
 
-                {{-- Filter Bar --}}
-                <div class="filter-bar">
-                    <div class="page-title">
-                        @if($filter_type === 'allotment_expenditure')
-                            Budget Utilization ({{ $year }})
-                        @elseif($filter_type === 'suc_income')
-                            SUC Income ({{ $year }})
-                        @else
-                            University Financial Overview ({{ $year }})
-                        @endif
+                <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                    <div class="hidden sm:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
+                        Filter
                     </div>
-                    <div class="filter-right">
-                        <span class="filter-bar-label">Filters:</span>
-                        <div class="filter-group">
-                            <label for="year_filter">Year:</label>
-                            <select id="year_filter" onchange="updateFilters()">
-                                @foreach($suc_years as $y)
-                                    <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
-                                @endforeach
-                                @if(empty($suc_years))
-                                    <option>No Data Found</option>
-                                @endif
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="type_filter">Type:</label>
-                            <select id="type_filter" onchange="updateFilters()">
-                                <option value="suc_income"            {{ $filter_type === 'suc_income'            ? 'selected' : '' }}>SUC Income</option>
-                                <option value="allotment_expenditure" {{ $filter_type === 'allotment_expenditure' ? 'selected' : '' }}>Budget Utilization</option>
-                            </select>
-                        </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Year:</span>
+                        <select id="year_filter" onchange="updateFilters()"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
+                            @foreach($suc_years as $y)
+                                <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
+                            @endforeach
+                            @if(empty($suc_years))
+                                <option>No Data Found</option>
+                            @endif
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Type:</span>
+                        <select id="type_filter" onchange="updateFilters()"
+                            class="block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
+                            <option value="suc_income"            {{ $filter_type === 'suc_income'            ? 'selected' : '' }}>SUC Income</option>
+                            <option value="allotment_expenditure" {{ $filter_type === 'allotment_expenditure' ? 'selected' : '' }}>Budget Utilization</option>
+                        </select>
                     </div>
                 </div>
             </div>
+        </div>
+        {{-- ── End sticky header ── --}}
 
-            {{-- Main Content (scrollable) --}}
-            <div class="main-content">
+        <div class="px-6 pb-10">
 
-                {{-- ============================================================ --}}
-                {{-- SUC INCOME SECTION --}}
-                {{-- ============================================================ --}}
-                <div id="suc_income_section" {{ !in_array($filter_type, ['all', 'suc_income']) ? 'style=display:none' : '' }}>
+            {{-- ============================================================ --}}
+            {{-- SUC INCOME SECTION --}}
+            {{-- ============================================================ --}}
+            <div id="suc_income_section" {{ !in_array($filter_type, ['all', 'suc_income']) ? 'style=display:none' : '' }}>
 
-                    {{-- Stat Cards — Programs-style design --}}
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 py-6 mb-2">
+                {{-- Stat Cards --}}
+                <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 mb-2 pt-4">
 
-                        {{-- Total University Income --}}
-                        <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden'>
-                            <div class='grid grid-rows-3 h-full'>
-                                <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
-                                    <i class="fa-solid fa-money-bill-wave text-white text-3xl"></i>
+                    {{-- Total University Income --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden">
+                            <div class="grid grid-rows-3 h-full">
+                                <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                    <i class="fa-solid fa-money-bill-wave text-white text-2xl"></i>
                                 </div>
-                                <div class='row-span-2 pt-2'>
-                                    <p class='text-lg sm:text-xl text-right font-[750] pr-4 align-bottom text-gray-800 leading-tight'>{{ $income['grand_total_income'] }}</p>
-                                    <p class='text-[10px] md:text-[12px] text-right font-medium pr-4'>Total University Income</p>
+                                <div class="row-span-2 pb-3">
+                                    <p class="stat-number-lg pr-4 pt-2">{{ $income['grand_total_income'] }}</p>
+                                    <p class="stat-label pr-4">Total University Income</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        {{-- Total Academic Fees --}}
-                        <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden'>
-                            <div class='grid grid-rows-3 h-full'>
-                                <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
-                                    <i class="fa-solid fa-graduation-cap text-white text-3xl"></i>
-                                </div>
-                                <div class='row-span-2 pt-2'>
-                                    <p class='text-lg sm:text-xl text-right font-[750] pr-4 align-bottom text-gray-800 leading-tight'>{{ $income['tuition_misc_fee'] }}</p>
-                                    <p class='text-[10px] md:text-[12px] text-right font-medium pr-4'>Total Academic Fees</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Auxiliary & Business Income --}}
-                        <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden'>
-                            <div class='grid grid-rows-3 h-full'>
-                                <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
-                                    <i class="fa-solid fa-building text-white text-3xl"></i>
-                                </div>
-                                <div class='row-span-2 pt-2'>
-                                    <p class='text-lg sm:text-xl text-right font-[750] pr-4 align-bottom text-gray-800 leading-tight'>{{ $income['miscellaneous'] }}</p>
-                                    <p class='text-[10px] md:text-[12px] text-right font-medium pr-4'>Auxiliary &amp; Business Income</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Other Business Income --}}
-                        <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden'>
-                            <div class='grid grid-rows-3 h-full'>
-                                <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
-                                    <i class="fa-solid fa-circle-plus text-white text-3xl"></i>
-                                </div>
-                                <div class='row-span-2 pt-2'>
-                                    <p class='text-lg sm:text-xl text-right font-[750] pr-4 align-bottom text-gray-800 leading-tight'>{{ $income['other_income'] }}</p>
-                                    <p class='text-[10px] md:text-[12px] text-right font-medium pr-4'>Other Business Income</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {{-- Income Charts --}}
-                    <div class="chart-section-wrapper">
-                        <div class="chart-grid-3">
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Total University Income Breakdown</div>
-                                <div class="chart-plot-area"><div id="mainPieChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Total Academic Fees Breakdown</div>
-                                <div class="chart-plot-area"><div id="tuitionPieChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Other Business Income Breakdown</div>
-                                <div class="chart-plot-area"><div id="otherIncomePieChart"></div></div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {{-- ============================================================ --}}
-                {{-- BUDGET UTILIZATION SECTION --}}
-                {{-- ============================================================ --}}
-                <div id="budget_utilization_section" {{ !in_array($filter_type, ['all', 'allotment_expenditure']) ? 'style=display:none' : '' }}>
-
-                    @php
-                        $cards = [
-                            [
-                                'label'       => 'Combined',
-                                'icon'        => 'fa-wallet',
-                                'allotment'   => $allotment['combined_total'],
-                                'expenditure' => $expenditure['combined_total'],
-                                'utilization' => isset($allotment_raw['combined']) && $allotment_raw['combined'] > 0
-                                                    ? round(($expenditure_raw['combined'] / $allotment_raw['combined']) * 100, 1)
-                                                    : null,
-                            ],
-                            [
-                                'label'       => 'GAA',
-                                'icon'        => 'fa-landmark',
-                                'allotment'   => $allotment['gaa_total'],
-                                'expenditure' => $expenditure['gaa_total'],
-                                'utilization' => isset($allotment_raw['gaa']) && $allotment_raw['gaa'] > 0
-                                                    ? round(($expenditure_raw['gaa'] / $allotment_raw['gaa']) * 100, 1)
-                                                    : null,
-                            ],
-                            [
-                                'label'       => 'SUC Income',
-                                'icon'        => 'fa-arrow-trend-up',
-                                'allotment'   => $allotment['suc_total'],
-                                'expenditure' => $expenditure['suc_total'],
-                                'utilization' => isset($allotment_raw['suc']) && $allotment_raw['suc'] > 0
-                                                    ? round(($expenditure_raw['suc'] / $allotment_raw['suc']) * 100, 1)
-                                                    : null,
-                            ],
-                        ];
-                    @endphp
-
-                    {{-- Budget Utilization Cards --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 py-6 mb-2">
-
-                        @foreach ($cards as $card)
-                            <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md rounded-xl shadow-md p-4 overflow-hidden'>
-                                <div class='flex flex-col gap-3'>
-                                    {{-- Top row: icon left, label badge right --}}
-                                    <div class='flex items-center justify-between'>
-                                        <div class='bg-green-50 border border-green-200 rounded-lg h-10 w-10 flex items-center justify-center'>
-                                            <i class="fa-solid {{ $card['icon'] }} text-green-600 text-lg"></i>
-                                        </div>
-                                        <span class='text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-full'>
-                                            {{ $card['label'] }}
-                                        </span>
-                                    </div>
-                                    {{-- Bottom row: allotment left, expenditure right --}}
-                                    <div class='flex items-end justify-between gap-2'>
-                                        <div>
-                                            <p class='text-[11px] text-gray-400 font-medium mb-0.5'>Allotment</p>
-                                            <p class='text-sm sm:text-base font-[750] text-gray-900 leading-tight'>{{ $card['allotment'] }}</p>
-                                        </div>
-                                        <div class='text-right'>
-                                            <p class='text-[11px] text-gray-400 font-medium mb-0.5'>Expenditure</p>
-                                            <p class='text-sm sm:text-base font-[750] text-red-500 leading-tight'>{{ $card['expenditure'] }}</p>
-                                        </div>
-                                    </div>
+                    {{-- Total Academic Fees --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden">
+                            <div class="grid grid-rows-3 h-full">
+                                <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                    <i class="fa-solid fa-graduation-cap text-white text-2xl"></i>
+                                </div>
+                                <div class="row-span-2 pb-3">
+                                    <p class="stat-number-lg pr-4 pt-2">{{ $income['tuition_misc_fee'] }}</p>
+                                    <p class="stat-label pr-4">Total Academic Fees</p>
                                 </div>
                             </div>
-                        @endforeach
-
+                        </div>
                     </div>
 
-                    {{-- Budget Charts --}}
-                    <div class="chart-section-wrapper">
-                        <div class="chart-grid-2">
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Distribution by Funding Source (GAA)</div>
-                                <div class="chart-plot-area"><div id="allotmentPieChart"></div></div>
+                    {{-- Auxiliary & Business Income --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden">
+                            <div class="grid grid-rows-3 h-full">
+                                <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                    <i class="fa-solid fa-building text-white text-2xl"></i>
+                                </div>
+                                <div class="row-span-2 pb-3">
+                                    <p class="stat-number-lg pr-4 pt-2">{{ $income['miscellaneous'] }}</p>
+                                    <p class="stat-label pr-4">Auxiliary &amp; Business Income</p>
+                                </div>
                             </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Distribution of Total Expenditures (GAA)</div>
-                                <div class="chart-plot-area"><div id="expenditurePieChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Total GAA Allotment by Expense Class</div>
-                                <div class="chart-plot-area"><div id="allotmentCategoryChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">Total GAA Expenditure by Expense Class</div>
-                                <div class="chart-plot-area"><div id="expenditureCategoryChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">GAA Allotment by Expense Class</div>
-                                <div class="chart-plot-area"><div id="allotmentGAAChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">GAA Expenditure by Expense Class</div>
-                                <div class="chart-plot-area"><div id="expenditureGAAChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">SUC Income Allotment by Expense Class</div>
-                                <div class="chart-plot-area"><div id="allotmentSUCChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card">
-                                <div class="chart-inner-title">SUC Income Expenditure by Expense Class</div>
-                                <div class="chart-plot-area"><div id="expenditureSUCChart"></div></div>
-                            </div>
-                            <div class="chart-inner-card full-width">
-                                <div class="chart-inner-title">Budget Utilization by Institutional Function</div>
-                                <div class="chart-plot-area"><div id="budgetUtilizationFunctionChart"></div></div>
+                        </div>
+                    </div>
+
+                    {{-- Other Business Income --}}
+                    <div class="col-span-3">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden">
+                            <div class="grid grid-rows-3 h-full">
+                                <div class="bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center">
+                                    <i class="fa-solid fa-circle-plus text-white text-2xl"></i>
+                                </div>
+                                <div class="row-span-2 pb-3">
+                                    <p class="stat-number-lg pr-4 pt-2">{{ $income['other_income'] }}</p>
+                                    <p class="stat-label pr-4">Other Business Income</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                 </div>
-            </div>{{-- /.main-content --}}
-        </div>{{-- /.content --}}
-    </div>{{-- /.app-wrapper --}}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+                {{-- Income Charts — 3 columns, border-t like publications 3-pie layout --}}
+                <div class="grid grid-cols-4 xl:grid-cols-12 gap-3 mb-3">
+
+                    <div class="col-span-4 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Total University Income Breakdown</div>
+                        <div class="chart-plot-area"><div id="mainPieChart"></div></div>
+                    </div>
+
+                    <div class="col-span-4 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Total Academic Fees Breakdown</div>
+                        <div class="chart-plot-area"><div id="tuitionPieChart"></div></div>
+                    </div>
+
+                    <div class="col-span-4 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Other Business Income Breakdown</div>
+                        <div class="chart-plot-area"><div id="otherIncomePieChart"></div></div>
+                    </div>
+
+                </div>
+
+            </div>
+            {{-- ── End SUC Income Section ── --}}
+
+
+            {{-- ============================================================ --}}
+            {{-- BUDGET UTILIZATION SECTION --}}
+            {{-- ============================================================ --}}
+            <div id="budget_utilization_section" {{ !in_array($filter_type, ['all', 'allotment_expenditure']) ? 'style=display:none' : '' }}>
+
+                @php
+                    $cards = [
+                        [
+                            'label'       => 'Combined',
+                            'icon'        => 'fa-wallet',
+                            'allotment'   => $allotment['combined_total'],
+                            'expenditure' => $expenditure['combined_total'],
+                            'utilization' => isset($allotment_raw['combined']) && $allotment_raw['combined'] > 0
+                                                ? round(($expenditure_raw['combined'] / $allotment_raw['combined']) * 100, 1)
+                                                : null,
+                        ],
+                        [
+                            'label'       => 'GAA',
+                            'icon'        => 'fa-landmark',
+                            'allotment'   => $allotment['gaa_total'],
+                            'expenditure' => $expenditure['gaa_total'],
+                            'utilization' => isset($allotment_raw['gaa']) && $allotment_raw['gaa'] > 0
+                                                ? round(($expenditure_raw['gaa'] / $allotment_raw['gaa']) * 100, 1)
+                                                : null,
+                        ],
+                        [
+                            'label'       => 'SUC Income',
+                            'icon'        => 'fa-arrow-trend-up',
+                            'allotment'   => $allotment['suc_total'],
+                            'expenditure' => $expenditure['suc_total'],
+                            'utilization' => isset($allotment_raw['suc']) && $allotment_raw['suc'] > 0
+                                                ? round(($expenditure_raw['suc'] / $allotment_raw['suc']) * 100, 1)
+                                                : null,
+                        ],
+                    ];
+                @endphp
+
+                {{-- Budget Utilization Stat Cards --}}
+                <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 mb-2 pt-4">
+
+                    @foreach($cards as $card)
+                    <div class="col-span-3 xl:col-span-4">
+                        <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md rounded-lg shadow-inner shadow-xl p-3 overflow-hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="bg-green-600/80 rounded-lg h-12 w-16 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid {{ $card['icon'] }} text-white text-2xl"></i>
+                                </div>
+                                <span class="text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                                    {{ $card['label'] }}
+                                    @if($card['utilization'] !== null)
+                                        &nbsp;·&nbsp;{{ $card['utilization'] }}%
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex items-end justify-between gap-2">
+                                <div>
+                                    <p class="budget-card-sub-label">Allotment</p>
+                                    <p class="budget-card-allotment">{{ $card['allotment'] }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="budget-card-sub-label">Expenditure</p>
+                                    <p class="budget-card-expenditure">{{ $card['expenditure'] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+
+                </div>
+
+                {{-- Budget Charts — 2-col pairs, border-l for bars, border-t for pies --}}
+
+                {{-- Row 1: Funding Source Pies (2 col) --}}
+                <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-3">
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Distribution by Funding Source (GAA)</div>
+                        <div class="chart-plot-area"><div id="allotmentPieChart"></div></div>
+                    </div>
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Distribution of Total Expenditures (GAA)</div>
+                        <div class="chart-plot-area"><div id="expenditurePieChart"></div></div>
+                    </div>
+
+                </div>
+
+                {{-- Row 2: Total by Expense Class Pies (2 col) --}}
+                <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-3">
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Total GAA Allotment by Expense Class</div>
+                        <div class="chart-plot-area"><div id="allotmentCategoryChart"></div></div>
+                    </div>
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">Total GAA Expenditure by Expense Class</div>
+                        <div class="chart-plot-area"><div id="expenditureCategoryChart"></div></div>
+                    </div>
+
+                </div>
+
+                {{-- Row 3: GAA Breakdown (2 col) --}}
+                <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-3">
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">GAA Allotment by Expense Class</div>
+                        <div class="chart-plot-area"><div id="allotmentGAAChart"></div></div>
+                    </div>
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">GAA Expenditure by Expense Class</div>
+                        <div class="chart-plot-area"><div id="expenditureGAAChart"></div></div>
+                    </div>
+
+                </div>
+
+                {{-- Row 4: SUC Income Breakdown (2 col) --}}
+                <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-3">
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">SUC Income Allotment by Expense Class</div>
+                        <div class="chart-plot-area"><div id="allotmentSUCChart"></div></div>
+                    </div>
+
+                    <div class="col-span-6 h-[380px] sm:h-[480px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
+                        <div class="chart-card-title">SUC Income Expenditure by Expense Class</div>
+                        <div class="chart-plot-area"><div id="expenditureSUCChart"></div></div>
+                    </div>
+
+                </div>
+
+                {{-- Row 5: Full-width budget utilization bar — border-l like programs trend charts --}}
+                <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl mb-4 chart-card">
+                    <div class="font-[750] text-sm md:text-lg text-gray-700 pl-6 pt-4">
+                        Budget Utilization by Institutional Function
+                    </div>
+                    <div class="chart-plot-area" style="min-height:480px;">
+                        <div id="budgetUtilizationFunctionChart" style="min-height:480px;"></div>
+                    </div>
+                </div>
+
+            </div>
+            {{-- ── End Budget Utilization Section ── --}}
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // ── All JavaScript unchanged from original ────────────────────────────────
     const selectedYear = @json($year);
-    const filterType = @json($filter_type);
-
-    const sucYears = @json($suc_years_chart ?? []);
-    const sucTotals = @json($suc_totals ?? []);
+    const filterType   = @json($filter_type);
+    const sucYears     = @json($suc_years_chart ?? []);
+    const sucTotals    = @json($suc_totals ?? []);
 
     const chartColors = [
         '#007B3E', '#FFD700', '#39EDFF', '#FFE450', '#FFB495',
@@ -504,8 +462,8 @@
     function compactPeso(v) {
         v = Number(v || 0);
         if (v >= 1_000_000_000) return '₱' + (v / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
-        if (v >= 1_000_000) return '₱' + (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (v >= 1_000) return '₱' + (v / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+        if (v >= 1_000_000)     return '₱' + (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (v >= 1_000)         return '₱' + (v / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
         return '₱' + v.toLocaleString('en-US');
     }
 
@@ -525,7 +483,7 @@
             } : undefined,
             margin: { t: 30, r: 30, b: 30, l: 30 },
             paper_bgcolor: 'transparent',
-            plot_bgcolor: 'transparent',
+            plot_bgcolor:  'transparent',
             font: { family: 'Inter, sans-serif', color: '#111827', size: 12 },
             legend: {
                 orientation: 'h', x: 0.5, xanchor: 'center',
@@ -674,7 +632,6 @@
         return res.json();
     }
 
-    // ---------- SUC INCOME ----------
     async function loadIncomeCharts() {
         const data = await fetchJson(`/data/income-data?year=${encodeURIComponent(selectedYear)}`);
 
@@ -709,7 +666,6 @@
         }
     }
 
-    // ---------- ALLOTMENT ----------
     async function loadAllotmentCharts() {
         const data = await fetchJson(`/data/allotment-data?year=${encodeURIComponent(selectedYear)}`);
 
@@ -740,7 +696,6 @@
         return data;
     }
 
-    // ---------- EXPENDITURE ----------
     async function loadExpenditureCharts() {
         const expData = await fetchJson(`/data/expenditure-data?year=${encodeURIComponent(selectedYear)}`);
 
@@ -769,65 +724,6 @@
             ['#007B3E', '#FFD700', '#39EDFF'], 0.55, true);
 
         return expData;
-    }
-
-    window.addEventListener('resize', () => {
-        [
-            'mainPieChart', 'tuitionPieChart', 'otherIncomePieChart',
-            'allotmentPieChart', 'allotmentCategoryChart', 'allotmentGAAChart', 'allotmentSUCChart',
-            'expenditurePieChart', 'expenditureCategoryChart', 'expenditureGAAChart', 'expenditureSUCChart',
-            'sucIncomeLineChart', 'budgetUtilizationFunctionChart',
-        ].forEach(id => { if ($(id)) Plotly.Plots.resize($(id)); });
-    });
-
-    function renderBudgetComparisonBar(chartId, rows) {
-        const el = $(chartId);
-        if (!el) return;
-
-        const cleanRows = (rows || []).filter(r =>
-            (n(r.gaa_allotment) + n(r.suc_allotment)) > 0 ||
-            (n(r.gaa_expenditure) + n(r.suc_expenditure)) > 0
-        );
-
-        if (!cleanRows.length) { Plotly.purge(chartId); toggleChartCard(chartId, false); return; }
-        toggleChartCard(chartId, true);
-
-        const allotRows = cleanRows.filter(r => n(r.gaa_allotment) + n(r.suc_allotment) > 0);
-        const expRows   = cleanRows.filter(r => n(r.gaa_expenditure) + n(r.suc_expenditure) > 0);
-
-        const xA = [allotRows.map(r => wrapLabel(r.fn)), allotRows.map(() => '\u200B')];
-        const xE = [expRows.map(r => wrapLabel(r.fn)), expRows.map(() => '\u200C')];
-
-        const gaaA = allotRows.map(r => n(r.gaa_allotment) > 0 ? n(r.gaa_allotment) : null);
-        const sucA = allotRows.map(r => n(r.suc_allotment) > 0 ? n(r.suc_allotment) : null);
-        const gaaE = expRows.map(r => n(r.gaa_expenditure) > 0 ? n(r.gaa_expenditure) : null);
-        const sucE = expRows.map(r => n(r.suc_expenditure) > 0 ? n(r.suc_expenditure) : null);
-
-        const allotTotals = allotRows.map(r => n(r.gaa_allotment) + n(r.suc_allotment));
-        const expTotals   = expRows.map(r => n(r.gaa_expenditure) + n(r.suc_expenditure));
-        const maxY = Math.max(...allotTotals, ...expTotals, 0);
-
-        const traces = [];
-
-        if (gaaA.some(v => v !== null)) traces.push({ type: 'bar', name: 'GAA Allotment', x: xA, y: gaaA, marker: { color: '#007B3E' }, hovertemplate: '<b>%{x[0]}</b><br>GAA Allotment: %{y:,.2f}<extra></extra>' });
-        if (sucA.some(v => v !== null)) traces.push({ type: 'bar', name: 'SUC Income Allotment', x: xA, y: sucA, marker: { color: '#FFD700' }, hovertemplate: '<b>%{x[0]}</b><br>SUC Income Allotment: %{y:,.2f}<extra></extra>' });
-        if (gaaE.some(v => v !== null)) traces.push({ type: 'bar', name: 'GAA Expenditure', x: xE, y: gaaE, marker: { color: '#39EDFF' }, hovertemplate: '<b>%{x[0]}</b><br>GAA Expenditure: %{y:,.2f}<extra></extra>' });
-        if (sucE.some(v => v !== null)) traces.push({ type: 'bar', name: 'SUC Income Expenditure', x: xE, y: sucE, marker: { color: '#EA7C69' }, hovertemplate: '<b>%{x[0]}</b><br>SUC Income Expenditure: %{y:,.2f}<extra></extra>' });
-
-        traces.push({ type: 'scatter', mode: 'text', x: xA, y: allotTotals.map(v => v > 0 ? v + maxY * 0.03 : null), text: allotTotals.map(v => v > 0 ? `<b>${compactPeso(v)}</b>` : ''), textposition: 'top center', textfont: { family: 'Inter, sans-serif', size: 11, color: '#111827' }, hoverinfo: 'skip', showlegend: false });
-        traces.push({ type: 'scatter', mode: 'text', x: xE, y: expTotals.map(v => v > 0 ? v + maxY * 0.03 : null), text: expTotals.map(v => v > 0 ? `<b>${compactPeso(v)}</b>` : ''), textposition: 'top center', textfont: { family: 'Inter, sans-serif', size: 11, color: '#111827' }, hoverinfo: 'skip', showlegend: false });
-
-        const layout = {
-            ...baseLayout(),
-            barmode: 'stack', bargap: 0.25, bargroupgap: 0.1,
-            margin: { t: 60, r: 30, b: 120, l: 80 },
-            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12, yanchor: 'bottom', font: { size: 11 } },
-            xaxis: { type: 'multicategory', tickangle: 0, automargin: true, showgrid: false, zeroline: false, showline: false, ticks: '', tickfont: { size: 11 }, showdividers: false },
-            yaxis: { rangemode: 'tozero', automargin: true, tickprefix: '₱', tickformat: '.2s', range: [0, maxY * 1.18] }
-        };
-
-        Plotly.newPlot(chartId, traces, layout, { responsive: true, displayModeBar: false });
-        safeResize(chartId);
     }
 
     function wrapLabel(text, maxLength = 12) {
@@ -864,23 +760,96 @@
         );
     }
 
+    function renderBudgetComparisonBar(chartId, rows) {
+        const el = $(chartId);
+        if (!el) return;
+
+        const cleanRows = (rows || []).filter(r =>
+            (n(r.gaa_allotment) + n(r.suc_allotment)) > 0 ||
+            (n(r.gaa_expenditure) + n(r.suc_expenditure)) > 0
+        );
+
+        if (!cleanRows.length) { Plotly.purge(chartId); toggleChartCard(chartId, false); return; }
+        toggleChartCard(chartId, true);
+
+        const allotRows = cleanRows.filter(r => n(r.gaa_allotment) + n(r.suc_allotment) > 0);
+        const expRows   = cleanRows.filter(r => n(r.gaa_expenditure) + n(r.suc_expenditure) > 0);
+
+        const xA = [allotRows.map(r => wrapLabel(r.fn)), allotRows.map(() => '\u200B')];
+        const xE = [expRows.map(r => wrapLabel(r.fn)),   expRows.map(() => '\u200C')];
+
+        const gaaA = allotRows.map(r => n(r.gaa_allotment) > 0 ? n(r.gaa_allotment) : null);
+        const sucA = allotRows.map(r => n(r.suc_allotment) > 0 ? n(r.suc_allotment) : null);
+        const gaaE = expRows.map(r => n(r.gaa_expenditure) > 0 ? n(r.gaa_expenditure) : null);
+        const sucE = expRows.map(r => n(r.suc_expenditure) > 0 ? n(r.suc_expenditure) : null);
+
+        const allotTotals = allotRows.map(r => n(r.gaa_allotment) + n(r.suc_allotment));
+        const expTotals   = expRows.map(r => n(r.gaa_expenditure) + n(r.suc_expenditure));
+        const maxY = Math.max(...allotTotals, ...expTotals, 0);
+
+        const traces = [];
+
+        if (gaaA.some(v => v !== null)) traces.push({ type: 'bar', name: 'GAA Allotment', x: xA, y: gaaA, marker: { color: '#007B3E' }, hovertemplate: '<b>%{x[0]}</b><br>GAA Allotment: %{y:,.2f}<extra></extra>' });
+        if (sucA.some(v => v !== null)) traces.push({ type: 'bar', name: 'SUC Income Allotment', x: xA, y: sucA, marker: { color: '#FFD700' }, hovertemplate: '<b>%{x[0]}</b><br>SUC Income Allotment: %{y:,.2f}<extra></extra>' });
+        if (gaaE.some(v => v !== null)) traces.push({ type: 'bar', name: 'GAA Expenditure', x: xE, y: gaaE, marker: { color: '#39EDFF' }, hovertemplate: '<b>%{x[0]}</b><br>GAA Expenditure: %{y:,.2f}<extra></extra>' });
+        if (sucE.some(v => v !== null)) traces.push({ type: 'bar', name: 'SUC Income Expenditure', x: xE, y: sucE, marker: { color: '#EA7C69' }, hovertemplate: '<b>%{x[0]}</b><br>SUC Income Expenditure: %{y:,.2f}<extra></extra>' });
+
+        traces.push({ type: 'scatter', mode: 'text', x: xA, y: allotTotals.map(v => v > 0 ? v + maxY * 0.03 : null), text: allotTotals.map(v => v > 0 ? `<b>${compactPeso(v)}</b>` : ''), textposition: 'top center', textfont: { family: 'Inter, sans-serif', size: 11, color: '#111827' }, hoverinfo: 'skip', showlegend: false });
+        traces.push({ type: 'scatter', mode: 'text', x: xE, y: expTotals.map(v => v > 0 ? v + maxY * 0.03 : null), text: expTotals.map(v => v > 0 ? `<b>${compactPeso(v)}</b>` : ''), textposition: 'top center', textfont: { family: 'Inter, sans-serif', size: 11, color: '#111827' }, hoverinfo: 'skip', showlegend: false });
+
+        const layout = {
+            ...baseLayout(),
+            barmode: 'stack', bargap: 0.25, bargroupgap: 0.1,
+            margin: { t: 60, r: 30, b: 120, l: 80 },
+            legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12, yanchor: 'bottom', font: { size: 11 } },
+            xaxis: { type: 'multicategory', tickangle: 0, automargin: true, showgrid: false, zeroline: false, showline: false, ticks: '', tickfont: { size: 11 }, showdividers: false },
+            yaxis: { rangemode: 'tozero', automargin: true, tickprefix: '₱', tickformat: '.2s', range: [0, maxY * 1.18] }
+        };
+
+        Plotly.newPlot(chartId, traces, layout, { responsive: true, displayModeBar: false });
+        safeResize(chartId);
+    }
+
+    window.addEventListener('resize', () => {
+        [
+            'mainPieChart', 'tuitionPieChart', 'otherIncomePieChart',
+            'allotmentPieChart', 'allotmentCategoryChart', 'allotmentGAAChart', 'allotmentSUCChart',
+            'expenditurePieChart', 'expenditureCategoryChart', 'expenditureGAAChart', 'expenditureSUCChart',
+            'sucIncomeLineChart', 'budgetUtilizationFunctionChart',
+        ].forEach(id => { if ($(id)) Plotly.Plots.resize($(id)); });
+    });
+
+    // ResizeObserver mirrors programs page pattern
+    const contentDiv = document.querySelector('.content');
+    if (contentDiv) {
+        const ro = new ResizeObserver(() => {
+            [
+                'mainPieChart', 'tuitionPieChart', 'otherIncomePieChart',
+                'allotmentPieChart', 'allotmentCategoryChart', 'allotmentGAAChart', 'allotmentSUCChart',
+                'expenditurePieChart', 'expenditureCategoryChart', 'expenditureGAAChart', 'expenditureSUCChart',
+                'budgetUtilizationFunctionChart',
+            ].forEach(id => { const el = $(id); if (el && el.data) Plotly.Plots.resize(el); });
+        });
+        ro.observe(contentDiv);
+    }
+
     (async function init() {
         try {
             if (filterType === 'all' || filterType === 'suc_income') {
                 await loadIncomeCharts();
             }
             if (filterType === 'all' || filterType === 'allotment_expenditure') {
-                const allotmentData    = await loadAllotmentCharts();
-                const expenditureData  = await loadExpenditureCharts();
-                const allotmentRows    = Array.isArray(allotmentData?.breakdown)   ? allotmentData.breakdown   : [];
-                const expenditureRows  = Array.isArray(expenditureData?.breakdown) ? expenditureData.breakdown : [];
-                const combinedRows     = buildCombinedBudgetRows(allotmentRows, expenditureRows);
+                const allotmentData   = await loadAllotmentCharts();
+                const expenditureData = await loadExpenditureCharts();
+                const allotmentRows   = Array.isArray(allotmentData?.breakdown)   ? allotmentData.breakdown   : [];
+                const expenditureRows = Array.isArray(expenditureData?.breakdown) ? expenditureData.breakdown : [];
+                const combinedRows    = buildCombinedBudgetRows(allotmentRows, expenditureRows);
                 renderBudgetComparisonBar('budgetUtilizationFunctionChart', combinedRows);
             }
         } catch (e) {
             console.error(e);
         }
     })();
-</script>
+    </script>
 </body>
 </html>
