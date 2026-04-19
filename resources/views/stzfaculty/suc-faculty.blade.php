@@ -5,15 +5,22 @@
     <title>Siel Metrics</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    {{-- Vite-compiled application styles and scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Third-party CSS dependencies --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    {{-- Tailwind CDN — used for utility classes in the stat cards grid --}}
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+        /* =====================================================================
+           RESET & BASE
+           ===================================================================== */
         * {
             margin: 0;
             padding: 0;
@@ -23,31 +30,38 @@
         body {
             background: #e8ebe8;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
+            overflow: hidden;   /* prevent body scroll; inner panels scroll independently */
             height: 100vh;
         }
 
+        /* =====================================================================
+           LAYOUT SHELL
+           Sidebar + content panel sit side-by-side and fill the full viewport.
+           ===================================================================== */
         .app-wrapper {
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
+        /* Sidebar never shrinks; it scrolls independently on overflow */
         .sidebar {
             flex-shrink: 0;
             height: 100vh;
             overflow-y: auto;
         }
 
+        /* Content panel takes all remaining width and stacks header + scrollable body */
         .content {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            min-width: 0;
+            min-width: 0; /* prevent flex blowout on long content */
         }
 
+        /* Header + filter bar stay pinned at the top while the main area scrolls */
         .fixed-header-section {
             flex-shrink: 0;
             position: sticky;
@@ -56,7 +70,10 @@
             background: #e8ebe8;
         }
 
-        /* ===== HEADER (MATCH TEACHING LOAD) ===== */
+        /* =====================================================================
+           PAGE HEADER
+           Green banner at the top of the content column.
+           ===================================================================== */
         .page-header {
             height: 80px;
             padding: 2rem 3.5rem;
@@ -72,7 +89,10 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* ===== FILTER BAR (MATCH TEACHING LOAD) ===== */
+        /* =====================================================================
+           FILTER BAR
+           Horizontally scrollable row of dropdown filters.
+           ===================================================================== */
         .filter-bar {
             background: #cfd3d6;
             min-height: 52px;
@@ -82,17 +102,12 @@
             justify-content: flex-start;
             gap: 1rem;
             flex-wrap: nowrap;
-            overflow-x: auto;
+            overflow-x: auto; /* scroll horizontally on narrow viewports */
         }
 
-        .filter-bar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .filter-bar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        /* Hide scrollbar while keeping scroll functionality */
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-bar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .filter-bar-label {
             font-size: 1rem;
@@ -103,6 +118,7 @@
             margin-right: 6px;
         }
 
+        /* Each label + select pair */
         .filter-group {
             display: flex;
             align-items: center;
@@ -118,6 +134,7 @@
             margin: 0;
         }
 
+        /* Custom-styled select — native arrow replaced with an inline SVG chevron */
         .filter-group select {
             font-size: 12px;
             padding: 6px 34px 6px 12px;
@@ -143,6 +160,7 @@
             box-shadow: 0 0 0 2px rgba(0, 149, 57, 0.15);
         }
 
+        /* "Clear" button — only rendered when at least one filter is active */
         .clear-btn {
             background: #009539;
             color: white;
@@ -163,7 +181,10 @@
             color: white;
         }
 
-        /* ===== MAIN CONTENT ===== */
+        /* =====================================================================
+           MAIN CONTENT AREA
+           Scrollable panel that sits below the sticky header.
+           ===================================================================== */
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -171,25 +192,16 @@
             padding: 24px 30px 40px 30px;
         }
 
-        .main-content::-webkit-scrollbar {
-            width: 8px;
-        }
+        /* Custom green scrollbar to match the brand palette */
+        .main-content::-webkit-scrollbar       { width: 8px; }
+        .main-content::-webkit-scrollbar-track { background: #d4d9d4; border-radius: 4px; }
+        .main-content::-webkit-scrollbar-thumb { background: #009539; border-radius: 4px; }
+        .main-content::-webkit-scrollbar-thumb:hover { background: #016531; }
 
-        .main-content::-webkit-scrollbar-track {
-            background: #d4d9d4;
-            border-radius: 4px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb {
-            background: #009539;
-            border-radius: 4px;
-        }
-
-        .main-content::-webkit-scrollbar-thumb:hover {
-            background: #016531;
-        }
-
-        /* ===== STAT CARDS ===== */
+        /* =====================================================================
+           STAT CARDS
+           Glassmorphism-style summary cards at the top of the dashboard.
+           ===================================================================== */
         .stat-card {
             border-left: 5px solid #16a34a;
             background: rgba(255,255,255,0.55);
@@ -205,6 +217,7 @@
             justify-content: space-between;
         }
 
+        /* Green icon badge in the top-left of each card */
         .stat-icon-box {
             background: rgba(0,149,57,0.82);
             border-radius: 14px;
@@ -235,7 +248,10 @@
             letter-spacing: 0.2px;
         }
 
-        /* ===== CHART CARDS ===== */
+        /* =====================================================================
+           CHART GRID
+           Two-column grid that collapses to a single column on narrow screens.
+           ===================================================================== */
         .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -244,9 +260,7 @@
         }
 
         @media (max-width: 980px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+            .charts-grid { grid-template-columns: 1fr; }
         }
 
         .chart-card {
@@ -274,13 +288,17 @@
             position: relative;
         }
 
+        /* The canvas fills the card body; Chart.js uses this size as its render target */
         .chart-height {
             height: 100%;
             min-height: 300px;
             position: relative;
         }
 
-        /* ===== NO DATA PAGE ===== */
+        /* =====================================================================
+           FULL-PAGE "NO DATA" STATE
+           Shown when the current filter combination returns zero records.
+           ===================================================================== */
         .no-data-state {
             display: flex;
             flex-direction: column;
@@ -302,26 +320,11 @@
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
         }
 
-        .no-data-icon-wrap i {
-            font-size: 40px;
-            color: #9ca3af;
-        }
+        .no-data-icon-wrap i { font-size: 40px; color: #9ca3af; }
+        .no-data-title  { font-size: 24px; font-weight: 800; color: #374151; margin-bottom: 8px; font-family: 'Inter', sans-serif; }
+        .no-data-text   { color: #9ca3af; font-size: 14px; max-width: 360px; margin-bottom: 24px; }
 
-        .no-data-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: #374151;
-            margin-bottom: 8px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .no-data-text {
-            color: #9ca3af;
-            font-size: 14px;
-            max-width: 360px;
-            margin-bottom: 24px;
-        }
-
+        /* "Reset Filters" pill button */
         .reset-btn {
             display: inline-flex;
             align-items: center;
@@ -337,12 +340,12 @@
             transition: background 0.2s;
         }
 
-        .reset-btn:hover {
-            background: #15803d;
-            color: white;
-        }
+        .reset-btn:hover { background: #15803d; color: white; }
 
-        /* ===== NO DATA INSIDE CHART ===== */
+        /* =====================================================================
+           INLINE "NO DATA" STATE
+           Overlay shown inside an individual chart card when it has no data.
+           ===================================================================== */
         .no-data {
             display: flex;
             flex-direction: column;
@@ -353,29 +356,37 @@
             gap: 8px;
         }
 
-        .no-data i {
-            font-size: 36px;
-        }
-
-        .no-data span {
-            font-size: 13px;
-            font-weight: 600;
-        }
+        .no-data i    { font-size: 36px; }
+        .no-data span { font-size: 13px; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div class="app-wrapper">
+
+        {{-- Shared sidebar component (navigation links, logo, etc.) --}}
         @include('components.sidebar')
 
         <div class="content">
+
+            {{-- ================================================================
+                 STICKY HEADER SECTION
+                 Contains the page title banner and the filter form.
+                 Remains pinned to the top while the main content area scrolls.
+                 ================================================================ --}}
             <div class="fixed-header-section">
-                <!-- PAGE HEADER -->
+
+                {{-- Page title banner --}}
                 <div class="page-header">
                     <span>Total Faculty of the University</span>
                 </div>
 
-                <!-- FILTER BAR -->
+                {{-- ============================================================
+                     FILTER BAR
+                     Auto-submits on select change (handled in JS below).
+                     Each dropdown is driven by $filter_columns / $filter_options
+                     passed from FacultyController::index().
+                     ============================================================ --}}
                 <div class="filter-bar">
                     <form id="facultyFilterForm"
                           method="GET"
@@ -384,12 +395,17 @@
 
                         <span class="filter-bar-label">Filter</span>
 
+                        {{-- Render one select per filterable column --}}
                         @foreach($filter_columns as $col)
-                            @php $param = $filter_param_keys[$col] ?? $col; @endphp
+                            @php
+                                {{-- Resolve the URL parameter key for this column label --}}
+                                $param = $filter_param_keys[$col] ?? $col;
+                            @endphp
                             <div class="filter-group">
                                 <label>{{ $col }}:</label>
                                 <select name="{{ $param }}">
                                     <option value="All">All</option>
+                                    {{-- Populate options and pre-select the active filter value --}}
                                     @foreach(($filter_options[$col] ?? []) as $val)
                                         <option value="{{ $val }}" {{ request($param) == $val ? 'selected' : '' }}>
                                             {{ $val }}
@@ -399,21 +415,32 @@
                             </div>
                         @endforeach
 
+                        {{-- Only show the "Clear" button when at least one filter is active --}}
                         @if(count(array_filter(request()->only(array_values($filter_param_keys)))) > 0)
                             <a href="{{ route('suc-faculty.index') }}" class="clear-btn">Clear</a>
                         @endif
+
                     </form>
                 </div>
             </div>
 
-            <!-- MAIN CONTENT -->
+            {{-- ================================================================
+                 MAIN CONTENT
+                 Scrollable area below the sticky header.
+                 Conditionally renders the dashboard or the "no data" state.
+                 ================================================================ --}}
             <div class="main-content">
 
                 @if($total_faculty > 0)
 
-                    <!-- STAT CARDS -->
+                    {{-- ========================================================
+                         STAT CARDS
+                         Three summary counters: total faculty, tertiary, and
+                         elementary / secondary / tech-voc headcounts.
+                         ======================================================== --}}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
+                        {{-- Total faculty matching current filters --}}
                         <div class="stat-card">
                             <div class="stat-icon-box">
                                 <i class="fa-solid fa-users text-white text-3xl"></i>
@@ -424,6 +451,7 @@
                             </div>
                         </div>
 
+                        {{-- Tertiary teaching-category subset --}}
                         <div class="stat-card">
                             <div class="stat-icon-box">
                                 <i class="fa-solid fa-user-graduate text-white text-3xl"></i>
@@ -434,6 +462,7 @@
                             </div>
                         </div>
 
+                        {{-- Elementary / Secondary / Technical-Vocational subset --}}
                         <div class="stat-card">
                             <div class="stat-icon-box">
                                 <i class="fa-solid fa-school text-white text-3xl"></i>
@@ -446,9 +475,14 @@
 
                     </div>
 
-                    <!-- CHARTS -->
+                    {{-- ========================================================
+                         CHART GRID
+                         Four Chart.js canvases populated asynchronously by
+                         loadFacultyPies() via the /api/faculty-pie endpoint.
+                         ======================================================== --}}
                     <div class="charts-grid">
 
+                        {{-- Pie: tenured vs non-tenured breakdown --}}
                         <div class="chart-card">
                             <div class="chart-card-header">Faculty Tenure Distribution</div>
                             <div class="chart-body">
@@ -458,6 +492,7 @@
                             </div>
                         </div>
 
+                        {{-- Pie: distribution by normalised faculty rank --}}
                         <div class="chart-card">
                             <div class="chart-card-header">Faculty Rank Distribution</div>
                             <div class="chart-body">
@@ -467,6 +502,7 @@
                             </div>
                         </div>
 
+                        {{-- Doughnut: male vs female (deduped by faculty name) --}}
                         <div class="chart-card">
                             <div class="chart-card-header">Faculty Sex Distribution</div>
                             <div class="chart-body">
@@ -476,6 +512,7 @@
                             </div>
                         </div>
 
+                        {{-- Stacked bar: male/female headcount per college --}}
                         <div class="chart-card">
                             <div class="chart-card-header">Sex Distribution by College</div>
                             <div class="chart-body">
@@ -489,7 +526,11 @@
 
                 @else
 
-                    <!-- NO DATA -->
+                    {{-- ========================================================
+                         FULL-PAGE "NO DATA" STATE
+                         Shown when $total_faculty === 0 (no records match
+                         the current filter combination).
+                         ======================================================== --}}
                     <div class="no-data-state">
                         <div class="no-data-icon-wrap">
                             <i class="fa-solid fa-filter-circle-xmark"></i>
@@ -510,12 +551,22 @@
         </div>
     </div>
 
+    {{-- Bootstrap JS bundle (includes Popper) --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- Chart.js core + datalabels plugin for percentage annotations on slices --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <script>
+        // =====================================================================
+        // BOOTSTRAP
+        // Register the datalabels plugin globally and kick off chart loading
+        // once the DOM is ready.
+        // =====================================================================
         document.addEventListener("DOMContentLoaded", () => {
+
+            // Auto-submit the filter form whenever any select value changes
             const form = document.getElementById("facultyFilterForm");
             if (form) {
                 form.querySelectorAll("select").forEach(sel => {
@@ -526,21 +577,42 @@
             loadFacultyPies();
         });
 
+        // =====================================================================
+        // CONSTANTS
+        // =====================================================================
+
+        // General-purpose colour palette (used for tenure and rank pie charts)
         const COLORS = [
             "#009639", "#FFD700", "#65FF9C", "#FFD05F", "#39EDFF",
             "#FFE450", "#FFB495", "#FFC177", "#00FFFF", "#494949", "#E0DA0D"
         ];
 
+        // Two-colour palette reserved for male/female charts
         const GENDER_COLORS = ['#4285F4', '#FF7BAC'];
 
+        // =====================================================================
+        // CHART INSTANCE REFERENCES
+        // Kept in module scope so we can destroy and re-create charts when
+        // new data arrives (avoids "Canvas is already in use" errors).
+        // =====================================================================
         let tenureChart, rankChart, genderChart, genderCollegeChart;
 
+        // Register the datalabels plugin if it loaded successfully
         if (window.ChartDataLabels) Chart.register(ChartDataLabels);
 
+        // =====================================================================
+        // UTILITY FUNCTIONS
+        // =====================================================================
+
+        /** Sums an array of numbers, coercing non-numeric values to 0. */
         function sum(arr) {
             return (arr || []).reduce((a, b) => a + (Number(b) || 0), 0);
         }
 
+        /**
+         * Parses a hex colour string into its {r, g, b} components.
+         * Handles both 3-digit (#FFF) and 6-digit (#FFFFFF) formats.
+         */
         function hexToRgb(hex) {
             hex = String(hex || '').replace("#", "");
             if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
@@ -548,11 +620,21 @@
             return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
         }
 
+        /**
+         * Returns either black (#111827) or white (#FFFFFF) depending on the
+         * perceived luminance of the given background hex colour, ensuring
+         * WCAG-compliant contrast for overlaid text labels.
+         */
         function getContrastColor(bgHex) {
             const { r, g, b } = hexToRgb(bgHex);
             return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111827" : "#FFFFFF";
         }
 
+        // =====================================================================
+        // CUSTOM CHART.JS PLUGIN — Doughnut Centre Text
+        // Draws "TOTAL" and the numeric total in the hollow centre of any
+        // doughnut chart. Does nothing for other chart types.
+        // =====================================================================
         const doughnutCenterText = {
             id: 'doughnutCenterText',
             afterDraw(chart) {
@@ -560,19 +642,21 @@
                 const { ctx, chartArea } = chart;
                 if (!chartArea) return;
 
-                const total = sum(chart.data.datasets?.[0]?.data || []);
-                const centerX = (chartArea.left + chartArea.right) / 2;
-                const centerY = (chartArea.top + chartArea.bottom) / 2;
+                const total   = sum(chart.data.datasets?.[0]?.data || []);
+                const centerX = (chartArea.left + chartArea.right)  / 2;
+                const centerY = (chartArea.top  + chartArea.bottom) / 2;
 
                 ctx.save();
-                ctx.textAlign = 'center';
+                ctx.textAlign    = 'center';
                 ctx.textBaseline = 'middle';
 
-                ctx.font = '600 11px "Inter", sans-serif';
+                // "TOTAL" label in grey, above centre
+                ctx.font      = '600 11px "Inter", sans-serif';
                 ctx.fillStyle = '#6B7280';
                 ctx.fillText('TOTAL', centerX, centerY - 12);
 
-                ctx.font = '800 22px "Inter", sans-serif';
+                // Numeric total in dark, below the label
+                ctx.font      = '800 22px "Inter", sans-serif';
                 ctx.fillStyle = '#111827';
                 ctx.fillText(String(total), centerX, centerY + 12);
 
@@ -582,16 +666,17 @@
 
         Chart.register(doughnutCenterText);
 
+        // =====================================================================
+        // SHARED PIE / DOUGHNUT OPTIONS
+        // Applied to every pie-type chart; the stacked bar chart uses its own
+        // options block defined inline.
+        // =====================================================================
         const pieLabelOptions = {
             plugins: {
                 legend: {
                     position: "top",
                     labels: {
-                        font: {
-                            family: 'Inter',
-                            size: 11,
-                            weight: '600'
-                        }
+                        font: { family: 'Inter', size: 11, weight: '600' }
                     }
                 },
                 datalabels: {
@@ -600,15 +685,21 @@
                     clamp: true,
                     clip: true,
                     font: { weight: "900", size: 11 },
+                    /**
+                     * Shows "X.X%" when the slice represents ≥ 3% of the total.
+                     * Returning '' hides the label without throwing an error.
+                     */
                     formatter: (value, ctx) => {
                         const total = sum(ctx.dataset.data || []);
                         if (!total) return '';
                         const pct = (Number(value) / total) * 100;
                         return pct >= 3 ? `${pct.toFixed(1)}%` : '';
                     },
+                    // Auto-contrast: white label on dark slices, black on light slices
                     color: (ctx) => getContrastColor(ctx.dataset.backgroundColor?.[ctx.dataIndex]),
+                    // Skip the label entirely for tiny slices to avoid overlap
                     display: (ctx) => {
-                        const v = Number(ctx.dataset.data?.[ctx.dataIndex] || 0);
+                        const v     = Number(ctx.dataset.data?.[ctx.dataIndex] || 0);
                         const total = sum(ctx.dataset.data || []);
                         return total > 0 && (v / total * 100) >= 3;
                     }
@@ -618,13 +709,20 @@
             maintainAspectRatio: false
         };
 
+        // =====================================================================
+        // showNoData(canvasId)
+        // Hides the <canvas> element and injects a centred "No data available"
+        // placeholder into its parent container. Safe to call multiple times —
+        // the placeholder div is only created once.
+        // =====================================================================
         function showNoData(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
 
             const wrapper = canvas.parentNode;
-            canvas.style.display = 'none';
+            canvas.style.display = 'none'; // hide the canvas without removing it
 
+            // Create the placeholder only if it doesn't already exist
             let nd = wrapper.querySelector('.no-data');
             if (!nd) {
                 nd = document.createElement('div');
@@ -636,9 +734,16 @@
             nd.style.display = 'flex';
         }
 
+        // =====================================================================
+        // loadFacultyPies()
+        // Fetches aggregated chart data from the /faculty/data/faculty-pie API
+        // endpoint (mirroring the active URL query string so filters apply),
+        // then builds or rebuilds each of the four Chart.js instances.
+        // =====================================================================
         async function loadFacultyPies() {
             try {
-                const qs = window.location.search || "";
+                // Preserve whatever filter params are currently in the URL
+                const qs  = window.location.search || "";
                 const res = await fetch(`/faculty/data/faculty-pie${qs}`);
 
                 if (!res.ok) {
@@ -648,10 +753,13 @@
 
                 const data = await res.json();
 
+                // -----------------------------------------------------------------
+                // TENURE PIE
+                // -----------------------------------------------------------------
                 if (!data.tenure?.values?.length) {
                     showNoData('tenurePie');
                 } else {
-                    if (tenureChart) tenureChart.destroy();
+                    if (tenureChart) tenureChart.destroy(); // prevent duplicate canvas error
                     tenureChart = new Chart(document.getElementById("tenurePie"), {
                         type: "pie",
                         data: {
@@ -667,6 +775,9 @@
                     });
                 }
 
+                // -----------------------------------------------------------------
+                // RANK PIE
+                // -----------------------------------------------------------------
                 if (!data.rank?.values?.length) {
                     showNoData('rankPie');
                 } else {
@@ -686,6 +797,10 @@
                     });
                 }
 
+                // -----------------------------------------------------------------
+                // GENDER DOUGHNUT
+                // Uses a 65% cutout to reveal the doughnutCenterText plugin.
+                // -----------------------------------------------------------------
                 if (!data.gender?.values?.length) {
                     showNoData('genderPie');
                 } else {
@@ -703,11 +818,16 @@
                         },
                         options: {
                             ...pieLabelOptions,
-                            cutout: "65%"
+                            cutout: "65%" // leave room for the centre total label
                         }
                     });
                 }
 
+                // -----------------------------------------------------------------
+                // GENDER BY COLLEGE — STACKED BAR
+                // Each gender becomes a separate dataset (bar series); colleges
+                // are the x-axis categories. Percentage labels appear per segment.
+                // -----------------------------------------------------------------
                 const cctx = document.getElementById("genderCollegeStacked");
 
                 if (!cctx || !data.gender_by_college?.labels?.length) {
@@ -715,14 +835,18 @@
                 } else {
                     if (genderCollegeChart) genderCollegeChart.destroy();
 
+                    // Merge the API dataset objects with visual config
                     const datasets = (data.gender_by_college.datasets || []).map((ds, i) => ({
                         ...ds,
                         backgroundColor: GENDER_COLORS[i % GENDER_COLORS.length],
                         borderSkipped: false,
                         datalabels: {
+                            // Show segment percentage only when it's ≥ 5% of the column total
                             formatter: (value, ctx) => {
-                                const xi = ctx.dataIndex;
-                                const total = ctx.chart.data.datasets.reduce((s, d) => s + (Number(d.data?.[xi]) || 0), 0);
+                                const xi    = ctx.dataIndex;
+                                const total = ctx.chart.data.datasets.reduce(
+                                    (s, d) => s + (Number(d.data?.[xi]) || 0), 0
+                                );
                                 if (!total) return '';
                                 const pct = (Number(value) / total) * 100;
                                 return pct >= 5 ? `${pct.toFixed(0)}%` : '';
@@ -748,36 +872,20 @@
                             plugins: {
                                 legend: {
                                     position: "bottom",
-                                    labels: {
-                                        font: {
-                                            family: 'Inter',
-                                            size: 11,
-                                            weight: '600'
-                                        }
-                                    }
+                                    labels: { font: { family: 'Inter', size: 11, weight: '600' } }
                                 },
-                                datalabels: {}
+                                datalabels: {} // datalabels config lives on each dataset above
                             },
                             scales: {
                                 x: {
-                                    stacked: true,
+                                    stacked: true, // stack gender series per college
                                     grid: { display: false },
-                                    ticks: {
-                                        font: {
-                                            family: 'Inter',
-                                            size: 11
-                                        }
-                                    }
+                                    ticks: { font: { family: 'Inter', size: 11 } }
                                 },
                                 y: {
                                     stacked: true,
                                     beginAtZero: true,
-                                    ticks: {
-                                        font: {
-                                            family: 'Inter',
-                                            size: 11
-                                        }
-                                    }
+                                    ticks: { font: { family: 'Inter', size: 11 } }
                                 }
                             }
                         }
@@ -785,6 +893,7 @@
                 }
 
             } catch (err) {
+                // Log unexpected errors (network failure, JSON parse error, etc.)
                 console.error("loadFacultyPies error:", err);
             }
         }

@@ -3,23 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{-- Laravel Vite directive to load compiled CSS/JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- External CDN Dependencies --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    {{-- Tom Select for searchable/customizable dropdowns --}}
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     <title>Siel Metrics</title>
 
     <style>
+        /* ── Main Layout & Sidebar Transition ── */
         .content {
-            margin-left: 250px;
+            margin-left: 250px; /* Default sidebar width */
             transition: margin-left 0.3s ease, max-width 0.3s ease;
             max-width: calc(100vw - 250px);
-            overflow-x: clip;
+            overflow-x: clip; /* Prevents horizontal scroll on the whole page */
         }
+        /* Adjusts main content area when sidebar shrinks */
         body.sidebar-collapsed .content {
             margin-left: 68px;
             max-width: calc(100vw - 68px);
@@ -33,6 +41,7 @@
             overflow-x: clip;
         }
 
+        /* ── Top Header Styling ── */
         header {
             height: 70px;
             padding: 2rem 3rem;
@@ -43,13 +52,14 @@
             align-items: center;
         }
 
-        /* ── Fixed title on left of filter bar ── */
+        /* ── Filter Bar: Fixed Left Title ── */
+        /* Keeps the page title static while the filters to the right can scroll */
         .filter-page-title {
             font-size: 13px;
             font-weight: 700;
             color: #2d2d2d;
             white-space: nowrap;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevents title from squishing */
             padding: 0 14px;
             min-height: 42px;
             display: flex;
@@ -59,24 +69,24 @@
             border-right: 1px solid #b0b5b0;
         }
 
-        /* ── Scrollable right section ── */
+        /* ── Filter Bar: Scrollable Right Section ── */
         .filter-bar-scroll {
             background: #d1d5db;
             border-bottom: 1px solid #b0b5b0;
             min-height: 42px;
             display: flex;
             align-items: center;
-            overflow-x: auto;
+            overflow-x: auto; /* Allows horizontal scrolling for filters on small screens */
             overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            scrollbar-width: none; /* Firefox: hide scrollbar */
+            -ms-overflow-style: none; /* IE/Edge: hide scrollbar */
             flex: 1;
-            min-width: 0;
+            min-width: 0; /* Important flexbox fix to allow shrinking inside parent */
         }
-        .filter-bar-scroll::-webkit-scrollbar { display: none; }
+        .filter-bar-scroll::-webkit-scrollbar { display: none; } /* Chrome/Safari: hide scrollbar */
 
-        /* inner row — never wraps */
+        /* Inner row — never wraps, forces horizontal scroll if too wide */
         .filter-bar-inner {
             display: flex;
             align-items: center;
@@ -87,7 +97,7 @@
             min-width: max-content;
         }
 
-        /* Filter label divider */
+        /* Filter label divider (e.g., "Filter |") */
         .filter-label-divider {
             font-size: 11px;
             font-weight: 700;
@@ -99,7 +109,7 @@
             margin-right: 2px;
         }
 
-        /* Each filter item */
+        /* Each individual filter dropdown container */
         .filter-item {
             display: flex;
             align-items: center;
@@ -112,6 +122,7 @@
             color: #2d2d2d;
             white-space: nowrap;
         }
+        /* Custom styled native select dropdowns */
         .filter-item select {
             font-size: 11px;
             padding: 3px 24px 3px 8px;
@@ -119,7 +130,8 @@
             border: 1px solid #8a8f8a;
             background-color: #f5f5f5;
             color: #2d2d2d;
-            appearance: none;
+            appearance: none; /* Removes default OS dropdown arrow */
+            /* Custom SVG arrow */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%232d2d2d' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 8px center;
@@ -140,7 +152,7 @@
             cursor: not-allowed;
         }
 
-        /* Scroll fade hint on right edge */
+        /* Scroll fade hint on right edge: Creates a gradient effect to indicate more content to the right */
         .filter-bar-wrapper {
             position: relative;
             flex: 1;
@@ -158,7 +170,7 @@
             z-index: 1;
         }
 
-        /* ── Stat card numbers ── */
+        /* ── Standard Stat Card Typography ── */
         .stat-card-number {
             font-family: 'Inter', sans-serif;
             font-weight: 800;
@@ -177,7 +189,7 @@
             margin-top: 2px;
         }
 
-        /* ── Gender split variant ── */
+        /* ── Gender Split Variant Typography (Used when data is broken down by Male/Female) ── */
         .stat-gender-number {
             font-family: 'Inter', sans-serif;
             font-weight: 800;
@@ -192,7 +204,7 @@
             margin-bottom: 2px;
         }
 
-        /* ── Chart card wrappers ── */
+        /* ── Chart Card Wrappers ── */
         .chart-card { position: relative; overflow: hidden; }
         .chart-card-title {
             font-size: 13px;
@@ -201,10 +213,10 @@
             padding: 14px 18px 0;
         }
 
-        /* ── Section toggle ── */
+        /* Utility to hide chart sections based on dropdown selection */
         .section-hidden { display: none !important; }
 
-        /* ── No-data page ── */
+        /* ── Empty State / No-data Page ── */
         .no-data-page {
             display: flex;
             flex-direction: column;
@@ -232,14 +244,16 @@
         .no-data-page a:hover { background: #007a2f; color: white; }
     </style>
 
+    {{-- Tailwind CSS CDN for rapid UI styling --}}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+    {{-- Sidebar Navigation Component --}}
     @include('components.sidebar')
 
     <div class="content w-100">
 
-        {{-- ── Sticky header + filter bar ── --}}
+        {{-- ── Sticky header + filter bar: Stays at the top while scrolling ── --}}
         <div class="sticky top-0 z-50">
             <header>
                 <span class="text-lg md:text-2xl font-[650] text-white">Graduates</span>
@@ -248,7 +262,7 @@
             {{-- Two-part filter bar: fixed title left, scrollable filters right ── --}}
             <div class="flex" style="background:#d1d5db; border-bottom:1px solid #b0b5b0; min-height:42px;">
 
-                {{-- Fixed left: page title ── --}}
+                {{-- Fixed left: Page title dynamically updates based on View Type and Semester --}}
                 <div class="filter-page-title">
                     @php
                         $viewLabel = $selected_view_type === 'demographic_profile' ? 'Demographic Profile' : 'Graduate Headcount';
@@ -256,17 +270,19 @@
                     @endphp
                 </div>
 
-                {{-- Scrollable right: all filters ── --}}
+                {{-- Scrollable right: Contains the actual form with dropdowns --}}
                 <div class="filter-bar-wrapper">
                     <div class="filter-bar-scroll">
                         <div class="filter-bar-inner">
 
                             <span class="filter-label-divider">Filter</span>
 
+                            {{-- Form triggers a GET request to update dashboard state --}}
                             <form method="GET" action="{{ route('graduates.index') }}"
                                   id="graduatesFilterForm"
                                   style="display:flex; align-items:center; gap:10px; flex-wrap:nowrap;">
 
+                                {{-- View Type: Toggles between Headcount and Demographic UI --}}
                                 <div class="filter-item">
                                     <span>View:</span>
                                     <select name="view_type" id="view_type">
@@ -275,6 +291,7 @@
                                     </select>
                                 </div>
 
+                                {{-- Student Level Filter --}}
                                 <div class="filter-item">
                                     <span>Level:</span>
                                     <select name="student_level" id="student_level">
@@ -284,6 +301,7 @@
                                     </select>
                                 </div>
 
+                                {{-- Semester Filter (populated dynamically from backend) --}}
                                 <div class="filter-item">
                                     <span>Semester:</span>
                                     <select name="semester" id="semester">
@@ -294,6 +312,7 @@
                                     </select>
                                 </div>
 
+                                {{-- College Filter --}}
                                 <div class="filter-item">
                                     <span>College:</span>
                                     <select name="college" id="college">
@@ -304,10 +323,12 @@
                                     </select>
                                 </div>
 
+                                {{-- If "All" colleges are selected, reset the program filter behind the scenes --}}
                                 @if($selected_college === 'All')
                                     <input type="hidden" name="program" value="All">
                                 @endif
 
+                                {{-- Program Filter (disabled until a specific college is chosen) --}}
                                 <div class="filter-item">
                                     <span>Program:</span>
                                     <select name="program" id="program"
@@ -331,6 +352,11 @@
 
         <div class="px-6 pt-4 pb-10">
 
+            {{--
+                Data pre-processing block:
+                Safely extracts the total count from the first box to determine if charts should render.
+                Handles both single integer values and associative arrays (male/female split).
+            --}}
             @php
                 $firstBoxValue   = $value_boxes[0]['value'] ?? 0;
                 $total_graduates = is_array($firstBoxValue)
@@ -338,6 +364,7 @@
                     : (int) $firstBoxValue;
                 $has_data = $total_graduates > 0;
 
+                // Array of FontAwesome icons cycled through for the stat cards
                 $icons = [
                     'fa-solid fa-chart-line',
                     'fa-solid fa-users',
@@ -350,12 +377,14 @@
 
             @if($has_data)
 
-                {{-- ── Stat Cards ── --}}
+                {{-- ── Stat Cards Top Row ── --}}
                 <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 mb-4">
                     @foreach($value_boxes as $index => $box)
                         @php
                             $icon     = $icons[$index % count($icons)];
-                            $isGender = is_array($box['value']);
+                            $isGender = is_array($box['value']); // Check if we need to show Male/Female split
+
+                            // Adjust columns based on the total number of cards to fit grid nicely
                             $span     = count($value_boxes) <= 3 ? 4 : 3;
                         @endphp
 
@@ -367,6 +396,7 @@
                                     </div>
 
                                     @if($isGender)
+                                        {{-- Layout for Gender Split Data (e.g. Male: 50, Female: 60) --}}
                                         <div class="row-span-2 pb-2 flex flex-col justify-end">
                                             <div class="flex justify-between items-end pr-4">
                                                 <div>
@@ -381,6 +411,7 @@
                                             <p class="stat-card-label pr-4 mt-1">{{ $box['title'] }}</p>
                                         </div>
                                     @else
+                                        {{-- Layout for Single Value Data (e.g. Total: 110) --}}
                                         <div class="row-span-2 pb-3">
                                             <p class="stat-card-number pr-4 pt-2">{{ $box['value'] }}</p>
                                             <p class="stat-card-label pr-4">{{ $box['title'] }}</p>
@@ -393,7 +424,7 @@
                 </div>
                 {{-- ── End Stat Cards ── --}}
 
-                {{-- ── Demographic Profile View ── --}}
+                {{-- ── Demographic Profile View (Pie Chart) ── --}}
                 <div id="demographicSection" class="{{ $selected_view_type === 'demographic_profile' ? '' : 'section-hidden' }}">
                     <div class="border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl mb-3 chart-card">
                         <div class="chart-card-title font-[750] text-sm md:text-lg text-gray-700 pl-5 sm:pl-7 pt-4"
@@ -404,12 +435,13 @@
                     </div>
                 </div>
 
-                {{-- ── Headcount View ── --}}
+                {{-- ── Headcount View (Donut, Ranking Bar, Stacked Bar) ── --}}
                 <div id="headcountSection" class="{{ $selected_view_type === 'graduate_headcount' ? '' : 'section-hidden' }}">
 
-                    {{-- Row 1: Donut + Ranking (2 col) ── --}}
+                    {{-- Row 1: Donut + Ranking (Side by Side on Large Screens) ── --}}
                     <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-3">
 
+                        {{-- Donut Chart Container --}}
                         <div class="col-span-6 h-[420px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
                             <div class="chart-card-title font-[750] text-sm md:text-lg text-gray-700 pl-5 sm:pl-7 pt-4"
                                  id="donutChartTitle">
@@ -418,6 +450,7 @@
                             <div id="headcountDonut" style="height:calc(100% - 50px);"></div>
                         </div>
 
+                        {{-- Ranking Bar Chart Container --}}
                         <div class="col-span-6 h-[420px] border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
                             <div class="chart-card-title font-[750] text-sm md:text-lg text-gray-700 pl-5 sm:pl-7 pt-4"
                                  id="rankingChartTitle">
@@ -428,7 +461,7 @@
 
                     </div>
 
-                    {{-- Row 2: Full-width stacked sex bar ── --}}
+                    {{-- Row 2: Full-width stacked sex bar chart ── --}}
                     <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl mb-3 chart-card">
                         <div class="chart-card-title font-[750] text-sm md:text-lg text-gray-700 pl-5 sm:pl-7 pt-4"
                              id="stackedChartTitle">
@@ -445,6 +478,7 @@
 
             @else
 
+                {{-- ── Empty State UI (Shown if $has_data is false) ── --}}
                 <div class="no-data-page">
                     <div class="icon-wrap">
                         <i class="fa-solid fa-filter-circle-xmark"></i>
@@ -463,18 +497,22 @@
     </div>
 
     @if($has_data)
+    {{-- Load Plotly.js for interactive charting --}}
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script>
-    // ── All JavaScript unchanged from original ────────────────────────────────
+    // ── Data Formatting & Chart Configuration ────────────────────────────────
+
+    // Hardcoded overrides for long college/department names
     const FALLBACK_ABBREVIATIONS = {
         'Graduate School - Masters':  'GS-Masters',
         'Graduate School - Doctoral': 'GS-Doctoral',
         'DOT-UNI':                    'DOT-UNI',
     };
 
+    // Regex patterns to strip formal degrees down to abbreviations (e.g. "Bachelor of Science" -> "BS")
     const DEGREE_PREFIXES = [
-        { pattern: /^Bachelor of Science in\s+/i,                           short: 'BS ' },
-        { pattern: /^Bachelor of Science\s*/i,                              short: 'BS ' },
+        { pattern: /^Bachelor of Science in\s+/i,                          short: 'BS ' },
+        { pattern: /^Bachelor of Science\s*/i,                               short: 'BS ' },
         { pattern: /^Bachelor of Arts in\s+/i,                             short: 'BA ' },
         { pattern: /^Bachelor of Arts\s*/i,                                short: 'BA ' },
         { pattern: /^Bachelor of Technology in\s+/i,                       short: 'BTech ' },
@@ -491,14 +529,17 @@
         { pattern: /^Bachelor of Culture\s*&\s*Arts Education\s*/i,        short: 'BS Culture & Arts Education' },
     ];
 
+    // Standard color palette for charts
     const PALETTE = [
         '#016531','#86090A','#B29A00','#6D430F','#0A6DAF',
         '#00FFFF','#A70062','#FF0000','#4b4b4b',
         '#5A0F8A','#0F6D5A','#C46A00',
     ];
 
-    const MALE_COLOR   = '#3B82F6';
-    const FEMALE_COLOR = '#EC4899';
+    const MALE_COLOR   = '#3B82F6'; // Blue
+    const FEMALE_COLOR = '#EC4899'; // Pink
+
+    // Reusable Plotly config and layout settings to ensure UI consistency
     const BASE_CONFIG  = { responsive: true, displayModeBar: false };
     const BASE_LAYOUT  = {
         font: { family: 'Inter, system-ui, sans-serif', size: 12 },
@@ -506,6 +547,7 @@
         plot_bgcolor:  'rgba(0,0,0,0)',
     };
 
+    // Inject PHP data directly into JS object using Laravel's Js::from directive
     const initialData = {!! Js::from([
         'selected_view_type' => $selected_view_type,
         'dynamic_title'      => $dynamic_title,
@@ -519,6 +561,7 @@
         'selected_program'   => $selected_program,
     ]) !!};
 
+    /** Removes long degree prefixes using the DEGREE_PREFIXES rules */
     function shortenDegreeName(name) {
         if (!name) return name;
         let cleaned = String(name).trim();
@@ -528,6 +571,7 @@
         return cleaned;
     }
 
+    /** Cleans up trailing parenthesis notes from programs before abbreviating */
     function abbreviateProgram(name) {
         if (!name) return name;
         let cleaned = String(name).trim();
@@ -535,36 +579,46 @@
         return shortenDegreeName(cleaned);
     }
 
+    /** Extracts college acronyms from parenthesis (e.g., "College of Arts (COA)" -> "COA") */
     function abbreviateCollege(name) {
         if (!name) return name;
         let cleaned = String(name).trim();
         const parenMatch = cleaned.match(/\(([^)]+)\)\s*$/);
         if (parenMatch) return parenMatch[1].trim();
+
+        // Fallback to hardcoded dict
         if (FALLBACK_ABBREVIATIONS[cleaned]) return FALLBACK_ABBREVIATIONS[cleaned];
         const ci = Object.keys(FALLBACK_ABBREVIATIONS).find(k => k.toLowerCase() === cleaned.toLowerCase());
         if (ci) return FALLBACK_ABBREVIATIONS[ci];
+
         return cleaned;
     }
 
+    /** Determines which formatter to use based on the current drill-down state (College vs Program) */
     function getLabelFormatter(data, mode = 'auto') {
         const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
         const isProgramSelected = initialData.selected_program && initialData.selected_program !== 'All';
         if (mode === 'college') return abbreviateCollege;
         if (mode === 'program') return abbreviateProgram;
+
+        // Auto logic: If viewing all colleges, abbreviate colleges. If college selected, abbreviate programs.
         if (!isCollegeSelected) return abbreviateCollege;
         if (isProgramSelected)  return abbreviateProgram;
         return abbreviateProgram;
     }
 
+    // ── Chart Rendering Functions ───────────────────────────────────────────
+
+    /** Renders the Male/Female Demographics Pie Chart */
     function renderDemographicPie(data) {
         if (!data?.labels?.length) return;
-        document.getElementById('demographicChartTitle').textContent = data.title || 'Percentage of Graduates by Sex';
+        document.getElementById('demographicChartTitle').textContent = data.title || 'Percentage of Graduates by external Sex';
         Plotly.newPlot('demographicPie', [{
             type: 'pie', labels: data.labels, values: data.values,
             marker: { colors: [MALE_COLOR, FEMALE_COLOR], line: { color: '#fff', width: 2 } },
             texttemplate: '<b>%{percent:.1%}</b>', textposition: 'outside',
             hovertemplate: '<b>%{label}</b><br>Count: %{value}<br>Share: %{percent:.1%}<extra></extra>',
-            pull: 0.03,
+            pull: 0.03, // Slight explosion effect
         }], {
             ...BASE_LAYOUT,
             margin: { t: 60, b: 20, l: 20, r: 20 },
@@ -572,17 +626,21 @@
         }, BASE_CONFIG);
     }
 
+    /** Renders the Headcount Donut Chart (Colleges or Programs distribution) */
     function renderHeadcountDonut(data) {
         if (!data?.labels?.length) return;
         document.getElementById('donutChartTitle').textContent = data.title || 'Graduate Distribution';
         const formatter         = getLabelFormatter(data);
-        const shortLabels       = data.labels.map(formatter);
+        const shortLabels       = data.labels.map(formatter); // Use abbreviations for cleaner UI
         const programColors     = data.program_colors || {};
         const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
+
+        // Map colors. Use specific program colors if provided, else fallback to standard palette.
         const colors = data.labels.map((label, i) => {
             if (isCollegeSelected) return programColors[label] || PALETTE[i % PALETTE.length];
             return PALETTE[i % PALETTE.length];
         });
+
         Plotly.newPlot('headcountDonut', [{
             type: 'pie', labels: shortLabels, values: data.values, customdata: data.labels,
             hole: 0.58, marker: { colors, line: { color: '#fff', width: 2 } },
@@ -595,20 +653,25 @@
         }, BASE_CONFIG);
     }
 
+    /** Renders the Horizontal Bar Chart ranking departments/programs */
     function renderRankingBar(data) {
         if (!data?.labels?.length) return;
         document.getElementById('rankingChartTitle').textContent = data.title || 'Ranking of Graduates Count';
         const programColors     = data.program_colors || {};
         const isCollegeSelected = initialData.selected_college && initialData.selected_college !== 'All';
         const formatter         = isCollegeSelected ? abbreviateProgram : abbreviateCollege;
+
+        // Bind full names, short names, and values together so we can sort them accurately
         const rows = data.labels
             .map((full, i) => ({ short: formatter(full), full, val: data.values[i], highlight: data.highlight && full === data.highlight }))
-            .sort((a, b) => a.val - b.val);
+            .sort((a, b) => a.val - b.val); // Sort ascending so largest is on top in Plotly
+
         const colors = rows.map((row, i) => {
-            if (row.highlight) return '#F59E0B';
+            if (row.highlight) return '#F59E0B'; // Highlight specific row (Yellow)
             if (isCollegeSelected) return programColors[row.full] || PALETTE[i % PALETTE.length];
             return PALETTE[(rows.length - 1 - i) % PALETTE.length];
         });
+
         Plotly.newPlot('rankingBar', [{
             type: 'bar', orientation: 'h',
             x: rows.map(d => d.val), y: rows.map(d => d.short), customdata: rows.map(d => d.full),
@@ -624,20 +687,24 @@
         }, BASE_CONFIG);
     }
 
+    /** Renders the Stacked 100% Bar Chart showing Male/Female ratios per department */
     function renderStackedSexBar(data) {
         if (!data?.labels?.length) return;
         document.getElementById('stackedChartTitle').textContent = data.title || 'Graduates Sex Distribution';
         const formatter   = getLabelFormatter(data);
         const shortLabels = data.labels.map(formatter);
+
+        // Pass full context to customdata so hover tooltips show absolute counts alongside percentages
         const cd = data.labels.map((l, i) => ({
             full: l, malePct: data.male_pct[i], femalePct: data.female_pct[i],
             maleCount: data.male_count[i], femaleCount: data.female_count[i],
         }));
+
         Plotly.newPlot('stackedSexBar', [
             {
                 type: 'bar', name: 'Male', orientation: 'h',
                 x: data.male_pct, y: shortLabels, customdata: cd,
-                text: data.male_pct.map(v => v > 4 ? `${v}%` : ''),
+                text: data.male_pct.map(v => v > 4 ? `${v}%` : ''), // Hide text if slice is too small
                 textposition: 'inside', textfont: { color: '#fff', size: 11 },
                 marker: { color: MALE_COLOR },
                 hovertemplate: '<b>%{customdata.full}</b><br>Male: %{customdata.malePct}% (%{customdata.maleCount})<br>Female: %{customdata.femalePct}% (%{customdata.femaleCount})<extra></extra>',
@@ -652,7 +719,7 @@
             }
         ], {
             ...BASE_LAYOUT,
-            barmode: 'stack',
+            barmode: 'stack', // Crucial for 100% stacked effect
             margin: { t: 50, b: 50, l: 140, r: 30 },
             legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.06, font: { size: 13, color: '#374151' }, itemsizing: 'constant' },
             xaxis: { title: { text: 'Percentage (%)', font: { size: 12 } }, range: [0, 100], gridcolor: '#f1f5f9', zeroline: false },
@@ -660,56 +727,32 @@
         }, BASE_CONFIG);
     }
 
+    /** Master orchestrator function to render the correct charts based on View Type */
     function renderDashboard(data) {
         const isDemographic = data.selected_view_type === 'demographic_profile';
+
+        // Toggle visibility of the layout sections
         document.getElementById('demographicSection').classList.toggle('section-hidden', !isDemographic);
         document.getElementById('headcountSection').classList.toggle('section-hidden', isDemographic);
+
         if (isDemographic) {
             renderDemographicPie(data.pie_chart);
         } else {
+            // Determine if we should show program-specific donut data or general college donut data
             const isProgramSelected = data.selected_program && data.selected_program !== 'All';
             const donutData = (isProgramSelected && data.major_chart?.labels?.length)
                 ? data.major_chart
                 : data.donut_chart;
+
             renderHeadcountDonut(donutData);
             renderRankingBar(data.ranking_chart);
             renderStackedSexBar(data.stacked_chart);
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        renderDashboard(initialData);
-    });
+    // Auto-render on script load using the injected PHP data
+    renderDashboard(initialData);
     </script>
     @endif
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form         = document.getElementById('graduatesFilterForm');
-        const college      = document.getElementById('college');
-        const program      = document.getElementById('program');
-        const viewType     = document.getElementById('view_type');
-        const studentLevel = document.getElementById('student_level');
-        const semester     = document.getElementById('semester');
-
-        function syncProgramState() {
-            const isAll = college.value === 'All';
-            if (isAll) { program.value = 'All'; program.setAttribute('disabled', 'disabled'); }
-            else { program.removeAttribute('disabled'); }
-        }
-
-        syncProgramState();
-        college.addEventListener('change', syncProgramState);
-
-        [viewType, studentLevel, semester, college, program].forEach(el => {
-            el.addEventListener('change', () => {
-                if (college.value === 'All') program.value = 'All';
-                form.submit();
-            });
-        });
-    });
-    </script>
-
 </body>
 </html>
