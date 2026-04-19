@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{-- Asset bundler for CSS/JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- External CSS libraries --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    {{-- Plotly for chart rendering --}}
     <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
+
+    {{-- Tom Select for enhanced dropdowns --}}
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     <title>Siel Metrics</title>
 
     <style>
+        /* Offset content from sidebar width */
         .content {
             margin-left: 250px;
             transition: margin-left 0.3s ease, max-width 0.3s ease;
@@ -22,11 +31,13 @@
             overflow-x: clip;
         }
 
+        /* Shrink content area when sidebar collapses */
         body.sidebar-collapsed .content {
             margin-left: 68px;
             max-width: calc(100vw - 68px);
         }
 
+        /* Fix Bootstrap collapse visibility bug */
         .collapse.show {
             visibility: visible !important;
         }
@@ -38,6 +49,7 @@
             overflow-x: clip;
         }
 
+        /* Top sticky header bar */
         header {
             height: 70px;
             padding: 2rem 3rem;
@@ -87,7 +99,7 @@
             line-height: 1.4;
         }
 
-        /* ── Loading overlay ── */
+        /* Semi-transparent overlay shown during data fetch */
         .loading-overlay {
             position: absolute;
             inset: 0;
@@ -101,10 +113,12 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
+        /* Makes overlay visible */
         .loading-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
+        /* Spinning animation for loader */
         .spinner {
             width: 36px;
             height: 36px;
@@ -115,7 +129,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── No-data overlay ── */
+        /* Shown when chart has no data */
         .no-data-overlay {
             position: absolute;
             inset: 0;
@@ -131,7 +145,7 @@
         .no-data-overlay i   { font-size: 40px; color: #ccc; }
         .no-data-overlay span { font-size: 13px; font-weight: 600; color: #999; }
 
-        /* ── Stat shimmer ── */
+        /* Pulsing skeleton effect while stats load */
         .stat-shimmer .stat-card-number,
         .stat-shimmer .stat-card-label {
             background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
@@ -145,7 +159,7 @@
             100% { background-position: -200% 0; }
         }
 
-        /* ── Filter bar loading ── */
+        /* Disables filter controls during fetch */
         .filter-bar-loading select,
         .filter-bar-loading button {
             pointer-events: none;
@@ -153,9 +167,11 @@
         }
     </style>
 
+    {{-- Tailwind utility classes via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+    {{-- Reusable sidebar component --}}
     @include('components.sidebar')
 
     <div class="content">
@@ -166,11 +182,16 @@
                 <span class="text-lg md:text-2xl font-[650] text-white">Faculty Profile</span>
             </header>
 
+            {{-- Filter bar: semester and college selectors --}}
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4" id="filterBar">
+
+                {{-- Dynamic title updates based on active filters --}}
                 <div class="font-[650] text-sm md:text-lg" id="dynamicTitle">
                     @php
+                        // Resolve selected semester display text
                         $selectedSemesterObj = $semesters->firstWhere('sem_id', $filters['semester']);
                         $semesterDisplay = $selectedSemesterObj ? $selectedSemesterObj->semester . ' ' . $selectedSemesterObj->sy : '';
+                        // Show college acronym if a specific college is selected
                         if ($filters['college'] != 'all') {
                             $selectedUnit = $colleges->firstWhere('c_u_id', $filters['college']);
                             $unitDisplay  = $selectedUnit ? $selectedUnit->college_acro : '';
@@ -186,6 +207,7 @@
                         Filter
                     </div>
 
+                    {{-- Semester dropdown filter --}}
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium">Semester:</span>
                         <select id="semesterFilter"
@@ -198,6 +220,7 @@
                         </select>
                     </div>
 
+                    {{-- College/unit dropdown filter --}}
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium">Unit/Office:</span>
                         <select id="collegeFilter"
@@ -218,10 +241,10 @@
 
         <div class="px-6">
 
-            {{-- ── Stat Cards — 4 cards like publications single-card row ── --}}
+            {{-- ── Stat Cards: key faculty metrics at a glance ── --}}
             <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
 
-                {{-- Total EWMS Faculty --}}
+                {{-- Total faculty registered in EWMS --}}
                 <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardTotal">
                         <div class="grid grid-rows-4 h-full">
@@ -236,7 +259,7 @@
                     </div>
                 </div>
 
-                {{-- Active Faculty --}}
+                {{-- Faculty with active status --}}
                 <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardActive">
                         <div class="grid grid-rows-4 h-full">
@@ -251,7 +274,7 @@
                     </div>
                 </div>
 
-                {{-- PhD Holders --}}
+                {{-- Faculty holding doctorate degrees --}}
                 <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardPhd">
                         <div class="grid grid-rows-4 h-full">
@@ -266,7 +289,7 @@
                     </div>
                 </div>
 
-                {{-- Masters Holders --}}
+                {{-- Faculty holding master's degrees --}}
                 <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-3">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden" id="cardMasters">
                         <div class="grid grid-rows-4 h-full">
@@ -284,10 +307,10 @@
             </div>
             {{-- ── End Stat Cards ── --}}
 
-            {{-- ── Charts: 3 columns matching publications layout ── --}}
+            {{-- ── Charts: 3-column grid layout ── --}}
             <div class="grid grid-cols-4 xl:grid-cols-12 gap-3">
 
-                {{-- ① Submitted Faculty Workload --}}
+                {{-- ① Horizontal bar: submitted workloads per college/dept --}}
                 <div class="col-span-4 h-[340px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card" id="cardRanking">
                     <h3 id="rankingTitle">
                         @if($filters['college'] != 'all')
@@ -303,7 +326,7 @@
                     <div class="loading-overlay" id="loadRanking"><div class="spinner"></div></div>
                 </div>
 
-                {{-- ② Employment Status --}}
+                {{-- ② Donut chart: faculty by employment category --}}
                 <div class="col-span-4 h-[300px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card" id="cardEmployment">
                     <h3 id="employmentTitle">
                         @if($filters['college'] != 'all')
@@ -319,7 +342,7 @@
                     <div class="loading-overlay" id="loadEmployment"><div class="spinner"></div></div>
                 </div>
 
-                {{-- ③ Faculty Availability --}}
+                {{-- ③ Donut chart: active vs on-leave faculty --}}
                 <div class="col-span-4 h-[300px] sm:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card" id="cardStatus">
                     <h3 id="statusTitle">
                         @if($filters['college'] != 'all')
@@ -337,7 +360,7 @@
 
             </div>
 
-            {{-- ── Full-width chart: Qualification Distribution (mirrors publications trend row) ── --}}
+            {{-- ④ Full-width stacked bar: degree breakdown per college/dept --}}
             <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[380px] sm:h-[420px] mt-3 mb-8 chart-card" id="cardQual">
                 <h3 id="qualificationTitle" class="font-[750] text-sm sm:text-lg text-gray-700 pl-5 sm:pl-7 pt-4">
                     @if($filters['college'] != 'all')
@@ -359,7 +382,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // ── All JavaScript unchanged from original ────────────────────────────────
+    // ── Seed data from server on initial page load ──
     const INITIAL_DATA = {
         totalFaculty      : {{ $totalFaculty }},
         activeCount       : {{ $activeCount }},
@@ -384,19 +407,23 @@
         collegeFilterValue: @json($filters['college']),
     };
 
+    // AJAX endpoint and CSRF token for filter requests
     const AJAX_URL   = '{{ route("stzfaculty.overview.ajax") }}';
     const CSRF_TOKEN = '{{ csrf_token() }}';
 
+    // Activates spinners and disables filter controls
     function showLoaders() {
         document.getElementById('filterBar').classList.add('filter-bar-loading');
         ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
             document.getElementById(id)?.classList.add('active');
         });
+        // Apply shimmer to stat cards while loading
         ['cardTotal','cardActive','cardPhd','cardMasters'].forEach(id => {
             document.getElementById(id)?.classList.add('stat-shimmer');
         });
     }
 
+    // Removes all spinners and re-enables controls
     function hideLoaders() {
         document.getElementById('filterBar').classList.remove('filter-bar-loading');
         ['loadRanking','loadEmployment','loadStatus','loadQual'].forEach(id => {
@@ -407,6 +434,7 @@
         });
     }
 
+    // Shared layout config for all donut charts
     function donutLayout() {
         return {
             font: { family: 'Inter' },
@@ -429,6 +457,7 @@
         };
     }
 
+    // Injects "No record found" overlay over empty chart
     function showNoData(div) {
         let overlay = div.parentNode.querySelector('.no-data-overlay');
         if (!overlay) {
@@ -441,12 +470,14 @@
         div.style.visibility = 'hidden';
     }
 
+    // Hides the no-data overlay, restores chart
     function clearNoData(div) {
         const overlay = div.parentNode.querySelector('.no-data-overlay');
         if (overlay) overlay.style.display = 'none';
         div.style.visibility = 'visible';
     }
 
+    // Converts hex color to rgba with per-bar opacity array
     function colorWithOpacity(baseColor, opacities) {
         const r = parseInt(baseColor.slice(1,3), 16);
         const g = parseInt(baseColor.slice(3,5), 16);
@@ -454,18 +485,21 @@
         return opacities.map(o => `rgba(${r},${g},${b},${o})`);
     }
 
+    // Shared Plotly config: responsive, minimal toolbar
     const plotCfg = {
         responsive: true,
         displaylogo: false,
         modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
     };
 
+    // Renders horizontal bar chart for workload submission
     function renderRanking(d) {
         const div = document.getElementById('facultyRankingChart');
         if (!div) return;
 
         if (!d.rankingLabels || d.rankingLabels.length === 0) { showNoData(div); return; }
 
+        // Check if total faculty data exists alongside submissions
         const hasTotals = Array.isArray(d.rankingTotals)
             && d.rankingTotals.length === d.rankingLabels.length
             && d.rankingTotals.some(v => v > 0);
@@ -478,6 +512,7 @@
         clearNoData(div);
 
         if (hasTotals) {
+            // Grouped bar: submitted workload vs total faculty
             const labels = [...d.rankingLabels].reverse();
             const counts = [...d.rankingCounts].reverse();
             const totals = [...d.rankingTotals].reverse();
@@ -538,6 +573,7 @@
             }, plotCfg);
 
         } else {
+            // Single bar: submitted workload only, highlight selected dept
             const labels = [...d.rankingLabels].reverse();
             const counts = [...d.rankingCounts].reverse();
             const maxVal = Math.max(...counts, 1);
@@ -579,11 +615,13 @@
         }
     }
 
+    // Renders donut chart for employment status categories
     function renderEmployment(d) {
         const div = document.getElementById('employmentChart');
         if (!div) return;
         const colorMap = ['#009539','#2c7be5','#f6c343','#e74c3c'];
         const vals=[], labels=[], colors=[];
+        // Filter out zero-value categories before plotting
         d.categoryData.forEach((v, i) => {
             if (v > 0) { vals.push(v); labels.push(d.categoryLabels[i]); colors.push(colorMap[i % colorMap.length]); }
         });
@@ -607,6 +645,7 @@
         }], donutLayout(), plotCfg);
     }
 
+    // Renders donut chart: active vs on-leave faculty
     function renderStatus(d) {
         const div = document.getElementById('statusChart');
         if (!div) return;
@@ -614,6 +653,7 @@
         const lbl  = ['Active', 'On Leave'];
         const clr  = ['#009539', '#e74c3c'];
         const vals=[], labels=[], colors=[];
+        // Exclude zero values from the chart
         raw.forEach((v, i) => {
             if (v > 0) { vals.push(v); labels.push(lbl[i]); colors.push(clr[i]); }
         });
@@ -635,6 +675,7 @@
         }], donutLayout(), plotCfg);
     }
 
+    // Recalculates percentages to always sum to exactly 100%
     function normalizeQualPct(phdArr, mastersArr, bachelorsArr) {
         const normPhd=[], normMasters=[], normBachelors=[];
         phdArr.forEach((_, i) => {
@@ -645,6 +686,7 @@
                 const scale = 100 / total;
                 const p = parseFloat((phdArr[i]    * scale).toFixed(4));
                 const m = parseFloat((mastersArr[i] * scale).toFixed(4));
+                // Bachelors gets remainder to avoid floating-point drift
                 const b = parseFloat((100 - p - m).toFixed(4));
                 normPhd.push(p); normMasters.push(m); normBachelors.push(b < 0 ? 0 : b);
             }
@@ -652,10 +694,12 @@
         return { normPhd, normMasters, normBachelors };
     }
 
+    // Renders stacked bar chart for degree qualification breakdown
     function renderQual(d) {
         const div = document.getElementById('qualificationChart');
         if (!div) return;
 
+        // Remove colleges/depts with zero faculty across all degrees
         const filteredQualLabels=[], filteredPhdPct=[], filteredMastersPct=[], filteredBachelorsPct=[];
         const filteredPhdCounts=[], filteredMastersCounts=[], filteredBachelorsCounts=[];
 
@@ -677,6 +721,7 @@
         if (!filteredQualLabels.length || totalQual === 0) { showNoData(div); return; }
         clearNoData(div);
 
+        // Dim non-selected departments when one is active
         const sel = d.selectedDept;
         const opacities = sel
             ? filteredQualLabels.map(l => l === sel ? 1 : 0.4)
@@ -743,6 +788,7 @@
         }, plotCfg);
     }
 
+    // Updates the four stat card numbers from fetched data
     function updateStatCards(d) {
         document.getElementById('statTotalNum').textContent   = d.totalFaculty;
         document.getElementById('statActiveNum').textContent  = d.activeCount;
@@ -750,6 +796,7 @@
         document.getElementById('statMastersNum').textContent = d.mastersHolders;
     }
 
+    // Updates all chart/page titles based on active filters
     function updateTitles(d, filters) {
         const col     = filters.college || d.collegeFilterValue || 'all';
         const sem     = filters.semesterText || d.semesterText  || '';
@@ -770,6 +817,7 @@
         document.getElementById('qualificationTitle').textContent = prefix + 'Faculty Qualification Distribution';
     }
 
+    // Fetches filtered data then re-renders all charts
     function fetchAndRender(params) {
         showLoaders();
         fetch(AJAX_URL + '?' + params.toString(), {
@@ -788,6 +836,7 @@
             renderStatus(data);
             renderQual(data);
 
+            // Sync URL query string without page reload
             const url = new URL(window.location.href);
             url.search = params.toString();
             window.history.replaceState({}, '', url.toString());
@@ -796,6 +845,7 @@
         .finally(()  => hideLoaders());
     }
 
+    // Collects current filter values into URLSearchParams
     function buildParams() {
         const params = new URLSearchParams();
         params.set('semester',   document.getElementById('semesterFilter').value);
@@ -804,20 +854,24 @@
         return params;
     }
 
+    // Triggered on semester or college change
     function applyFilters() {
         updateDynamicTitle();
         fetchAndRender(buildParams());
     }
 
+    // Triggered specifically on college change (resets dept)
     function updateDepartments() {
         updateDynamicTitle();
         fetchAndRender(buildParams());
     }
 
+    // Redirects to default route, clearing all filters
     function clearFilters() {
         window.location.href = '{{ route("stzfaculty.overview") }}';
     }
 
+    // Instantly updates page title before fetch completes
     function updateDynamicTitle() {
         const semEl   = document.getElementById('semesterFilter');
         const semText = semEl.options[semEl.selectedIndex].text;
@@ -828,6 +882,7 @@
             : 'Faculty Profile (' + semText + ')';
     }
 
+    // Tells Plotly to resize all charts to current container
     function reflowCharts() {
         ['facultyRankingChart','employmentChart','statusChart','qualificationChart']
             .forEach(id => {
@@ -837,12 +892,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Bind filter dropdowns to change handlers
         document.getElementById('semesterFilter').addEventListener('change', applyFilters);
         document.getElementById('collegeFilter').addEventListener('change',  updateDepartments);
 
+        // Reflow charts after sidebar animation completes
         const sidebarBtn = document.getElementById('sidebarToggle');
         if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
 
+        // Render all charts with server-provided initial data
         updateTitles(INITIAL_DATA, {
             college     : INITIAL_DATA.collegeFilterValue,
             semesterText: INITIAL_DATA.semesterText
@@ -852,13 +910,14 @@
         renderStatus(INITIAL_DATA);
         renderQual(INITIAL_DATA);
 
-        // ResizeObserver mirrors programs page pattern
+        // Reflow charts when content area resizes (sidebar toggle)
         const contentDiv = document.querySelector('.content');
         if (contentDiv) {
             const ro = new ResizeObserver(() => reflowCharts());
             ro.observe(contentDiv);
         }
 
+        // Debounced reflow on window resize
         let resizeTimeout;
         window.addEventListener('resize', function () {
             clearTimeout(resizeTimeout);

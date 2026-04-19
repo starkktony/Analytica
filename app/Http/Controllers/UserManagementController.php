@@ -9,6 +9,7 @@ use App\Models\User;
 
 class UserManagementController extends Controller
 {
+    // Fetch all users and pass to index view
     public function index()
     {
         $users = User::all();
@@ -17,18 +18,20 @@ class UserManagementController extends Controller
 
     public function store(Request $request)
     {
+        // Validate name, institutional email, role, and password
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => [
                 'required',
                 'email',
-                'ends_with:@clsu.edu.ph',
+                'ends_with:@clsu.edu.ph',   // Restrict to institutional domain
                 Rule::unique('users', 'email'),
             ],
             'role'     => ['required', 'string', Rule::in($this->validRoles())],
             'password' => 'required|min:6',
         ]);
 
+        // Create user with hashed password
         User::create([
             'name'     => $request->name,
             'email'    => $request->email,
@@ -41,8 +44,10 @@ class UserManagementController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Abort if user not found
         $user = User::findOrFail($id);
 
+        // Validate name and email, ignoring current user's email uniqueness
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => [
@@ -56,7 +61,7 @@ class UserManagementController extends Controller
         $user->update([
             'name'  => $request->name,
             'email' => $request->email,
-            // role intentionally excluded — locked after creation
+            // Role intentionally excluded — locked after creation
         ]);
 
         return redirect()->back()->with('success', 'User updated successfully!');
@@ -66,6 +71,7 @@ class UserManagementController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // Prevent self-deletion
         if ($user->id === auth()->id()) {
             return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
@@ -74,6 +80,7 @@ class UserManagementController extends Controller
         return redirect()->back()->with('success', 'User deleted successfully!');
     }
 
+    // Returns list of all allowed user roles
     private function validRoles(): array
     {
         return [

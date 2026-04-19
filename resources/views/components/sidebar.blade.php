@@ -2,6 +2,7 @@
     $user = Auth::user();
     $role = $user->role;
 
+    // Define role-based access flags for each section
     $canViewStudent     = true;
     $canViewFaculty     = in_array($role, ['Admin', 'Executive', 'Director', 'Chief', 'Employee-Teaching']);
     $canViewFinancial   = in_array($role, ['Admin', 'Executive', 'Director', 'Chief']);
@@ -14,18 +15,18 @@
 
     <div class="sidebar-scrollable">
 
-        {{-- Logo - full --}}
+        {{-- Logo: shown when sidebar is expanded --}}
         <div class="sidebar-logo-full" style="text-align:center;padding:12px 0;">
             <div class="sidebar-brand">
                 <span class="brand-text">Siel<span class="brand-metrics">Metrics</span><span class="brand-plus">+</span></span>
             </div>
         </div>
-        {{-- Logo - mini (collapsed) --}}
+        {{-- Logo: shown when sidebar is collapsed --}}
         <div class="sidebar-logo-mini" style="text-align:center;padding:12px 0;display:none;">
             <span class="brand-plus" style="font-size:1.8rem;font-weight:900;color:#4ade80;">+</span>
         </div>
 
-        {{-- Search - full --}}
+        {{-- Search bar: shown when expanded --}}
         <div class="sidebar-search-full" style="margin:0 12px 12px;display:flex;align-items:center;gap:0;">
             <span style="background:#2a2a2a;border:1px solid #444;border-right:none;padding:8px 12px;border-radius:20px 0 0 20px;">
                 <i class="bi bi-search" style="color:#cfcfcf;font-size:0.9rem;"></i>
@@ -33,12 +34,12 @@
             <input type="text" placeholder="Search here"
                 style="flex:1;background:#2a2a2a;border:1px solid #444;border-left:none;padding:8px 12px;border-radius:0 20px 20px 0;color:#cfcfcf;font-size:0.85rem;outline:none;">
         </div>
-        {{-- Search - mini (collapsed) --}}
+        {{-- Search icon: shown when collapsed --}}
         <div class="sidebar-search-mini" style="text-align:center;margin-bottom:12px;display:none;">
             <i class="bi bi-search" style="color:#cfcfcf;font-size:1.1rem;"></i>
         </div>
 
-        {{-- DASHBOARD — all roles --}}
+        {{-- Dashboard link — visible to all roles --}}
         <a href="{{ url('/dashboard') }}"
            class="sidebar-menu-item {{ request()->is('dashboard') ? 'active' : '' }}"
            data-label="Dashboard">
@@ -46,9 +47,10 @@
             <span class="menu-label">Dashboard</span>
         </a>
 
-        {{-- STUDENT — Admin, Executive, Director, Chief --}}
+        {{-- Student section — visible to all roles --}}
         @if($canViewStudent)
         <div class="sidebar-item">
+            {{-- Parent row: active if on any student sub-page --}}
             <div class="sidebar-parent {{ request()->is('student*') || request()->is('enrollment') || request()->is('graduation') || request()->is('scholarship') || request()->routeIs('graduates.index') ? 'active' : '' }}"
                  data-label="Student">
                 <a href="{{ url('/student') }}" class="sidebar-link" style="flex:1;">
@@ -59,6 +61,7 @@
                     <i class="bi bi-chevron-down"></i>
                 </span>
             </div>
+            {{-- Submenu: auto-opens when on a student route --}}
             <div class="sidebar-submenu {{ request()->is('student*') || request()->is('enrollment') || request()->is('graduation') || request()->is('scholarship') || request()->routeIs('graduates.index') ? 'open' : '' }}"
                  id="studentMenu">
                 <a href="{{ url('/enrollment') }}" class="submenu-link {{ request()->is('enrollment') ? 'active' : '' }}">
@@ -74,9 +77,10 @@
         </div>
         @endif
 
-        {{-- FACULTY — Admin, Executive, Director, Chief, Employee-Teaching --}}
+        {{-- Faculty section — Teaching staff and above --}}
         @if($canViewFaculty)
         <div class="sidebar-item">
+            {{-- Parent row: active if on any faculty route --}}
             <div class="sidebar-parent {{ request()->routeIs('stzfaculty.*') || request()->routeIs('suc-faculty.*') ? 'active' : '' }}"
                  data-label="Faculty">
                 <a href="{{ route('stzfaculty.overview') }}" class="sidebar-link" style="flex:1;">
@@ -87,6 +91,7 @@
                     <i class="bi bi-chevron-down"></i>
                 </span>
             </div>
+            {{-- Submenu: faculty sub-pages --}}
             <div class="sidebar-submenu {{ request()->routeIs('stzfaculty.*') || request()->routeIs('suc-faculty.*') ? 'open' : '' }}"
                  id="facultyMenu">
                 <a href="{{ route('stzfaculty.overview') }}" class="submenu-link {{ request()->routeIs('stzfaculty.overview') ? 'active' : '' }}">
@@ -108,9 +113,10 @@
         </div>
         @endif
 
-        {{-- FINANCIAL REPORTS — Admin, Executive, Director, Chief --}}
+        {{-- Financial Reports — Director level and above --}}
         @if($canViewFinancial)
         <div class="sidebar-item">
+            {{-- Parent row: active if on any normative-funding route --}}
             <div class="sidebar-parent {{ request()->routeIs('normative-funding.*') ? 'active' : '' }}"
                  data-label="Financial Reports">
                 <a href="{{ route('normative-funding.index') }}" class="sidebar-link" style="flex:1;">
@@ -130,9 +136,10 @@
         </div>
         @endif
 
-        {{-- RADIIS — Admin, Executive, Director, Chief --}}
+        {{-- RADIIS — Director level and above --}}
         @if($canViewRadiis)
         <div class="sidebar-item">
+            {{-- Parent row: active if on any radiis route --}}
             <div class="sidebar-parent {{ request()->routeIs('radiis.*') ? 'active' : '' }}"
                  data-label="RADIIS">
                 <a href="{{ route('radiis.programs') }}" class="sidebar-link" style="flex:1;">
@@ -143,6 +150,7 @@
                     <i class="bi bi-chevron-down"></i>
                 </span>
             </div>
+            {{-- Submenu: all RADIIS sub-pages --}}
             <div class="sidebar-submenu {{ request()->routeIs('radiis.*') ? 'open' : '' }}"
                  id="radiisMenu">
                 <a href="{{ route('radiis.programs') }}" class="submenu-link {{ request()->routeIs('radiis.programs') ? 'active' : '' }}">
@@ -179,9 +187,10 @@
         </div>
         @endif
 
-        {{-- EIS — Admin, Executive only --}}
+        {{-- EIS — Admin and Executive only --}}
         @if($canViewEIS)
         <div class="sidebar-item">
+            {{-- Parent row: active if on any EIS route --}}
             <div class="sidebar-parent {{ request()->routeIs('eis.*') ? 'active' : '' }}"
                  data-label="EIS">
                 <a href="{{ route('eis.igp') }}" class="sidebar-link" style="flex:1;">
@@ -192,6 +201,7 @@
                     <i class="bi bi-chevron-down"></i>
                 </span>
             </div>
+            {{-- Submenu: EIS sub-pages --}}
             <div class="sidebar-submenu {{ request()->routeIs('eis.*') ? 'open' : '' }}"
                  id="eisMenu">
                 <a href="{{ route('eis.igp') }}" class="submenu-link {{ request()->routeIs('eis.igp') ? 'active' : '' }}">
@@ -212,13 +222,13 @@
 
         <hr style="border-color:#555;margin:8px 12px;">
 
-        {{-- ABOUT — all roles --}}
+        {{-- About link — visible to all roles --}}
         <a href="" class="sidebar-menu-item" data-label="About Analytica">
             <span class="menu-icon"><i class="bi bi-info-circle"></i></span>
             <span class="menu-label">About Analytica</span>
         </a>
 
-        {{-- USER MANAGEMENT — Admin only --}}
+        {{-- User Management — Admin only --}}
         @if($canViewUserMgmt)
         <a href="{{ route('user_manage') }}"
            class="sidebar-menu-item {{ request()->routeIs('user_manage*') ? 'active' : '' }}"
@@ -230,7 +240,7 @@
 
     </div>{{-- end sidebar-scrollable --}}
 
-    {{-- Profile Section --}}
+    {{-- Displays logged-in user name, role, and logout button --}}
     <div class="sidebar-profile">
         <div class="profile-info">
             <div class="profile-icon"><i class="bi bi-person-circle"></i></div>
@@ -247,7 +257,7 @@
         </form>
     </div>
 
-    {{-- Toggle Button --}}
+    {{-- Toggle button to expand/collapse sidebar --}}
     <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle Sidebar">
         <i class="bi bi-chevron-left" id="toggleIcon"></i>
     </button>
@@ -255,6 +265,7 @@
 </div>{{-- end .sidebar --}}
 
 <style>
+    /* Sidebar fixed layout, full height, dark background */
     .sidebar {
         position: fixed; top: 0; left: 0;
         width: 250px; height: 100vh;
@@ -264,24 +275,30 @@
         transition: width 0.3s ease;
         font-family: 'Bricolage Grotesque', 'Segoe UI', sans-serif;
     }
+    /* Collapsed width — icon-only mode */
     .sidebar.collapsed { width: 68px; }
     .sidebar-brand { padding: 4px 0; }
     .brand-text { font-family: 'Segoe UI', sans-serif; font-size: 1.5rem; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; }
     .brand-metrics { color: #4ade80; }
     .brand-plus { color: #4ade80; font-size: 1.8rem; font-weight: 900; }
+    /* Scrollable nav area with thin custom scrollbar */
     .sidebar-scrollable { flex: 1; overflow-y: auto; overflow-x: hidden; background-color: #1f1f1f; padding-bottom: 20px; }
     .sidebar-scrollable::-webkit-scrollbar { width: 4px; }
     .sidebar-scrollable::-webkit-scrollbar-track { background: transparent; }
     .sidebar-scrollable::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
     .sidebar-scrollable::-webkit-scrollbar-thumb:hover { background: #0f8f3a; }
+    /* Hide text labels and search when collapsed */
     .sidebar.collapsed .menu-label,
     .sidebar.collapsed .sidebar-search-full,
     .sidebar.collapsed .sidebar-logo-full,
     .sidebar.collapsed .sidebar-chevron,
     .sidebar.collapsed .profile-text { display: none !important; }
+    /* Show mini versions when collapsed */
     .sidebar.collapsed .sidebar-logo-mini,
     .sidebar.collapsed .sidebar-search-mini { display: block !important; }
+    /* Hide submenus entirely when collapsed */
     .sidebar.collapsed .sidebar-submenu { display: none !important; }
+    /* Center icons when collapsed */
     .sidebar.collapsed .sidebar-menu-item,
     .sidebar.collapsed .sidebar-link,
     .sidebar.collapsed .sidebar-parent { justify-content: center; padding-left: 0; padding-right: 0; }
@@ -289,6 +306,7 @@
     .sidebar.collapsed .menu-icon { display: flex; justify-content: center; align-items: center; width: 68px; font-size: 1.1rem; }
     .sidebar.collapsed .sidebar-menu-item,
     .sidebar.collapsed .sidebar-parent { position: relative; }
+    /* Tooltip on hover when collapsed */
     .sidebar.collapsed .sidebar-menu-item[data-label]:hover::after,
     .sidebar.collapsed .sidebar-parent[data-label]:hover::after {
         content: attr(data-label); position: absolute; left: 72px; top: 50%;
@@ -296,6 +314,7 @@
         padding: 5px 10px; border-radius: 6px; font-size: 0.8rem;
         white-space: nowrap; z-index: 9999; pointer-events: none;
     }
+    /* Floating toggle button, repositions on collapse */
     .sidebar-toggle-btn {
         position: fixed; top: 50%; left: 230px; transform: translateY(-50%);
         width: 36px; height: 36px; background: #0f8f3a; border: none; border-radius: 50%;
@@ -304,15 +323,18 @@
         transition: background 0.2s ease, left 0.3s ease;
     }
     .sidebar-toggle-btn:hover { background: #09722d; }
+    /* Chevron icon rotates 180° when collapsed */
     #toggleIcon { transition: transform 0.3s ease; }
     .sidebar.collapsed #toggleIcon { transform: rotate(180deg); }
     body.sidebar-collapsed .sidebar-toggle-btn { left: 48px; }
+    /* Profile bar pinned to sidebar bottom */
     .sidebar-profile {
         flex-shrink: 0; width: 100%; padding: 12px 16px;
         background-color: #009539; color: white;
         display: flex; justify-content: space-between; align-items: center;
         transition: padding 0.3s ease;
     }
+    /* Collapse profile to logout icon only */
     .sidebar.collapsed .sidebar-profile { padding: 12px 0; justify-content: center; }
     .sidebar.collapsed .sidebar-profile .profile-info { display: none; }
     .sidebar.collapsed .sidebar-profile form { margin: 0 auto; }
@@ -323,9 +345,11 @@
     .profile-role { font-size: 11px; opacity: 0.85; }
     .logout-btn { background: transparent; border: none; color: white; font-size: 22px; padding: 0; cursor: pointer; display: flex; align-items: center; transition: opacity 0.2s; }
     .logout-btn:hover { opacity: 0.75; }
+    /* Top-level nav item styles */
     .sidebar-menu-item { color: #cfcfcf; text-decoration: none; padding: 12px 20px; display: flex; align-items: center; gap: 8px; font-size: 0.92rem; font-weight: 500; transition: background-color 0.2s ease, color 0.2s ease; }
     .sidebar-menu-item:hover { background: #0f8f3a; color: white; }
     .sidebar-menu-item.active { background: #009539; color: white; }
+    /* Expandable parent row */
     .sidebar-parent { display: flex; align-items: center; transition: background-color 0.2s ease; cursor: default; }
     .sidebar-parent:hover { background: #0f8f3a; }
     .sidebar-parent:hover .sidebar-link,
@@ -335,10 +359,13 @@
     .sidebar-parent.active .sidebar-chevron i { color: white; }
     .sidebar-link { color: #cfcfcf; text-decoration: none; padding: 12px 20px; display: flex; align-items: center; gap: 8px; font-size: 0.92rem; font-weight: 500; background: transparent; transition: color 0.2s ease; }
     .sidebar-link:hover { color: white; }
+    /* Chevron rotates when submenu is open */
     .sidebar-chevron i { color: #cfcfcf; font-size: 0.75rem; transition: color 0.2s ease, transform 0.3s ease; display: block; }
     .sidebar-chevron.rotated i { transform: rotate(180deg); }
+    /* Submenu slides open via max-height animation */
     .sidebar-submenu { background: #2a2a2a; overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
     .sidebar-submenu.open { max-height: 600px; }
+    /* Indented submenu link with left accent border */
     .submenu-link { display: flex; align-items: center; gap: 8px; color: #cfcfcf; text-decoration: none; padding: 10px 20px 10px 44px; font-size: 0.87rem; font-weight: 400; border-left: 3px solid transparent; background: transparent; transition: color 0.2s ease, border-left-color 0.2s ease, background-color 0.2s ease; }
     .submenu-link i { font-size: 0.85rem; opacity: 0.75; }
     .submenu-link:hover { color: white; border-left-color: #009539; background: #333; }
@@ -347,6 +374,7 @@
     .submenu-link.active i { opacity: 1; }
     .menu-icon { display: flex; align-items: center; justify-content: center; width: 20px; flex-shrink: 0; }
     .menu-icon i { font-size: 1rem; }
+    /* Main content offset matches sidebar width */
     .content { margin-left: 250px; transition: margin-left 0.3s ease; }
     body.sidebar-collapsed .content { margin-left: 68px; }
 </style>
@@ -357,6 +385,7 @@
         const toggleBtn   = document.getElementById('sidebarToggle');
         const STORAGE_KEY = 'clsu_analytica_sidebar_collapsed';
 
+        // Apply collapsed/expanded state and persist to localStorage
         function applyState(isCollapsed) {
             sidebar.classList.toggle('collapsed', isCollapsed);
             document.body.classList.toggle('sidebar-collapsed', isCollapsed);
@@ -364,12 +393,15 @@
             localStorage.setItem(STORAGE_KEY, isCollapsed);
         }
 
+        // Restore sidebar state from previous session
         applyState(localStorage.getItem(STORAGE_KEY) === 'true');
 
+        // Toggle sidebar on button click
         toggleBtn.addEventListener('click', function () {
             applyState(!sidebar.classList.contains('collapsed'));
         });
 
+        // Chevron click: open target submenu, close all others
         document.querySelectorAll('.sidebar-chevron').forEach(function (chevron) {
             chevron.addEventListener('click', function () {
                 const targetId = this.getAttribute('data-target');
@@ -377,6 +409,7 @@
                 const submenu = document.getElementById(targetId);
                 if (!submenu) return;
                 const isOpen = submenu.classList.contains('open');
+                // Close any other open submenus
                 document.querySelectorAll('.sidebar-submenu.open').forEach(function (el) {
                     if (el.id !== targetId) {
                         el.classList.remove('open');
@@ -389,6 +422,7 @@
             });
         });
 
+        // Rotate chevron for any submenu already open on page load
         document.querySelectorAll('.sidebar-submenu.open').forEach(function (submenu) {
             const chevron = document.querySelector(`.sidebar-chevron[data-target="${submenu.id}"]`);
             if (chevron) chevron.classList.add('rotated');

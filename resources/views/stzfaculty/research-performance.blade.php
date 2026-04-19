@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{-- Asset bundler for CSS/JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- External CSS libraries --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    {{-- Plotly for chart rendering --}}
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    {{-- Tom Select for enhanced dropdowns --}}
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     <title>Siel Metrics</title>
 
     <style>
+        /* Offset content from sidebar width */
         .content {
             margin-left: 250px;
             transition: margin-left 0.3s ease, max-width 0.3s ease;
@@ -22,11 +31,13 @@
             overflow-x: clip;
         }
 
+        /* Shrink content area when sidebar collapses */
         body.sidebar-collapsed .content {
             margin-left: 68px;
             max-width: calc(100vw - 68px);
         }
 
+        /* Fix Bootstrap collapse visibility bug */
         .collapse.show {
             visibility: visible !important;
         }
@@ -38,6 +49,7 @@
             overflow-x: clip;
         }
 
+        /* Top sticky header bar */
         header {
             height: 70px;
             padding: 2rem 3rem;
@@ -48,7 +60,7 @@
             align-items: center;
         }
 
-        /* ── Loading overlay ── */
+        /* Semi-transparent overlay shown during data fetch */
         .loading-overlay {
             position: absolute;
             inset: 0;
@@ -62,10 +74,12 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
+        /* Makes overlay visible */
         .loading-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
+        /* Spinning animation for loader */
         .spinner {
             width: 36px;
             height: 36px;
@@ -76,7 +90,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Stat shimmer ── */
+        /* Pulsing skeleton effect while stats load */
         .stat-shimmer .stat-card-number,
         .stat-shimmer .stat-card-label {
             background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
@@ -90,7 +104,7 @@
             100% { background-position: -200% 0; }
         }
 
-        /* ── Stat numbers ── */
+        /* Large bold number in each stat card */
         .stat-card-number {
             font-family: 'Inter', sans-serif;
             font-weight: 800;
@@ -99,6 +113,7 @@
             color: #1f2937;
             text-align: right;
         }
+        /* Small descriptor below the stat number */
         .stat-card-label {
             font-family: 'Inter', sans-serif;
             font-weight: 500;
@@ -109,7 +124,7 @@
             margin-top: 2px;
         }
 
-        /* ── Chart card wrapper ── */
+        /* Positions relative for loading overlay placement */
         .chart-card {
             position: relative;
             overflow: hidden;
@@ -122,14 +137,14 @@
             padding: 14px 18px 0;
         }
 
-        /* ── Filter bar loading ── */
+        /* Disables filter controls during fetch */
         .filter-bar-loading select,
         .filter-bar-loading button {
             pointer-events: none;
             opacity: 0.5;
         }
 
-        /* ── College badge ── */
+        /* Pill badge showing selected college; hidden by default */
         .college-badge {
             display: none;
             align-items: center;
@@ -143,14 +158,17 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+        /* Reveals badge when a college is selected */
         .college-badge.visible {
             display: flex;
         }
     </style>
 
+    {{-- Tailwind utility classes via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+    {{-- Reusable sidebar component --}}
     @include('components.sidebar')
 
     <div class="content w-100">
@@ -163,12 +181,16 @@
 
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4" id="filterBar">
                 <div class="flex items-center gap-2 font-[650] text-sm md:text-lg">
+
+                    {{-- Dynamic title updates with active semester --}}
                     <span id="pageTitle">
                         Research &amp; Non-Teaching Load
                         @if(isset($activeSemObj))
                             ({{ $activeSemObj->semester }} {{ $activeSemObj->sy }})
                         @endif
                     </span>
+
+                    {{-- College pill badge, visible only when a college is selected --}}
                     <span class="college-badge {{ $filters['college'] !== 'all' && isset($selectedCollegeObj) ? 'visible' : '' }}"
                           id="collegeBadge">
                         <i class="bi bi-building"></i>
@@ -181,6 +203,7 @@
                         Filter
                     </div>
 
+                    {{-- Semester dropdown filter --}}
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium">Semester:</span>
                         <select id="semesterFilter"
@@ -195,6 +218,7 @@
                         </select>
                     </div>
 
+                    {{-- College/unit dropdown filter --}}
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium">Unit/Office:</span>
                         <select id="collegeFilter"
@@ -215,10 +239,10 @@
 
         <div class="px-6 pt-4 pb-10">
 
-            {{-- ── Stat Cards ── --}}
+            {{-- ── Stat Cards: key research metrics at a glance ── --}}
             <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 mb-4">
 
-                {{-- Total Research Assignments --}}
+                {{-- Count of all research assignments --}}
                 <div class="col-span-3 xl:col-span-4">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden" id="cardResearch">
                         <div class="grid grid-rows-3 h-full">
@@ -233,7 +257,7 @@
                     </div>
                 </div>
 
-                {{-- Total ETL Hours --}}
+                {{-- Sum of equivalent teaching load hours --}}
                 <div class="col-span-3 xl:col-span-4">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden" id="cardEtl">
                         <div class="grid grid-rows-3 h-full">
@@ -248,7 +272,7 @@
                     </div>
                 </div>
 
-                {{-- Publications --}}
+                {{-- Total published research outputs --}}
                 <div class="col-span-3 xl:col-span-4">
                     <div class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden" id="cardPubs">
                         <div class="grid grid-rows-3 h-full">
@@ -266,31 +290,31 @@
             </div>
             {{-- ── End Stat Cards ── --}}
 
-            {{-- ── Charts 2×2 grid ── --}}
+            {{-- ── Charts: 2×2 grid layout ── --}}
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
 
-                {{-- Research Assignments by Department --}}
+                {{-- ① Vertical bar: research assignments per department --}}
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
                     <h3>Research Assignments by Department</h3>
                     <div id="chart-assignments"></div>
                     <div class="loading-overlay" id="loadAssignments"><div class="spinner"></div></div>
                 </div>
 
-                {{-- Total Research ETL Hours by Department --}}
+                {{-- ② Horizontal bar: ETL hours per department --}}
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
                     <h3>Total Research ETL Hours by Department</h3>
                     <div id="chart-etl"></div>
                     <div class="loading-overlay" id="loadEtl"><div class="spinner"></div></div>
                 </div>
 
-                {{-- Faculty Research Output by Department --}}
+                {{-- ③ Horizontal bar: publications per department --}}
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
                     <h3>Faculty Research Output by Department</h3>
                     <div id="chart-publications"></div>
                     <div class="loading-overlay" id="loadPublications"><div class="spinner"></div></div>
                 </div>
 
-                {{-- Research Output by Types — border-t for pie ── --}}
+                {{-- ④ Donut chart: publications broken down by type --}}
                 <div class="border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl chart-card">
                     <h3>Research Output by Types</h3>
                     <div id="chart-pub-types"></div>
@@ -305,7 +329,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // ── All JS unchanged ──────────────────────────────────────────────────────
+    // ── Seed data from server on initial page load ──
     const INITIAL_DATA = {
         researchLoad             : {!! json_encode($researchLoad) !!},
         publications             : {!! json_encode($publications) !!},
@@ -319,13 +343,17 @@
         collegeAcro  : '{{ isset($selectedCollegeObj) ? $selectedCollegeObj->college_acro : "" }}',
     };
 
+    // AJAX endpoint and CSRF token for filter requests
     const AJAX_URL   = '{{ route("stzfaculty.research-performance.ajax") }}';
     const CSRF_TOKEN = '{{ csrf_token() }}';
 
+    // Shared style constants for all Plotly charts
     const FONT    = "'Inter', sans-serif";
     const GREEN   = '#009539';
     const PALETTE = ['#009539','#2c7be5','#f6a623','#e74c3c','#9b59b6',
                      '#1abc9c','#e67e22','#34495e','#e91e63','#00bcd4'];
+
+    // Reusable Plotly layout base for transparent backgrounds
     const BASE = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor : 'rgba(0,0,0,0)',
@@ -333,20 +361,28 @@
         xaxis: { gridcolor: '#efefef', linecolor: '#ddd', tickfont: { family: FONT } },
         yaxis: { gridcolor: '#efefef', linecolor: '#ddd', tickfont: { family: FONT } },
     };
+
+    // Shared Plotly config: responsive, minimal toolbar
     const CFG = {
         responsive: true,
         displaylogo: false,
         modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
     };
+
+    // Max bars shown when viewing all colleges
     const CAP = 10;
 
+    // Activates spinners and disables filter controls
     function showLoaders() {
         document.getElementById('filterBar').classList.add('filter-bar-loading');
         ['loadAssignments','loadPublications','loadEtl','loadPubTypes']
             .forEach(id => document.getElementById(id)?.classList.add('active'));
+        // Apply shimmer to stat cards while loading
         ['cardResearch','cardPubs','cardEtl']
             .forEach(id => document.getElementById(id)?.classList.add('stat-shimmer'));
     }
+
+    // Removes all spinners and re-enables controls
     function hideLoaders() {
         document.getElementById('filterBar').classList.remove('filter-bar-loading');
         ['loadAssignments','loadPublications','loadEtl','loadPubTypes']
@@ -355,6 +391,7 @@
             .forEach(id => document.getElementById(id)?.classList.remove('stat-shimmer'));
     }
 
+    // Replaces chart div content with empty-state message
     function noData(divId) {
         const el = document.getElementById(divId);
         if (!el) return;
@@ -366,6 +403,8 @@
             <p style="margin-top:8px;font-size:0.82rem;">No data for current filters</p>
         </div>`;
     }
+
+    // Purges Plotly and resets div before re-rendering
     function clearDiv(divId) {
         const el = document.getElementById(divId);
         if (!el) return;
@@ -375,14 +414,17 @@
         el.innerHTML     = '';
     }
 
+    // Limits rows to CAP when showing all colleges
     function capData(arr, collegeFilter) {
         return collegeFilter === 'all' ? arr.slice(0, CAP) : arr;
     }
 
+    // Renders vertical bar: research assignments per department
     function renderAssignments(researchLoad, collegeFilter) {
         clearDiv('chart-assignments');
         if (!researchLoad.length) return noData('chart-assignments');
 
+        // Sort descending, then cap if viewing all colleges
         const sorted = [...researchLoad].sort((a, b) => b.research_count - a.research_count);
         const data   = capData(sorted, collegeFilter);
         const depts  = data.map(d => d.department_acro);
@@ -404,10 +446,12 @@
         }, CFG);
     }
 
+    // Renders horizontal bar: publications per department
     function renderPublications(publications, collegeFilter) {
         clearDiv('chart-publications');
         if (!publications.length) return noData('chart-publications');
 
+        // Reverse for bottom-to-top horizontal bar ordering
         const sorted  = [...publications].sort((a, b) => b.publication_count - a.publication_count);
         const data    = capData(sorted, collegeFilter);
         const dataRev = [...data].reverse();
@@ -430,10 +474,12 @@
         }, CFG);
     }
 
+    // Renders horizontal bar: ETL hours per department
     function renderEtl(researchLoad, collegeFilter) {
         clearDiv('chart-etl');
         if (!researchLoad.length) return noData('chart-etl');
 
+        // Reverse for bottom-to-top horizontal bar ordering
         const sorted  = [...researchLoad].sort((a, b) => b.total_etl - a.total_etl);
         const data    = capData(sorted, collegeFilter);
         const dataRev = [...data].reverse();
@@ -456,6 +502,7 @@
         }, CFG);
     }
 
+    // Renders donut chart: publications broken down by type
     function renderPubTypes(publicationTypeBreakdown) {
         clearDiv('chart-pub-types');
         if (!publicationTypeBreakdown.length) return noData('chart-pub-types');
@@ -478,6 +525,7 @@
             showlegend: true,
             legend: { font: { family: FONT, size: 10 }, orientation: 'h',
                       x: 0.5, xanchor: 'center', y: 1.12, yanchor: 'top' },
+            // Center annotation shows total count inside the donut hole
             annotations: [{
                 text: `<b>Total</b><br><b>${total.toLocaleString()}</b>`,
                 x: 0.5, y: 0.5, xref: 'paper', yref: 'paper',
@@ -488,6 +536,7 @@
         }, CFG);
     }
 
+    // Calls all four chart render functions at once
     function renderAll(data, collegeFilter) {
         renderAssignments(data.researchLoad,           collegeFilter);
         renderPublications(data.publications,          collegeFilter);
@@ -495,6 +544,7 @@
         renderPubTypes(data.publicationTypeBreakdown);
     }
 
+    // Updates the three stat card numbers from fetched data
     function updateStatCards(totals) {
         document.getElementById('statResearch').textContent =
             Number(totals.researchCount).toLocaleString();
@@ -504,6 +554,7 @@
             Number(totals.etlHours).toLocaleString(undefined, { maximumFractionDigits: 0 });
     }
 
+    // Updates page title with active semester text
     function updatePageTitle(semesterText) {
         const el    = document.getElementById('pageTitle');
         if (!el) return;
@@ -511,6 +562,7 @@
         el.textContent = 'Research & Non-Teaching Load' + (clean ? ' (' + clean + ')' : '');
     }
 
+    // Shows/hides the college pill badge in the header
     function updateCollegeBadge(collegeAcro) {
         const badge = document.getElementById('collegeBadge');
         const txt   = document.getElementById('collegeBadgeText');
@@ -524,15 +576,18 @@
         }
     }
 
+    // Collects current filter values into URLSearchParams
     function buildParams() {
         const params  = new URLSearchParams();
         const sem     = document.getElementById('semesterFilter').value;
         const college = document.getElementById('collegeFilter').value;
+        // Only append non-default values to keep URL clean
         if (sem     !== 'all') params.set('semester', sem);
         if (college !== 'all') params.set('college',  college);
         return params;
     }
 
+    // Fetches filtered data then re-renders all charts
     function fetchAndRender() {
         showLoaders();
         const params        = buildParams();
@@ -559,6 +614,7 @@
             updateCollegeBadge(data.collegeAcro);
             renderAll(data, collegeFilter);
 
+            // Sync URL query string without page reload
             const url = new URL(window.location.href);
             url.search = params.toString();
             window.history.replaceState({}, '', url.toString());
@@ -567,12 +623,14 @@
         .finally(()  => hideLoaders());
     }
 
+    // Resets both filters to "all" then re-fetches
     function clearFilters() {
         document.getElementById('semesterFilter').value = 'all';
         document.getElementById('collegeFilter').value  = 'all';
         fetchAndRender();
     }
 
+    // Tells Plotly to resize all charts to current container
     function reflowCharts() {
         ['chart-assignments','chart-publications','chart-etl','chart-pub-types']
             .forEach(id => {
@@ -582,24 +640,30 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Bind both filter dropdowns to fetch handler
         ['semesterFilter','collegeFilter'].forEach(id =>
             document.getElementById(id)?.addEventListener('change', fetchAndRender)
         );
 
+        // Clear button resets all filters
         document.getElementById('clearFiltersBtn')
             ?.addEventListener('click', clearFilters);
 
+        // Reflow charts after sidebar animation completes
         const sidebarBtn = document.getElementById('sidebarToggle');
         if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
 
+        // Render all charts with server-provided initial data
         renderAll(INITIAL_DATA, document.getElementById('collegeFilter').value);
 
+        // Reflow charts when content area resizes (sidebar toggle)
         const contentDiv = document.querySelector('.content');
         if (contentDiv) {
             const ro = new ResizeObserver(() => reflowCharts());
             ro.observe(contentDiv);
         }
 
+        // Debounced reflow on window resize
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);

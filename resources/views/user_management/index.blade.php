@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siel Metrics — User Management</title>
 
+    {{-- External CSS libraries --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,6 +21,7 @@
             overflow: hidden;
         }
 
+        /* Fixed sidebar, slides to narrow width when collapsed */
         .sidebar {
             position: fixed; left: 0; top: 0;
             height: 100vh; width: 210px;
@@ -28,6 +30,7 @@
         }
         body.sidebar-collapsed .sidebar { width: 68px; }
 
+        /* Offset content from sidebar; fills remaining viewport */
         .content {
             margin-left: 210px;
             transition: margin-left 0.3s ease;
@@ -35,8 +38,10 @@
         }
         body.sidebar-collapsed .content { margin-left: 68px; }
 
+        /* Prevents header from scrolling with content */
         .fixed-header-section { flex-shrink: 0; background: #e8ebe8; z-index: 100; }
 
+        /* Top green header bar */
         .header {
             background: #009539; color: white;
             padding: 0 30px; font-size: 32px; font-weight: 800;
@@ -45,14 +50,17 @@
         }
         .header i { font-size: 28px; }
 
+        /* Scrollable main area below fixed header */
         .main-content {
             flex: 1; overflow-y: auto; overflow-x: hidden;
             padding: 24px 30px 40px 30px;
         }
+        /* Custom scrollbar styling */
         .main-content::-webkit-scrollbar { width: 8px; }
         .main-content::-webkit-scrollbar-track { background: #d4d9d4; border-radius: 4px; }
         .main-content::-webkit-scrollbar-thumb { background: #009539; border-radius: 4px; }
 
+        /* Row containing page title and Add button */
         .page-title-section {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
@@ -63,6 +71,7 @@
         }
         .page-title-section h2 i { color: #009539; font-size: 28px; }
 
+        /* Button to open the Add User modal */
         .add-user-btn {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white; border: none; padding: 10px 24px; border-radius: 12px;
@@ -72,7 +81,7 @@
         }
         .add-user-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
 
-        /* Stats row */
+        /* ── Stats row: total users + per-role counts ── */
         .stats-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
         .stat-card {
             background: white; border-radius: 16px; padding: 16px 24px;
@@ -86,7 +95,7 @@
         .stat-label { font-size: 12px; color: #6b7280; font-weight: 500; }
         .stat-value { font-size: 22px; font-weight: 800; color: #111827; line-height: 1; }
 
-        /* Table */
+        /* ── Users table ── */
         .table-container {
             background: white; border-radius: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow-x: auto;
@@ -101,10 +110,12 @@
         .user-table tbody tr:last-child td { border-bottom: none; }
         .user-table tbody tr:hover { background: #f9fafb; }
 
+        /* Color-coded pill badge per role */
         .role-badge {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
         }
+        /* Each role has its own background/text color */
         .role-Admin                 { background: #fef3c7; color: #92400e; }
         .role-Executive             { background: #ede9fe; color: #5b21b6; }
         .role-Director              { background: #dbeafe; color: #1e40af; }
@@ -112,6 +123,7 @@
         .role-Employee-Teaching     { background: #dcfce7; color: #166534; }
         .role-Employee-Non-Teaching { background: #f3f4f6; color: #374151; }
 
+        /* Edit and Delete icon buttons in table rows */
         .action-buttons { display: flex; gap: 8px; }
         .btn-icon {
             padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
@@ -123,9 +135,7 @@
         .btn-delete { background: #fee2e2; color: #dc2626; }
         .btn-delete:hover { background: #dc2626; color: white; transform: translateY(-1px); }
 
-        /* ============================================================
-           SHARED MODAL BASE
-        ============================================================ */
+        /* ── Shared modal base styles ── */
         .modal {
             display: none; position: fixed; z-index: 2000;
             left: 0; top: 0; width: 100%; height: 100%;
@@ -134,6 +144,7 @@
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Centered modal card with slide-down entrance */
         .modal-content {
             background: white; width: 480px; max-width: 90%;
             margin: 5% auto; border-radius: 24px; position: relative;
@@ -156,6 +167,7 @@
         .close { font-size: 28px; cursor: pointer; color: #9ca3af; transition: color 0.2s; line-height: 1; }
         .close:hover { color: #111827; }
 
+        /* Modal form field styles */
         .modal-body { padding: 24px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
@@ -171,6 +183,7 @@
         .form-group select:focus {
             outline: none; border-color: #009539; box-shadow: 0 0 0 3px rgba(0,149,57,0.1);
         }
+        /* Read-only field styling (used for locked role in edit modal) */
         .form-group input[readonly] { background: #f9fafb; cursor: not-allowed; color: #6b7280; }
         .field-hint { font-size: 11px; color: #6b7280; margin-top: 4px; }
 
@@ -190,16 +203,15 @@
         }
         .btn-cancel:hover { background: #d1d5db; }
 
-        /* Delete modal */
+        /* Delete confirmation modal styles */
         .delete-message { text-align: center; padding: 20px 0; }
         .delete-message .del-icon { font-size: 52px; color: #dc2626; margin-bottom: 16px; }
         .delete-message p { font-size: 16px; color: #111827; margin: 0; }
         .warning-text { color: #dc2626; font-weight: 600; margin-top: 12px; font-size: 13px; }
+        /* Overrides green submit button to red for destructive action */
         .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; }
 
-        /* ============================================================
-           NOTICE POPUP — success / error / validation
-        ============================================================ */
+        /* ── Notice popup: success / error / validation ── */
         #noticeModal .modal-content {
             width: 380px;
             border-radius: 20px;
@@ -216,6 +228,7 @@
             gap: 0;
         }
 
+        /* Colored ring icon changes per notice type */
         .notice-icon-ring {
             width: 80px; height: 80px; border-radius: 50%;
             border-width: 3px; border-style: solid;
@@ -223,80 +236,43 @@
             margin-bottom: 20px;
             font-size: 36px;
         }
-
-        /* success = green ring */
-        .notice-icon-ring.success {
-            border-color: #009539;
-            color: #009539;
-        }
-
-        /* error = red ring */
-        .notice-icon-ring.error {
-            border-color: #dc2626;
-            color: #dc2626;
-        }
-
-        /* validation = amber ring */
-        .notice-icon-ring.warning {
-            border-color: #f59e0b;
-            color: #f59e0b;
-        }
+        /* Green ring for success notices */
+        .notice-icon-ring.success { border-color: #009539; color: #009539; }
+        /* Red ring for error notices */
+        .notice-icon-ring.error   { border-color: #dc2626; color: #dc2626; }
+        /* Amber ring for validation warnings */
+        .notice-icon-ring.warning { border-color: #f59e0b; color: #f59e0b; }
 
         .notice-title {
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #111827;
-            margin-bottom: 12px;
+            font-size: 18px; font-weight: 800; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #111827; margin-bottom: 12px;
         }
-
         .notice-message {
-            font-size: 14px;
-            color: #6b7280;
-            line-height: 1.6;
-            margin-bottom: 28px;
+            font-size: 14px; color: #6b7280; line-height: 1.6; margin-bottom: 28px;
         }
-
-        .notice-message ul {
-            list-style: none;
-            padding: 0; margin: 0;
-            text-align: left;
-        }
-
-        .notice-message ul li::before {
-            content: '• ';
-            color: #dc2626;
-            font-weight: 700;
-        }
+        /* Bullet list style for validation error messages */
+        .notice-message ul { list-style: none; padding: 0; margin: 0; text-align: left; }
+        .notice-message ul li::before { content: '• '; color: #dc2626; font-weight: 700; }
 
         .notice-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
+            width: 100%; padding: 12px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            letter-spacing: 0.5px; transition: all 0.2s;
         }
-
+        /* Notice button color matches notice type */
         .notice-btn.success { background: #009539; color: white; }
         .notice-btn.success:hover { background: #016531; }
-
         .notice-btn.error   { background: #dc2626; color: white; }
         .notice-btn.error:hover { background: #b91c1c; }
-
         .notice-btn.warning { background: #f59e0b; color: white; }
         .notice-btn.warning:hover { background: #d97706; }
 
-        /* Empty state */
+        /* Shown when user list is empty */
         .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
         .empty-state i { font-size: 64px; margin-bottom: 16px; }
         .empty-state p { font-size: 16px; }
 
-        /* Access legend */
+        /* Role access summary card above the table */
         .access-legend {
             background: white; border-radius: 16px; padding: 20px 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;
@@ -306,8 +282,10 @@
             letter-spacing: 0.5px; margin-bottom: 14px;
             display: flex; align-items: center; gap: 8px;
         }
+        /* Responsive grid for legend items */
         .legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
         .legend-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #374151; line-height: 1.4; }
+        /* Colored dot matching role badge color */
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
 
         @media (max-width: 768px) {
@@ -320,6 +298,7 @@
     </style>
 </head>
 <body>
+    {{-- Reusable sidebar component --}}
     @include('components.sidebar')
 
     <div class="content">
@@ -332,7 +311,7 @@
 
         <div class="main-content">
 
-            {{-- Page title + Add button --}}
+            {{-- Page title and Add New User button --}}
             <div class="page-title-section">
                 <h2>
                     <i class="fas fa-user-friends"></i>
@@ -344,9 +323,10 @@
                 </button>
             </div>
 
-            {{-- Stats --}}
+            {{-- Stat cards: total count + per-role breakdown --}}
             <div class="stats-row">
                 @php
+                    // Group users by role for per-role stat counts
                     $roleCounts = $users->groupBy('role');
                     $totalUsers = $users->count();
                 @endphp
@@ -359,6 +339,7 @@
                         <div class="stat-value">{{ $totalUsers }}</div>
                     </div>
                 </div>
+                {{-- Loop generates one card per role with matching icon and colors --}}
                 @foreach([
                     ['Admin',                '#fef3c7','#92400e', 'fa-user-shield'],
                     ['Executive',            '#ede9fe','#5b21b6', 'fa-user-tie'],
@@ -379,7 +360,7 @@
                 @endforeach
             </div>
 
-            {{-- Access Legend --}}
+            {{-- Role access legend: what each role can view --}}
             <div class="access-legend">
                 <h4><i class="fas fa-shield-alt" style="color:#009539;"></i> Role Access Summary</h4>
                 <div class="legend-grid">
@@ -410,7 +391,7 @@
                 </div>
             </div>
 
-            {{-- Table --}}
+            {{-- Users table --}}
             <div class="table-container">
                 @if($users->count() > 0)
                 <table class="user-table">
@@ -431,6 +412,7 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 @php
+                                    // Build CSS class and icon from user role string
                                     $roleClass = 'role-' . str_replace(' ', '-', $user->role);
                                     $roleIcons = [
                                         'Admin'                  => 'fa-user-shield',
@@ -449,6 +431,7 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
+                                    {{-- Hide edit/delete for the currently logged-in user --}}
                                     @if($user->id !== auth()->id())
                                         <button class="btn-icon btn-edit"
                                             onclick="openEditModal('{{ $user->id }}', '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->role }}')">
@@ -459,6 +442,7 @@
                                             <i class="fas fa-trash-alt"></i> Delete
                                         </button>
                                     @else
+                                        {{-- Label the current user's row as "You" --}}
                                         <span style="font-size:12px; color:#9ca3af; font-style:italic;">You</span>
                                     @endif
                                 </div>
@@ -468,6 +452,7 @@
                     </tbody>
                 </table>
                 @else
+                {{-- Empty state: shown when no users exist --}}
                 <div class="empty-state">
                     <i class="fas fa-user-slash"></i>
                     <p>No users found. Click "Add New User" to get started.</p>
@@ -478,12 +463,11 @@
         </div>{{-- /main-content --}}
     </div>{{-- /content --}}
 
-    {{-- ============================================================ --}}
-    {{-- NOTICE POPUP (success / error / validation)                  --}}
-    {{-- ============================================================ --}}
+    {{-- ── Notice popup modal: success / error / validation ── --}}
     <div id="noticeModal" class="modal">
         <div class="modal-content">
             <div class="notice-body">
+                {{-- Ring color and icon are set dynamically by showNotice() --}}
                 <div class="notice-icon-ring" id="noticeIconRing">
                     <i id="noticeIcon"></i>
                 </div>
@@ -494,9 +478,7 @@
         </div>
     </div>
 
-    {{-- ============================================================ --}}
-    {{-- ADD MODAL                                                     --}}
-    {{-- ============================================================ --}}
+    {{-- ── Add User modal ── --}}
     <div id="addModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -525,6 +507,7 @@
                                 <option value="{{ $r }}" {{ old('role') === $r ? 'selected' : '' }}>{{ $r }}</option>
                             @endforeach
                         </select>
+                        {{-- Role is permanent; cannot be changed after user is created --}}
                         <div class="field-hint">Role cannot be changed after creation</div>
                     </div>
                     <div class="form-group">
@@ -544,9 +527,7 @@
         </div>
     </div>
 
-    {{-- ============================================================ --}}
-    {{-- EDIT MODAL                                                    --}}
-    {{-- ============================================================ --}}
+    {{-- ── Edit User modal: name and email editable, role is locked ── --}}
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -568,6 +549,7 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-tag"></i> Role</label>
+                        {{-- Read-only: role cannot be changed after user creation --}}
                         <input type="text" id="editRole" readonly>
                         <div class="field-hint">Role is locked after creation</div>
                     </div>
@@ -584,9 +566,7 @@
         </div>
     </div>
 
-    {{-- ============================================================ --}}
-    {{-- DELETE MODAL                                                  --}}
-    {{-- ============================================================ --}}
+    {{-- ── Delete confirmation modal ── --}}
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -599,6 +579,7 @@
                 <div class="modal-body">
                     <div class="delete-message">
                         <div class="del-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        {{-- User name is injected dynamically by openDeleteModal() --}}
                         <p id="deleteMessage"></p>
                         <div class="warning-text">
                             <i class="fas fa-info-circle"></i> This action cannot be undone.
@@ -617,9 +598,7 @@
         </div>
     </div>
 
-    {{-- ============================================================ --}}
-    {{-- Pass Laravel session/errors to JS                            --}}
-    {{-- ============================================================ --}}
+    {{-- ── Pass Laravel session flash and validation errors to JS ── --}}
     @if(session('success'))
         <script>
             window._notice = {
@@ -640,6 +619,7 @@
         </script>
     @elseif($errors->any())
         <script>
+            // Validation errors formatted as bullet list for the warning notice
             window._notice = {
                 type: 'warning',
                 title: 'NOTICE',
@@ -650,7 +630,7 @@
     @endif
 
     <script>
-        /* ---------- Notice popup ---------- */
+        // Populates and shows the notice popup with type-specific styles
         function showNotice({ type, title, message, icon }) {
             const ring    = document.getElementById('noticeIconRing');
             const iconEl  = document.getElementById('noticeIcon');
@@ -658,6 +638,7 @@
             const msgEl   = document.getElementById('noticeMessage');
             const btn     = document.getElementById('noticeBtn');
 
+            // Apply type class to ring, button; set icon, title, message
             ring.className    = `notice-icon-ring ${type}`;
             iconEl.className  = icon;
             titleEl.textContent = title;
@@ -667,41 +648,46 @@
             document.getElementById('noticeModal').style.display = 'block';
         }
 
-        // Fire on page load if Laravel sent a flash message
         document.addEventListener('DOMContentLoaded', () => {
+            // Fire notice popup if Laravel sent a flash/validation message
             if (window._notice) showNotice(window._notice);
 
-            // Re-open add modal with old input if validation failed
+            // Re-open add modal with old input if validation failed on submit
             @if($errors->any() && old('name'))
                 document.getElementById('addModal').style.display = 'block';
             @endif
         });
 
-        /* ---------- CRUD modals ---------- */
+        // Opens the Add User modal
         function openAddModal() {
             document.getElementById('addModal').style.display = 'block';
         }
 
+        // Populates and opens the Edit User modal with selected row's data
         function openEditModal(id, name, email, role) {
             document.getElementById('editName').value  = name;
             document.getElementById('editEmail').value = email;
             document.getElementById('editRole').value  = role;
+            // Set form action URL dynamically with the user's ID
             document.getElementById('editForm').action = `/user/management/update/${id}`;
             document.getElementById('editModal').style.display = 'block';
         }
 
+        // Populates and opens the Delete confirmation modal
         function openDeleteModal(id, name) {
             document.getElementById('deleteMessage').innerHTML =
                 `Are you sure you want to delete <strong>${name}</strong>?`;
+            // Set form action URL dynamically with the user's ID
             document.getElementById('deleteForm').action = `/user/management/delete/${id}`;
             document.getElementById('deleteModal').style.display = 'block';
         }
 
+        // Hides the specified modal by ID
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Close on backdrop click
+        // Close any modal when clicking outside its content area
         window.onclick = function (event) {
             ['addModal','editModal','deleteModal','noticeModal'].forEach(id => {
                 const modal = document.getElementById(id);

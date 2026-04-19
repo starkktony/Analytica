@@ -5,19 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siel Metrics</title>
 
+    {{-- Asset bundler for CSS/JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- External CSS libraries --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    {{-- Plotly for chart rendering --}}
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    {{-- Tom Select for enhanced dropdowns --}}
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <title>Siel Metrics</title>
-
     <style>
+        /* Offset content from sidebar width */
         .content {
             margin-left: 250px;
             transition: margin-left 0.3s ease, max-width 0.3s ease;
@@ -25,11 +30,13 @@
             overflow-x: clip;
         }
 
+        /* Shrink content area when sidebar collapses */
         body.sidebar-collapsed .content {
             margin-left: 68px;
             max-width: calc(100vw - 68px);
         }
 
+        /* Fix Bootstrap collapse visibility bug */
         .collapse.show {
             visibility: visible !important;
         }
@@ -41,6 +48,7 @@
             overflow-x: clip;
         }
 
+        /* Top sticky header bar */
         header {
             height: 70px;
             padding: 2rem 3rem;
@@ -51,7 +59,7 @@
             align-items: center;
         }
 
-        /* ── Stat numbers ── */
+        /* Large bold number in each stat card */
         .stat-card-number {
             font-family: 'Inter', sans-serif;
             font-weight: 800;
@@ -60,6 +68,7 @@
             color: #1f2937;
             text-align: right;
         }
+        /* Small descriptor below the stat number */
         .stat-card-label {
             font-family: 'Inter', sans-serif;
             font-weight: 500;
@@ -70,7 +79,7 @@
             margin-top: 2px;
         }
 
-        /* ── Loading overlay ── */
+        /* Semi-transparent overlay shown during data fetch */
         .loading-overlay {
             position: absolute;
             inset: 0;
@@ -84,10 +93,12 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
+        /* Makes overlay visible */
         .loading-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
+        /* Spinning animation for loader */
         .spinner {
             width: 36px;
             height: 36px;
@@ -98,7 +109,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Empty chart state ── */
+        /* Shown when a chart has no data to display */
         .empty-chart {
             width: 100%;
             height: 100%;
@@ -113,7 +124,7 @@
         .empty-chart i    { font-size: 32px; }
         .empty-chart span { font-size: 13px; font-weight: 600; }
 
-        /* ── Stat shimmer ── */
+        /* Pulsing skeleton effect while stats load */
         .stat-loading .stat-card-number,
         .stat-loading .stat-card-label {
             background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
@@ -127,7 +138,7 @@
             100% { background-position: -200% 0; }
         }
 
-        /* ── Drill badge in header ── */
+        /* Pill badge in header showing drilled-down college/dept */
         .drill-badge {
             display: inline-flex;
             align-items: center;
@@ -142,9 +153,11 @@
         }
     </style>
 
+    {{-- Tailwind utility classes via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+    {{-- Reusable sidebar component --}}
     @include('components.sidebar')
 
     <div class="content w-100">
@@ -155,6 +168,7 @@
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="text-lg md:text-2xl font-[650] text-white">Teaching Load</span>
 
+                    {{-- Drill-down badge: shows college and optional department when filtered --}}
                     @if($drillDown && $selectedCollege)
                         <span class="drill-badge">
                             <i class="bi bi-building"></i>
@@ -168,8 +182,11 @@
             </header>
 
             <div id="filterBar" class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4">
+
+                {{-- Dynamic title updates with active semester --}}
                 <div class="font-[650] text-sm md:text-lg" id="pageTitle">
                     @php
+                        // Resolve selected semester display text
                         $selectedSem = $semesters->firstWhere('sem_id', $filters['semester']);
                         echo $selectedSem
                             ? 'Faculty Teaching Load (' . $selectedSem->semester . ' ' . $selectedSem->sy . ')'
@@ -182,6 +199,7 @@
                         Filter
                     </div>
 
+                    {{-- Semester dropdown filter --}}
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium">Semester:</span>
                         <select id="semesterFilter"
@@ -195,6 +213,7 @@
                         </select>
                     </div>
 
+                    {{-- College/unit dropdown filter --}}
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium">Unit/Office:</span>
                         <select id="collegeFilter"
@@ -209,6 +228,7 @@
                         </select>
                     </div>
 
+                    {{-- Department filter: hidden until a college is selected --}}
                     <div class="flex items-center gap-2" id="departmentFilterGroup"
                         style="{{ !$drillDown ? 'display:none;' : '' }}">
                         <span class="text-sm font-medium">Department:</span>
@@ -226,6 +246,7 @@
                         </select>
                     </div>
 
+                    {{-- Redirects to default route, clearing all filters --}}
                     <button onclick="clearFilters()"
                         class="text-xs font-semibold bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition">
                         Clear Filters
@@ -237,10 +258,10 @@
 
         <div class="px-6 pt-4 pb-8">
 
-            {{-- ── Stat Cards — 3 cards across 12-col grid ── --}}
+            {{-- ── Stat Cards: key teaching load metrics at a glance ── --}}
             <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
 
-                {{-- Average ATL --}}
+                {{-- Average actual teaching hours per faculty --}}
                 <div class="col-span-4">
                     <div id="cardAvgAtl" class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 mt-2 overflow-hidden">
                         <div class="grid grid-rows-3 h-full">
@@ -255,7 +276,7 @@
                     </div>
                 </div>
 
-                {{-- Total Faculty --}}
+                {{-- Total faculty with submitted workloads --}}
                 <div class="col-span-4">
                     <div id="cardFaculty" class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 mt-2 overflow-hidden">
                         <div class="grid grid-rows-3 h-full">
@@ -270,7 +291,7 @@
                     </div>
                 </div>
 
-                {{-- Total Teaching Units --}}
+                {{-- Estimated total credit units offered --}}
                 <div class="col-span-4">
                     <div id="cardSubjects" class="border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 mt-2 overflow-hidden">
                         <div class="grid grid-rows-3 h-full">
@@ -288,14 +309,15 @@
             </div>
             {{-- ── End Stat Cards ── --}}
 
-            {{-- ── Charts ── --}}
+            {{-- ── Charts grid ── --}}
             <div class="grid grid-cols-6 md:grid-cols-12 gap-3 mb-3">
 
-                {{-- ATL Ranking — border-l --}}
+                {{-- ① Horizontal bar: average ATL ranked by college/dept --}}
                 <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl relative">
                     <div class="loading-overlay" id="loadAtlRank"><div class="spinner"></div></div>
                     <div class="grid grid-rows-7 h-full">
                         <div class="row-span-1 font-[750] text-sm sm:text-lg text-gray-700 pt-4 pl-5 sm:pl-7">
+                            {{-- Label updates dynamically via JS --}}
                             Average ATL Ranking by <span class="group-label-text">{{ $chartGroupLabel }}</span>
                         </div>
                         <div class="row-span-6 h-full w-full">
@@ -304,7 +326,7 @@
                     </div>
                 </div>
 
-                {{-- Workload Distribution Pie — border-t like pies across the system --}}
+                {{-- ② Pie chart: faculty count per workload bracket --}}
                 <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl relative">
                     <div class="loading-overlay" id="loadWorkload"><div class="spinner"></div></div>
                     <div class="grid grid-rows-7 h-full">
@@ -317,17 +339,19 @@
                     </div>
                 </div>
 
-                {{-- Units Offered — full-width, border-l like programs trend charts --}}
+                {{-- ③ Full-width vertical bar: estimated units offered per college/dept --}}
                 <div class="col-span-6 md:col-span-12 h-[350px] md:h-[400px] lg:h-[500px] border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl relative mb-2">
                     <div class="loading-overlay" id="loadSubjects"><div class="spinner"></div></div>
                     <div class="grid grid-rows-7 h-full">
                         <div class="row-span-1 font-[750] text-sm sm:text-lg text-gray-700 pt-4 pl-5 sm:pl-7">
+                            {{-- Label updates dynamically via JS --}}
                             Units Offered by <span class="group-label-text">{{ $chartGroupLabel }}</span>
                         </div>
                         <div class="row-span-6 h-full w-full">
                             <div id="chart-subjects" style="width:100%; height:100%;"></div>
                         </div>
                     </div>
+                    {{-- Disclaimer: units are estimated using per-college multipliers --}}
                     <div class="text-[8px] sm:text-[10px] text-gray-500/90 pl-6 pb-2">
                         <i>Note: Total units are estimated based on per-college credit unit multipliers.</i>
                     </div>
@@ -341,7 +365,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // ── All JavaScript unchanged from original ────────────────────────────────
+    // ── Seed data from server on initial page load ──
     const INITIAL_DATA = {
         chartStats      : {!! json_encode($chartStats) !!},
         workloadDist    : {!! json_encode($workloadDistribution) !!},
@@ -352,27 +376,36 @@
         semesterText    : '{{ $selectedSem ? $selectedSem->semester . " " . $selectedSem->sy : "" }}',
     };
 
+    // AJAX endpoints and CSRF token for filter requests
     const AJAX_URL   = '{{ route("stzfaculty.teaching-load.ajax") }}';
-    const DEPTS_URL  = '{{ url("/stzfaculty/departments-by-college") }}';
+    const DEPTS_URL  = '{{ url("/stzfaculty/departments-by-college") }}';  // Fetches depts by college ID
     const CSRF_TOKEN = '{{ csrf_token() }}';
 
+    // Shared style constants for all Plotly charts
     const FONT  = { family: "'Inter', sans-serif", size: 12, color: '#444' };
     const GREEN = '#009539';
     const BLUE  = '#2c7be5';
+
+    // Shared Plotly config: responsive, minimal toolbar
     const CFG   = {
         responsive: true,
         displaylogo: false,
         modeBarButtonsToRemove: ['lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d']
     };
+
+    // Fixed pixel height applied to each chart div
     const CHART_H = 380;
 
+    // Per-college multiplier to estimate total credit units from subject count
     const UNIT_MULTIPLIERS = {
         'CED' : 3.2, 'COS'  : 3.5, 'CASS': 3.0,
         'CEN' : 3.8, 'CAG'  : 3.3, 'CHSI': 3.1,
         'CVSM': 3.4, 'CBA'  : 3.0, 'CF'  : 3.2,
     };
+    // Fallback multiplier for colleges not in the map
     const DEFAULT_MULTIPLIER = 3.0;
 
+    // Activates spinners and applies shimmer to stat cards
     function showLoaders() {
         ['loadAtlRank','loadWorkload','loadSubjects']
             .forEach(id => document.getElementById(id)?.classList.add('active'));
@@ -380,6 +413,7 @@
             .forEach(id => document.getElementById(id)?.classList.add('stat-loading'));
     }
 
+    // Removes all spinners and stat shimmer effects
     function hideLoaders() {
         ['loadAtlRank','loadWorkload','loadSubjects']
             .forEach(id => document.getElementById(id)?.classList.remove('active'));
@@ -387,12 +421,14 @@
             .forEach(id => document.getElementById(id)?.classList.remove('stat-loading'));
     }
 
+    // Replaces chart div with an empty-state message
     function showEmpty(id) {
         try { Plotly.purge(id); } catch(e) {}
         document.getElementById(id).innerHTML =
             `<div class="empty-chart"><i class="bi bi-bar-chart"></i><span>No data available</span></div>`;
     }
 
+    // Purges Plotly instance and resets div before re-rendering
     function clearDiv(id) {
         try { Plotly.purge(id); } catch(e) {}
         const el = document.getElementById(id);
@@ -400,9 +436,12 @@
         el.style.cssText = '';
     }
 
+    // Sets fixed pixel height on chart div before rendering
     function setH(id) { document.getElementById(id).style.height = CHART_H + 'px'; }
 
+    // Renders horizontal bar: average ATL ranked per college/dept
     function renderAtlRank(chartStats) {
+        // Filter zero-ATL rows, sort ascending for bottom-to-top display
         const data = [...chartStats]
             .filter(d => parseFloat(d.avg_atl || 0) > 0)
             .sort((a, b) => parseFloat(a.avg_atl) - parseFloat(b.avg_atl));
@@ -425,13 +464,16 @@
             xaxis: {
                 title: { text: 'ATL (hours)', font: { size: 11 } },
                 gridcolor: '#efefef', zeroline: false,
+                // Add 25% padding so outside labels don't clip
                 range: [0, Math.max(...data.map(d => parseFloat(d.avg_atl))) * 1.25],
             },
             yaxis: { tickfont: { size: 11 }, automargin: true },
         }, CFG);
     }
 
+    // Renders pie chart: faculty count per workload bracket
     function renderWorkloadPie(workloadDist) {
+        // Map workload brackets to labeled slices, exclude zero values
         const raw = [
             { label: 'Low (<10 hrs)',    value: parseInt(workloadDist.low       || 0), color: BLUE      },
             { label: 'Moderate (10–15)', value: parseInt(workloadDist.moderate  || 0), color: GREEN     },
@@ -464,7 +506,9 @@
         }, CFG);
     }
 
+    // Renders vertical bar: estimated units offered per college/dept
     function renderSubjects(chartStats) {
+        // Apply per-college multiplier to estimate total credit units
         const data = [...chartStats]
             .filter(d => parseInt(d.total_subjects || 0) > 0)
             .map(d => {
@@ -501,32 +545,38 @@
         }, CFG);
     }
 
+    // Calls all three chart render functions at once
     function renderAll(data) {
         renderAtlRank(data.chartStats);
         renderWorkloadPie(data.workloadDist);
         renderSubjects(data.chartStats);
     }
 
+    // Updates the three stat card numbers from fetched data
     function updateStatCards(data) {
         document.getElementById('statAvgAtl').textContent   = parseFloat(data.avgAtl).toFixed(1);
         document.getElementById('statFaculty').textContent  = Number(data.totalFaculty).toLocaleString();
         document.getElementById('statSubjects').textContent = Number(data.totalSubjects).toLocaleString();
     }
 
+    // Updates chart title spans with current grouping label (College/Dept)
     function updateGroupLabels(label) {
         document.querySelectorAll('.group-label-text').forEach(el => el.textContent = label);
     }
 
+    // Updates page title with active semester text
     function updatePageTitle(semesterText) {
         document.getElementById('pageTitle').textContent = semesterText
             ? `Faculty Teaching Load (${semesterText})`
             : 'Faculty Teaching Load';
     }
 
+    // Fetches departments for selected college, then triggers callback
     function loadDepartments(collegeId, callback) {
         const group  = document.getElementById('departmentFilterGroup');
         const select = document.getElementById('departmentFilter');
 
+        // Hide dept filter and reset options when no college selected
         if (collegeId === 'all') {
             group.style.display = 'none';
             select.innerHTML    = '<option value="all">All</option>';
@@ -534,6 +584,7 @@
             return;
         }
 
+        // Show dept filter and fetch options from server
         group.style.display = 'flex';
         select.innerHTML    = '<option value="all">Loading…</option>';
         select.disabled     = true;
@@ -558,17 +609,20 @@
         });
     }
 
+    // Collects current filter values into URLSearchParams
     function buildParams() {
         const params  = new URLSearchParams();
         const sem     = document.getElementById('semesterFilter').value;
         const college = document.getElementById('collegeFilter').value;
         const dept    = document.getElementById('departmentFilter').value;
+        // Only append non-default values to keep URL clean
         if (sem)               params.set('semester',   sem);
         if (college !== 'all') params.set('college',    college);
         if (dept    !== 'all') params.set('department', dept);
         return params;
     }
 
+    // Fetches filtered data then re-renders all charts
     function fetchAndRender() {
         showLoaders();
         const params = buildParams();
@@ -583,6 +637,7 @@
             updatePageTitle(data.semesterText);
             renderAll(data);
 
+            // Sync URL query string without page reload
             const url = new URL(window.location.href);
             url.search = params.toString();
             window.history.replaceState({}, '', url.toString());
@@ -591,10 +646,12 @@
         .finally(()  => hideLoaders());
     }
 
+    // Redirects to default route, clearing all filters
     function clearFilters() {
         window.location.href = '{{ route("stzfaculty.teaching-load") }}';
     }
 
+    // Tells Plotly to resize all charts to current container
     function reflowCharts() {
         ['chart-atl-rank','chart-workload-pie','chart-subjects'].forEach(id => {
             try { Plotly.relayout(id, { autosize: true }); } catch(e) {}
@@ -602,19 +659,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Render all charts with server-provided initial data
         renderAll(INITIAL_DATA);
 
+        // College change: fetch departments first, then re-render charts
         document.getElementById('collegeFilter').addEventListener('change', function () {
             loadDepartments(this.value, fetchAndRender);
         });
 
+        // Semester and department changes trigger direct re-fetch
         document.getElementById('semesterFilter').addEventListener('change', fetchAndRender);
         document.getElementById('departmentFilter').addEventListener('change', fetchAndRender);
 
+        // Reflow charts after sidebar animation completes
         const sidebarBtn = document.getElementById('sidebarToggle');
         if (sidebarBtn) sidebarBtn.addEventListener('click', () => setTimeout(reflowCharts, 320));
 
-        // ResizeObserver mirrors programs page pattern
+        // Reflow charts when content area resizes (sidebar toggle)
         const charts     = ['chart-atl-rank','chart-workload-pie','chart-subjects'];
         const contentDiv = document.querySelector('.content');
         if (contentDiv) {
@@ -627,6 +688,7 @@
             ro.observe(contentDiv);
         }
 
+        // Debounced reflow on window resize
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);

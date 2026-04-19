@@ -24,16 +24,18 @@ class DashboardController extends Controller
     // =========================================================================
     public function facultyOverview(Request $request)
     {
+        // Fetch active semester or latest fallback
         $activeSemester = Semester::where('status', 1)->orderBy('sem_id', 'desc')->first()
                        ?? Semester::orderBy('sem_id', 'desc')->first();
 
+        // Set filters from request or defaults
         $filters = [
             'semester'   => $request->get('semester',   $activeSemester->sem_id ?? null),
             'college'    => $request->get('college',    'all'),
             'department' => $request->get('department', 'all'),
         ];
 
-        // 1. Active faculty
+        // Query active faculty for selected semester/filters
         $activeFaculty = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -46,9 +48,10 @@ class DashboardController extends Controller
             ->select('fp.id', 'fp.employeeID', 'fp.college', 'fp.department')
             ->get();
 
+        // Extract IDs from active faculty result
         $activeFacultyIds = $activeFaculty->pluck('id')->toArray();
 
-        // 2. On-leave faculty
+        // Query faculty currently on leave
         $onLeaveFaculty = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -61,14 +64,16 @@ class DashboardController extends Controller
             ->select('fp.id', 'fp.employeeID')
             ->get();
 
+        // Extract IDs from on-leave faculty result
         $onLeaveFacultyIds = $onLeaveFaculty->pluck('id')->toArray();
 
+        // Compute totals and merge all faculty IDs
         $activeCount   = count($activeFacultyIds);
         $onLeaveCount  = count($onLeaveFacultyIds);
         $totalFaculty  = $activeCount + $onLeaveCount;
         $allFacultyIds = array_merge($activeFacultyIds, $onLeaveFacultyIds);
 
-        // 3. PhD / Masters
+        // Count faculty with PhD degrees
         $phdHolders = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->whereIn('fad.f_id', $allFacultyIds)
@@ -78,6 +83,7 @@ class DashboardController extends Controller
             ->distinct()
             ->count('fad.f_id');
 
+        // Count Masters holders excluding PhD holders
         $mastersHolders = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->whereIn('fad.f_id', $allFacultyIds)
@@ -90,7 +96,7 @@ class DashboardController extends Controller
             ->distinct()
             ->count('fad.f_id');
 
-        // 4. Employment categories
+        // Group active faculty by employment category
         $categoryNames = [1 => 'Regular', 2 => 'Contractual', 3 => 'Part-Time', 4 => 'Temporary'];
         $categories = DB::connection('ewms')
             ->table('table_faculty_status as fs')
@@ -106,10 +112,11 @@ class DashboardController extends Controller
                 'count'    => $item->count,
             ]);
 
-        // 5. Faculty count ranking + workload coverage totals
+        // Allowed colleges for ranking chart
         $allowedColleges = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
 
         if ($filters['college'] !== 'all') {
+            // Drill-down: rank departments within selected college
             $submittedByDept = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -124,6 +131,7 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('department_id');
 
+            // Total faculty per department regardless of status
             $totalByDept = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_department as d', 'fp.department', '=', 'd.department_id')
@@ -133,6 +141,7 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('department_id');
 
+            // Merge submitted and total counts, sort descending
             $rankingData = $totalByDept
                 ->map(fn($row) => (object)[
                     'department_acro' => $row->department_acro,
@@ -141,6 +150,7 @@ class DashboardController extends Controller
                 ->sortByDesc(fn($r, $id) => $totalByDept[$id]->total_faculty ?? 0)
                 ->values();
 
+            // Raw totals for chart background bars
             $rankingTotals = $totalByDept
                 ->sortByDesc('total_faculty')
                 ->values()
@@ -148,6 +158,7 @@ class DashboardController extends Controller
                 ->toArray();
 
         } else {
+            // Overview: rank all allowed colleges by faculty count
             $totalByCollege = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
@@ -157,6 +168,7 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('college');
 
+            // Active faculty count per college for workload coverage
             $workloadByCollege = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -171,6 +183,7 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('college');
 
+            // Sort colleges by active faculty count
             $rankingData = $totalByCollege
                 ->map(fn($row, $acro) => (object)[
                     'college'       => $acro,
@@ -179,16 +192,17 @@ class DashboardController extends Controller
                 ->sortByDesc('total_faculty')
                 ->values();
 
+            // Totals array for chart background reference
             $rankingTotals = $rankingData
                 ->map(fn($row) => (int)($totalByCollege[$row->college]->total_faculty ?? 0))
                 ->toArray();
         }
 
-        // 7. Qualification distribution
+        // Build PhD/Masters/Bachelors breakdown per group
         $qualData             = $this->buildQualificationData($activeFacultyIds, $filters);
         $phdByDepartment      = $qualData;
 
-        // 8. Flat arrays for Blade JS
+        // Flatten collections to arrays for Blade/JS use
         $rankingLabels        = collect($rankingData)->pluck($filters['college'] !== 'all' ? 'department_acro' : 'college')->toArray();
         $rankingCounts        = collect($rankingData)->pluck('total_faculty')->toArray();
         $selectedDeptAcro     = '';
@@ -200,13 +214,14 @@ class DashboardController extends Controller
         $mastersCounts        = $qualData->pluck('masters_count')->toArray();
         $bachelorsCounts      = $qualData->pluck('bachelors_count')->toArray();
 
-        // 9. Dropdown data
+        // Load dropdown options for filters
         $semesters   = Semester::orderBy('sem_id', 'desc')->get();
         $colleges    = CollegeUnit::orderBy('college_acro')->get();
         $departments = $filters['college'] !== 'all'
             ? Department::where('college_id', $filters['college'])->orderBy('department')->get()
             : Department::orderBy('department')->get();
 
+        // Ensure collections are never null
         $collegeStats    = collect();
         $rankingData     = $rankingData     ?? collect();
         $phdByDepartment = $phdByDepartment ?? collect();
@@ -227,19 +242,23 @@ class DashboardController extends Controller
     // =========================================================================
     public function facultyOverviewAjax(Request $request)
     {
+        // Reject non-AJAX requests immediately
         if (!$request->ajax()) {
             return response()->json(['error' => 'Not an AJAX request'], 400);
         }
 
+        // Resolve active semester with fallback
         $activeSemester = Semester::where('status', 1)->orderBy('sem_id', 'desc')->first()
                        ?? Semester::orderBy('sem_id', 'desc')->first();
 
+        // Read filters from AJAX request
         $filters = [
             'semester'   => $request->get('semester',   $activeSemester->sem_id ?? null),
             'college'    => $request->get('college',    'all'),
             'department' => $request->get('department', 'all'),
         ];
 
+        // Same active/on-leave/degree queries as page load (see facultyOverview)
         $activeFaculty = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -294,6 +313,7 @@ class DashboardController extends Controller
             ->distinct()
             ->count('fad.f_id');
 
+        // Map category IDs to readable names
         $categoryNames = [1 => 'Regular', 2 => 'Contractual', 3 => 'Part-Time', 4 => 'Temporary'];
         $categories = DB::connection('ewms')
             ->table('table_faculty_status as fs')
@@ -314,6 +334,7 @@ class DashboardController extends Controller
         $rankingTotals    = [];
 
         if ($filters['college'] !== 'all') {
+            // Department-level ranking within selected college
             $submittedByDept = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -337,6 +358,7 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('department_id');
 
+            // Combine submitted vs total, sort by total
             $rankRowsCollection = $totalByDept
                 ->map(fn($row) => (object)[
                     'department_acro' => $row->department_acro,
@@ -347,6 +369,7 @@ class DashboardController extends Controller
 
             $rankRows = $rankRowsCollection;
 
+            // Chart background totals per department
             $rankingTotals = $totalByDept
                 ->sortByDesc('total_faculty')
                 ->values()
@@ -354,6 +377,7 @@ class DashboardController extends Controller
                 ->toArray();
 
         } else {
+            // College-level ranking across all allowed colleges
             $totalByCollege = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
@@ -377,6 +401,7 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('college');
 
+            // Sort colleges by active workload count descending
             $rankRowsCollection = $totalByCollege
                 ->map(fn($row, $acro) => (object)[
                     'department_acro' => $acro,
@@ -387,14 +412,17 @@ class DashboardController extends Controller
 
             $rankRows = $rankRowsCollection;
 
+            // Chart totals using overall (not just active) counts
             $rankingTotals = $rankRowsCollection
                 ->map(fn($row) => (int)($totalByCollege[$row->department_acro]->total_faculty ?? 0))
                 ->toArray();
         }
 
+        // Extract chart label and count arrays
         $rankingLabels = collect($rankRows)->pluck('department_acro')->toArray();
         $rankingCounts = collect($rankRows)->pluck('total_faculty')->toArray();
 
+        // Build qualification breakdown for chart
         $qualData        = $this->buildQualificationData($activeFacultyIds, $filters);
         $qualLabels      = $qualData->pluck('label')->toArray();
         $phdPct          = $qualData->pluck('phd_percentage')->toArray();
@@ -404,6 +432,7 @@ class DashboardController extends Controller
         $mastersCounts   = $qualData->pluck('masters_count')->toArray();
         $bachelorsCounts = $qualData->pluck('bachelors_count')->toArray();
 
+        // Resolve human-readable labels for selected filters
         $selectedSemester = Semester::find($filters['semester']);
         $semesterText     = $selectedSemester ? $selectedSemester->semester . ' ' . $selectedSemester->sy : '';
         $collegeAcro      = '';
@@ -417,6 +446,7 @@ class DashboardController extends Controller
             $deptAcro = $dep->department_acro ?? '';
         }
 
+        // Load departments for dynamic dropdown update
         $departments = $filters['college'] !== 'all'
             ? Department::where('college_id', $filters['college'])->orderBy('department')->get(['department_id', 'department_acro'])
             : collect();
@@ -450,6 +480,8 @@ class DashboardController extends Controller
     // =========================================================================
     // PRIVATE HELPERS
     // =========================================================================
+
+    // Delegates to college or department breakdown based on filter
     private function buildQualificationData(array $facultyIds, array $filters): \Illuminate\Support\Collection
     {
         $allowedColleges = ['CED', 'COS', 'CASS', 'CEN', 'CAG', 'CHSI', 'CVSM', 'CBA', 'CF'];
@@ -458,6 +490,7 @@ class DashboardController extends Controller
             return $this->buildQualificationByDepartment($facultyIds, $filters);
         }
 
+        // Group active faculty by college acronym
         $collegeGroups = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -479,6 +512,7 @@ class DashboardController extends Controller
             $deptIds = $group->pluck('faculty_id')->toArray();
             $total   = count($deptIds);
 
+            // Push zeroed row if no faculty in college
             if ($total === 0) {
                 $result->push((object)[
                     'label'               => $acro,
@@ -493,6 +527,7 @@ class DashboardController extends Controller
                 continue;
             }
 
+            // Compute degree counts for this college group
             [$phd, $masters, $bachAll] = $this->degreeBreakdown($deptIds);
 
             $result->push((object)[
@@ -507,11 +542,14 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Sort colleges by faculty count descending
         return $result->sortByDesc('total_faculty')->values();
     }
 
+    // Builds qualification breakdown grouped by department
     private function buildQualificationByDepartment(array $facultyIds, array $filters): \Illuminate\Support\Collection
     {
+        // Get active faculty count per department
         $facultyByDept = DB::connection('ewms')
             ->table('table_faculty_profile as fp')
             ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -529,6 +567,7 @@ class DashboardController extends Controller
         $result = collect();
 
         foreach ($facultyByDept as $dept) {
+            // Fetch faculty IDs belonging to this department
             $deptIds = DB::connection('ewms')
                 ->table('table_faculty_profile as fp')
                 ->join('table_faculty_status as fs', function ($join) use ($filters) {
@@ -543,6 +582,7 @@ class DashboardController extends Controller
 
             if (empty($deptIds)) continue;
 
+            // Compute degree counts for this department
             [$phd, $masters, $bachAll] = $this->degreeBreakdown($deptIds);
             $total = $dept->total_faculty;
 
@@ -564,8 +604,10 @@ class DashboardController extends Controller
         return $result->sortByDesc('total_faculty')->values();
     }
 
+    // Returns [phd, masters, bachelors] counts for given faculty IDs
     private function degreeBreakdown(array $facultyIds): array
     {
+        // Count PhD holders
         $phd = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->whereIn('fad.f_id', $facultyIds)
@@ -575,6 +617,7 @@ class DashboardController extends Controller
             ->distinct()
             ->count('fad.f_id');
 
+        // Count Masters holders without PhD
         $masters = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->whereIn('fad.f_id', $facultyIds)
@@ -587,6 +630,7 @@ class DashboardController extends Controller
             ->distinct()
             ->count('fad.f_id');
 
+        // Get all faculty IDs that have any degree record
         $withDegree = DB::connection('ewms')
             ->table('table_faculty_academic_degree')
             ->whereIn('f_id', $facultyIds)
@@ -594,6 +638,7 @@ class DashboardController extends Controller
             ->pluck('f_id')
             ->toArray();
 
+        // Count bachelors-only (no PhD/Masters) per faculty
         $bachelors = 0;
         foreach ($facultyIds as $fid) {
             if (!in_array($fid, $withDegree)) continue;
@@ -605,6 +650,7 @@ class DashboardController extends Controller
             }
         }
 
+        // Faculty with no degree record counted as bachelors tier
         $noDeg   = count($facultyIds) - count($withDegree);
         $bachAll = $bachelors + $noDeg;
 
@@ -617,9 +663,11 @@ class DashboardController extends Controller
     // =========================================================================
     public function facultyQualifications(Request $request)
     {
+        // Resolve active semester with fallback to latest
         $activeSemester = Semester::where('status', 1)->orderBy('sem_id', 'desc')->first()
                        ?? Semester::orderBy('sem_id', 'desc')->first();
 
+        // Read filter values from request
         $filters = [
             'semester'   => $request->get('semester',  $activeSemester->sem_id ?? null),
             'college'    => $request->get('college',   'all'),
@@ -627,6 +675,7 @@ class DashboardController extends Controller
             'rank'       => $request->get('rank',      'all'),
         ];
 
+        // Reusable base query closure with all filters applied
         $base = fn() => DB::connection('ewms')
             ->table('table_faculty_academic_degree')
             ->join('table_faculty_profile as fp', 'table_faculty_academic_degree.f_id', '=', 'fp.id')
@@ -639,12 +688,18 @@ class DashboardController extends Controller
             ->when($filters['department'] !== 'all', fn($q) => $q->where('fp.department',           $filters['department']))
             ->when($filters['rank']       !== 'all', fn($q) => $q->where('fp.generic_faculty_rank', $filters['rank']));
 
+        // Count distinct faculty with any degree record
         $facultyWithDegrees        = $base()->distinct('table_faculty_academic_degree.f_id')->count('table_faculty_academic_degree.f_id');
+        // Aggregate PhD, Masters counts and total
         $highestDegrees            = $base()->selectRaw("COUNT(CASE WHEN phd_degree_title IS NOT NULL AND phd_degree_title != '' THEN 1 END) as phd_count, COUNT(CASE WHEN ms_degree_title IS NOT NULL AND ms_degree_title != '' AND (phd_degree_title IS NULL OR phd_degree_title = '') THEN 1 END) as masters_count, COUNT(*) as total_faculty")->first();
+        // Count faculty who wrote thesis at any level
         $thesisExperience          = $base()->selectRaw("COUNT(CASE WHEN wrote_thesis='Yes' OR ms_wrote_thesis='Yes' OR phd_wrote_thesis='Yes' THEN 1 END) as with_thesis, COUNT(*) as total_faculty")->first();
+        // Count faculty who studied abroad
         $internationalEducation    = $base()->selectRaw("COUNT(CASE WHEN where_obtained LIKE '%abroad%' OR ms_where_obtained LIKE '%abroad%' OR phd_where_obtained LIKE '%abroad%' THEN 1 END) as international_count, COUNT(*) as total_faculty")->first();
+        // Degree tier distribution for donut chart
         $highestDegreeDistribution = $base()->selectRaw("COUNT(CASE WHEN phd_degree_title IS NOT NULL AND phd_degree_title != '' THEN 1 END) as doctorate, COUNT(CASE WHEN ms_degree_title IS NOT NULL AND ms_degree_title != '' AND (phd_degree_title IS NULL OR phd_degree_title = '') THEN 1 END) as masters, COUNT(CASE WHEN (phd_degree_title IS NULL OR phd_degree_title = '') AND (ms_degree_title IS NULL OR ms_degree_title = '') AND degree_title IS NOT NULL THEN 1 END) as bachelors, COUNT(CASE WHEN degree_title IS NULL OR degree_title = '' THEN 1 END) as no_degree")->first();
 
+        // Top 10 departments by PhD percentage
         $degreeByDepartment = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->join('table_faculty_profile as fp', 'fad.f_id', '=', 'fp.id')
@@ -661,6 +716,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // PhD attainment rate grouped by faculty rank
         $qualificationByRank = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->join('table_faculty_profile as fp', 'fad.f_id', '=', 'fp.id')
@@ -678,6 +734,7 @@ class DashboardController extends Controller
             ->orderBy('phd_percentage', 'desc')
             ->get();
 
+        // Thesis completion rate per department
         $thesisByDepartment = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->join('table_faculty_profile as fp', 'fad.f_id', '=', 'fp.id')
@@ -693,6 +750,7 @@ class DashboardController extends Controller
             ->orderBy('thesis_percentage', 'desc')
             ->get();
 
+        // Detailed per-faculty qualification rows for the table
         $facultyQualifications = DB::connection('ewms')
             ->table('table_faculty_academic_degree as fad')
             ->join('table_faculty_profile as fp', 'fad.f_id', '=', 'fp.id')
@@ -712,6 +770,7 @@ class DashboardController extends Controller
             ->limit(50)
             ->get();
 
+        // Dropdown data for filter UI
         $semesters   = Semester::orderBy('sem_id', 'desc')->get();
         $colleges    = CollegeUnit::orderBy('college_unit')->get();
         $departments = $filters['college'] !== 'all'
@@ -724,6 +783,7 @@ class DashboardController extends Controller
             ->orderBy('generic_faculty_rank')
             ->get();
 
+        // Null-safe fallbacks for stat objects
         $highestDegrees            = $highestDegrees            ?? (object) ['phd_count' => 0, 'masters_count' => 0, 'total_faculty' => 0];
         $thesisExperience          = $thesisExperience          ?? (object) ['with_thesis' => 0, 'total_faculty' => 0];
         $internationalEducation    = $internationalEducation    ?? (object) ['international_count' => 0, 'total_faculty' => 0];
@@ -743,8 +803,10 @@ class DashboardController extends Controller
     // =========================================================================
     public function teachingLoad(Request $request)
     {
+        // Academic colleges included in teaching load scope
         $academicCollegeAcros = ['CED','CASS','CAG','CEN','COS','CVSM','CHSI','CBA','CF'];
 
+        // Resolve active semester with fallback
         $activeSemester = Semester::where('status', 1)->orderBy('sem_id', 'desc')->first()
                        ?? Semester::orderBy('sem_id', 'desc')->first();
 
@@ -754,9 +816,11 @@ class DashboardController extends Controller
             'department' => $request->get('department', 'all'),
         ];
 
+        // Drill-down mode when specific college is selected
         $drillDown = $filters['college'] !== 'all';
         $semId     = $filters['semester'];
 
+        // Compute average ATL and faculty count for stat cards
         $overallStats = Summary::query()
             ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
             ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
@@ -770,16 +834,19 @@ class DashboardController extends Controller
         $avgAtl       = $overallStats->avg_atl      ?? 0;
         $totalFaculty = $overallStats->total_faculty ?? 0;
 
+        // Base query for class schedule subject/student counts
         $subjectQuery = ClassSchedule::query()
             ->when($semId, fn($q) => $q->where('sem_id', $semId))
             ->when(!$drillDown, fn($q) => $q->whereHas('department.college', fn($sq) => $sq->whereIn('college_acro', $academicCollegeAcros)))
             ->when($drillDown,  fn($q) => $q->whereHas('department', fn($sq) => $sq->where('college_id', $filters['college'])))
             ->when($filters['department'] !== 'all', fn($q) => $q->where('department_id', $filters['department']));
 
+        // Total distinct subjects and enrolled students
         $totalSubjects = (clone $subjectQuery)->distinct('subject_title')->count('subject_title');
         $totalStudents = (clone $subjectQuery)->sum('no_of_student');
 
         if (!$drillDown) {
+            // College-level chart: ATL averages and workload bands
             $csSub = DB::raw("(SELECT d.college_id, COUNT(DISTINCT cs.subject_title) AS total_subjects, SUM(cs.no_of_student) AS total_students FROM table_class_schedule cs JOIN table_department d ON cs.department_id=d.department_id WHERE cs.sem_id={$semId} GROUP BY d.college_id) AS cs");
             $chartStats = Summary::query()
                 ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
@@ -794,6 +861,7 @@ class DashboardController extends Controller
                 ->get();
             $chartGroupLabel = 'College';
         } else {
+            // Department-level chart within selected college
             $csSub = DB::raw("(SELECT department_id,COUNT(DISTINCT subject_title) AS total_subjects,SUM(no_of_student) AS total_students FROM table_class_schedule WHERE sem_id={$semId} GROUP BY department_id) AS cs");
             $chartStats = Summary::query()
                 ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
@@ -810,6 +878,7 @@ class DashboardController extends Controller
             $chartGroupLabel = 'Department';
         }
 
+        // Workload band distribution totals for donut chart
         $workloadDistribution = Summary::query()
             ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
             ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
@@ -820,6 +889,7 @@ class DashboardController extends Controller
             ->selectRaw("SUM(CASE WHEN table_summary.actual_atl<10 THEN 1 ELSE 0 END) AS low,SUM(CASE WHEN table_summary.actual_atl>=10 AND table_summary.actual_atl<15 THEN 1 ELSE 0 END) AS moderate,SUM(CASE WHEN table_summary.actual_atl>=15 AND table_summary.actual_atl<20 THEN 1 ELSE 0 END) AS high,SUM(CASE WHEN table_summary.actual_atl>=20 THEN 1 ELSE 0 END) AS very_high")
             ->first();
 
+        // Dropdown and context data for view
         $semesters       = Semester::orderBy('sem_id', 'desc')->get();
         $colleges        = CollegeUnit::orderBy('college_acro')->get();
         $departments     = $drillDown ? Department::where('college_id', $filters['college'])->orderBy('department')->get() : collect();
@@ -838,6 +908,7 @@ class DashboardController extends Controller
     // =========================================================================
     public function teachingLoadAjax(Request $request)
     {
+        // Reject non-AJAX calls early
         if (!$request->ajax()) {
             return response()->json(['error' => 'Not an AJAX request'], 400);
         }
@@ -856,6 +927,7 @@ class DashboardController extends Controller
         $drillDown = $filters['college'] !== 'all';
         $semId     = $filters['semester'];
 
+        // Overall ATL average and faculty count for stat cards
         $overallStats = Summary::query()
             ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
             ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
@@ -878,6 +950,7 @@ class DashboardController extends Controller
         $totalSubjects = (clone $subjectQuery)->distinct('subject_title')->count('subject_title');
 
         if (!$drillDown) {
+            // Aggregate chart data at college level
             $csSub = DB::raw("(SELECT d.college_id,COUNT(DISTINCT cs.subject_title) AS total_subjects,SUM(cs.no_of_student) AS total_students FROM table_class_schedule cs JOIN table_department d ON cs.department_id=d.department_id WHERE cs.sem_id={$semId} GROUP BY d.college_id) AS cs");
             $chartStats = Summary::query()
                 ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
@@ -892,6 +965,7 @@ class DashboardController extends Controller
                 ->get();
             $chartGroupLabel = 'College';
         } else {
+            // Aggregate chart data at department level
             $csSub = DB::raw("(SELECT department_id,COUNT(DISTINCT subject_title) AS total_subjects,SUM(no_of_student) AS total_students FROM table_class_schedule WHERE sem_id={$semId} GROUP BY department_id) AS cs");
             $chartStats = Summary::query()
                 ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
@@ -908,6 +982,7 @@ class DashboardController extends Controller
             $chartGroupLabel = 'Department';
         }
 
+        // Workload band counts for donut chart response
         $workloadDist = Summary::query()
             ->join('table_faculty_profile as fp', 'table_summary.f_id', '=', 'fp.id')
             ->join('table_college_unit as cu', 'fp.college', '=', 'cu.c_u_id')
@@ -918,6 +993,7 @@ class DashboardController extends Controller
             ->selectRaw("SUM(CASE WHEN table_summary.actual_atl<10 THEN 1 ELSE 0 END) AS low,SUM(CASE WHEN table_summary.actual_atl>=10 AND table_summary.actual_atl<15 THEN 1 ELSE 0 END) AS moderate,SUM(CASE WHEN table_summary.actual_atl>=15 AND table_summary.actual_atl<20 THEN 1 ELSE 0 END) AS high,SUM(CASE WHEN table_summary.actual_atl>=20 THEN 1 ELSE 0 END) AS very_high")
             ->first();
 
+        // Resolve human-readable semester label
         $semesterText = '';
         if ($semId) {
             $sem          = Semester::find($semId);
@@ -939,6 +1015,8 @@ class DashboardController extends Controller
     // =========================================================================
     // DEPARTMENTS BY COLLEGE
     // =========================================================================
+
+    // Returns department list for a given college (for dropdown)
     public function departmentsByCollege($collegeId)
     {
         return response()->json(
@@ -962,10 +1040,12 @@ class DashboardController extends Controller
             'college'  => $request->get('college',  'all'),
         ];
 
+        // Normalize empty strings to 'all'
         foreach ($filters as $k => $v) {
             if ($v === '' || $v === null) $filters[$k] = 'all';
         }
 
+        // ETL totals and faculty research engagement per department
         $researchLoad = AssignmentInStudentRS::query()
             ->join('table_faculty_profile as fp', 'table_assignment_in_student_rs.f_id', '=', 'fp.id')
             ->join('table_department as d', 'fp.department', '=', 'd.department_id')
@@ -977,6 +1057,7 @@ class DashboardController extends Controller
             ->orderBy('total_etl', 'desc')
             ->get();
 
+        // Publication counts per department
         $publications = Publication::query()
             ->join('table_faculty_profile as fp', 'table_publication.f_id', '=', 'fp.id')
             ->join('table_department as d', 'fp.department', '=', 'd.department_id')
@@ -989,6 +1070,7 @@ class DashboardController extends Controller
             ->orderBy('publication_count', 'desc')
             ->get();
 
+        // Publication volume by type for pie/bar chart
         $publicationTypeBreakdown = Publication::query()
             ->join('table_faculty_profile as fp', 'table_publication.f_id', '=', 'fp.id')
             ->join('table_department as d', 'fp.department', '=', 'd.department_id')
@@ -1001,10 +1083,12 @@ class DashboardController extends Controller
             ->orderBy('type_count', 'desc')
             ->get();
 
+        // Context objects for view header labels
         $activeSemObj       = ($filters['semester'] !== 'all') ? Semester::find($filters['semester'])   : null;
         $selectedCollegeObj = ($filters['college']  !== 'all') ? CollegeUnit::find($filters['college']) : null;
         $semesters          = Semester::orderBy('sem_id', 'desc')->get();
 
+        // Only show academic college units in dropdown
         $academicCollegeAcros = ['CAG','CASS','CBA','CED','CEN','CF','CHSI','COS','CVSM'];
         $collegeUnits = CollegeUnit::whereIn('college_acro', $academicCollegeAcros)
             ->orderBy('college_acro')
@@ -1022,6 +1106,7 @@ class DashboardController extends Controller
     // =========================================================================
     public function researchPerformanceAjax(Request $request)
     {
+        // Reject non-AJAX requests
         if (!$request->ajax()) {
             return response()->json(['error' => 'Not an AJAX request'], 400);
         }
@@ -1038,6 +1123,7 @@ class DashboardController extends Controller
             if ($v === '' || $v === null) $filters[$k] = 'all';
         }
 
+        // Same queries as page load (see researchPerformance)
         $researchLoad = AssignmentInStudentRS::query()
             ->join('table_faculty_profile as fp', 'table_assignment_in_student_rs.f_id', '=', 'fp.id')
             ->join('table_department as d', 'fp.department', '=', 'd.department_id')
@@ -1073,12 +1159,14 @@ class DashboardController extends Controller
             ->orderBy('type_count', 'desc')
             ->get();
 
+        // Aggregate totals for JSON summary cards
         $totals = [
             'researchCount' => (int)   $researchLoad->sum('research_count'),
             'pubCount'      => (int)   $publications->sum('publication_count'),
             'etlHours'      => (float) round($researchLoad->sum('total_etl'), 0),
         ];
 
+        // Resolve readable semester and college labels
         $semesterText = '';
         if ($filters['semester'] !== 'all') {
             $sem          = Semester::find($filters['semester']);
@@ -1115,7 +1203,7 @@ class DashboardController extends Controller
             'timeline_signatory' => $request->get('timeline_signatory', null),
         ];
 
-        // ── Stats cards: filter by selected semester date range ──────────────
+        // Filter signatory records by selected semester date range
         $mainQuery = DB::connection('ewms')->table('table_signatory');
         if (!empty($filters['main_semester'])) {
             $semester = Semester::find($filters['main_semester']);
@@ -1125,11 +1213,13 @@ class DashboardController extends Controller
         }
 
         $mainSignatories = $mainQuery->get();
+        // Compute overall approval state counts
         $totalDocuments  = $mainSignatories->count();
         $fullyApproved   = $mainSignatories->filter(fn($i) => $this->isFullyApproved($i))->count();
         $declined        = $mainSignatories->filter(fn($i) => $this->hasDeclinedApproval($i))->count();
         $pendingApproval = $mainSignatories->filter(fn($i) => $this->isSubmitted($i))->count();
 
+        // Sum individual field-level approval statuses
         $overallApproved = $overallPending = $overallDeclined = 0;
         foreach ($mainSignatories as $signatory) {
             $counts          = $this->getApprovalCounts($signatory);
@@ -1138,6 +1228,7 @@ class DashboardController extends Controller
             $overallDeclined += $counts['declined'];
         }
 
+        // Per-signatory role approval stats
         $dhStats       = $this->calculateSingleSignatoryStats($mainSignatories, 'dh_approval');
         $deanStats     = $this->calculateSingleSignatoryStats($mainSignatories, 'dean_approval');
         $directorStats = $this->calculateSingleSignatoryStats($mainSignatories, 'director_supervisor');
@@ -1147,6 +1238,7 @@ class DashboardController extends Controller
         $eteeapStats   = $this->calculateSingleSignatoryStats($mainSignatories, 'eteeap_approval');
         $vpaaStats     = $this->calculateSingleSignatoryStats($mainSignatories, 'vpaa_approval');
 
+        // Signatory rows config for table rendering
         $signatoryRows = [
             ['label' => 'Department Head',     'filter' => 'dh',      'stats' => $dhStats],
             ['label' => 'Dean',                'filter' => 'dean',    'stats' => $deanStats],
@@ -1158,8 +1250,7 @@ class DashboardController extends Controller
             ['label' => 'VPAA',                'filter' => 'vpaa',    'stats' => $vpaaStats],
         ];
 
-        // ── Timeline: iterate over each semester in order ────────────────────
-        // Pull ALL signatory records once for PHP-side filtering per semester
+        // Pull all records once for semester-bucketed timeline
         $allTimelineDocs   = DB::connection('ewms')->table('table_signatory')->get();
         $timelineSemesters = Semester::orderBy('sem_id', 'asc')->get();
 
@@ -1171,14 +1262,13 @@ class DashboardController extends Controller
         $yearlyApprovalRates  = [];
 
         foreach ($timelineSemesters as $sem) {
-            // Skip semesters without date bounds — we can't bucket records without them
+            // Skip semesters missing date bounds
             if (empty($sem->start_date) || empty($sem->end_date)) continue;
 
-            // Label: e.g. "1st Semester 2023-2024"
             $label            = $sem->semester . ' ' . $sem->sy;
             $timelineLabels[] = $label;
 
-            // Filter all docs that fall within this semester's date window
+            // Bucket documents falling within this semester window
             $semDocs = $allTimelineDocs->filter(function ($item) use ($sem) {
                 $d = $item->date_submitted ?? null;
                 if (!$d) return false;
@@ -1189,11 +1279,13 @@ class DashboardController extends Controller
             $yearlyDocumentCounts[$label] = $totalCount;
 
             if ($filters['timeline_signatory']) {
+                // Filter by specific signatory field if selected
                 $field     = $this->getTimelineField($filters['timeline_signatory']);
                 $approved  = $field ? $semDocs->filter(fn($i) => $this->checkIsApproved($i->$field ?? null))->count() : 0;
                 $declined2 = $field ? $semDocs->filter(fn($i) => $this->checkIsDeclined($i->$field ?? null))->count() : 0;
                 $pending   = max(0, $totalCount - $approved - $declined2);
             } else {
+                // Default: use overall document approval state
                 $approved  = $semDocs->filter(fn($i) => $this->isFullyApproved($i))->count();
                 $declined2 = $semDocs->filter(fn($i) => $this->hasDeclinedApproval($i))->count();
                 $pending   = $semDocs->filter(fn($i) => $this->isSubmitted($i))->count();
@@ -1202,12 +1294,13 @@ class DashboardController extends Controller
             $yearlyApprovedCounts[$label] = $approved;
             $yearlyDeclinedCounts[$label] = $declined2;
             $yearlyPendingCounts[$label]  = $pending;
+            // Approval rate percentage for timeline chart
             $yearlyApprovalRates[$label]  = $totalCount > 0 ? round(($approved / $totalCount) * 100, 1) : 0;
         }
 
-        // $timelineYears is kept as the label array for the blade/JS
         $timelineYears = $timelineLabels;
 
+        // Return JSON for AJAX or render full page view
         if ($request->ajax()) {
             return response()->json([
                 'overallStats'   => compact('totalDocuments', 'fullyApproved', 'pendingApproval', 'declined', 'overallApproved', 'overallPending', 'overallDeclined'),
@@ -1245,6 +1338,8 @@ class DashboardController extends Controller
     // =========================================================================
     // APPROVAL HELPERS
     // =========================================================================
+
+    // Returns all signatory field names
     private function getFields(): array
     {
         return [
@@ -1253,6 +1348,7 @@ class DashboardController extends Controller
         ];
     }
 
+    // Maps filter shorthand to DB column name
     private function getTimelineField($filter)
     {
         return [
@@ -1267,29 +1363,34 @@ class DashboardController extends Controller
         ][$filter] ?? null;
     }
 
+    // Returns true if status is an approval value
     private function checkIsApproved($status): bool
     {
         if ($status === null || trim((string) $status) === '') return false;
         return in_array(strtolower(trim($status)), ['approved','approve','yes','1','true','accept','accepted']);
     }
 
+    // Returns true if status is a declined value
     private function checkIsDeclined($status): bool
     {
         if ($status === null || trim((string) $status) === '') return false;
         return in_array(strtolower(trim($status)), ['declined','rejected','reject','deny','denied','no','disapproved','disapprove']);
     }
 
+    // Returns true if status is a pending/null value
     private function checkIsPending($status): bool
     {
         if ($status === null || trim((string) $status) === '') return true;
         return in_array(strtolower(trim($status)), ['pending','waiting','in progress','0','null','for approval','not yet','for review']);
     }
 
+    // Returns true if status is null or empty string
     private function isNullOrEmpty($status): bool
     {
         return $status === null || trim((string) $status) === '';
     }
 
+    // Returns true if all non-empty fields are approved
     private function isFullyApproved($signatory): bool
     {
         $hasAtLeastOne = false;
@@ -1303,6 +1404,7 @@ class DashboardController extends Controller
         return $hasAtLeastOne;
     }
 
+    // Returns true if any field has a declined status
     private function hasDeclinedApproval($signatory): bool
     {
         foreach ($this->getFields() as $field) {
@@ -1312,6 +1414,7 @@ class DashboardController extends Controller
         return false;
     }
 
+    // Returns true if submitted but not fully approved/declined
     private function isSubmitted($signatory): bool
     {
         if ($this->hasDeclinedApproval($signatory) || $this->isFullyApproved($signatory)) return false;
@@ -1322,6 +1425,7 @@ class DashboardController extends Controller
         return false;
     }
 
+    // Returns true if all signatory fields are empty
     private function isNotYetSubmitted($signatory): bool
     {
         foreach ($this->getFields() as $field) {
@@ -1331,11 +1435,13 @@ class DashboardController extends Controller
         return true;
     }
 
+    // Alias for isSubmitted — checks for any pending field
     private function hasPendingApproval($signatory): bool
     {
         return $this->isSubmitted($signatory);
     }
 
+    // Counts approved/pending/declined for one signatory field
     private function calculateSingleSignatoryStats($signatories, $fieldName): array
     {
         $approved = $pending = $declined = $total = 0;
@@ -1352,10 +1458,12 @@ class DashboardController extends Controller
             'pending'  => $pending,
             'declined' => $declined,
             'total'    => $total,
+            // Approval rate as percentage
             'rate'     => $total > 0 ? round(($approved / $total) * 100, 1) : 0,
         ];
     }
 
+    // Counts approved/pending/declined across all fields for one record
     private function getApprovalCounts($signatory): array
     {
         $approved = $pending = $declined = 0;
