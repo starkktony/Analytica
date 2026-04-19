@@ -11,33 +11,37 @@ class IPRightsController extends Controller
 {
     public function index(Request $request)
     {
+        // Get all distinct years for the dropdown, ordered in descending order
         $all_year = RDIPRights::select('filyear')
         ->distinct()
         ->orderBy('filyear', 'desc')
         ->pluck('filyear');
 
+        // Determine the selected year, defaulting to the maximum year if not provided, and start building the query
         $permMaxYear = RDIPRights::max('filyear');
         $selectedYear = $request->input('year') ?? $permMaxYear;
         $query = RDIPRights::query();
 
+        // Get the grouping parameter for the stacked chart, default to 'utilization' if not provided, and validate it against allowed values
         $grouping = $request->input('group_by');
             if (!in_array($grouping, ['utilization', 'type', 'acct_unit'])) {
                 $grouping = 'utilization';
             }
 
-       
-
+        // Determine the range of years to display in the stacked chart based on the selected year and the available years in the dataset
         $maxYear = $selectedYear ?? RDIPRights::max('filyear');
+        // Ensure we have a valid max year and calculate the second year for percentage change calculations
         $secondYear = $maxYear - 1;
 
+        // Logic to determine the 10-year range for the stacked chart based on the position of the selected year in the list of all years
         $targetIndex = $all_year->search($selectedYear);
-
         if ($targetIndex === false || $targetIndex > ($all_year->count() - 10)) {
             $startIndex = max(0, $all_year->count() - 10);
         } else {
             $startIndex = $targetIndex;
         }
 
+        // Get the 10-year range of years to display in the stacked chart, ensuring it's in ascending order for proper chart display
         $displayYears = $all_year->slice($startIndex, 10)->reverse()->values();
         $stackedData = RDIPRights::select('filyear', $grouping, DB::raw('count(*) as total'))
         ->whereIn('filyear', $displayYears) 
@@ -45,11 +49,12 @@ class IPRightsController extends Controller
         ->orderBy('filyear', 'asc') 
         ->get();
 
+        // Apply the year filter to the main query for the other charts and stats, and get the filtered data for further processing
         $filteredData = (clone $query)
         ->when($selectedYear, fn($q) => $q->where('filyear', $selectedYear))
         ->get();
         
-        //-----------------------------------------------------
+        // Group the filtered data for the various pie charts, count the number of records for each group, and sort them in descending order for better visualization
         $per_util = $filteredData
         ->groupBy('utilization')
         ->map(function ($items) {
@@ -62,6 +67,7 @@ class IPRightsController extends Controller
         return $items->count();})
         ->sortDesc();
 
+        // Map of long account unit names to their abbreviations for the per unit pie chart, which will be used to convert the long names in the dataset to more concise labels for the chart
         $collegeMap = [
             'College of Engineering' => 'CEn',
             'College of Arts and Social Science' => 'CASS',
@@ -81,6 +87,7 @@ class IPRightsController extends Controller
             'URPO - Philippine Carabao Center at CLSU' => 'URPO-PCC',
         ];
 
+        // Additional mapping for other units that may not be colleges but are still relevant for the per unit pie chart
         $per_unit = $filteredData
         ->groupBy('acct_unit')
         ->map(function ($group, $longName) use ($collegeMap) {
@@ -97,7 +104,7 @@ class IPRightsController extends Controller
 
         $unitresults = $per_unit->values();
 
-        //-----------------------------------------------------
+        // Group the filtered data by year and count the number of records for each year to prepare data for the IP rights filings per year line chart, ensuring the years are ordered in descending order and limited to the most recent 7 years for better visualization
         $per_year = RDIPRights::select('filyear', DB::raw('count(*) as total'))
         ->groupBy('filyear')
         ->orderBy('filyear', 'desc')
@@ -105,7 +112,7 @@ class IPRightsController extends Controller
         ->get()
         ->reverse();
 
-        //-----------------------------------------------------
+        // Calculate the percentage change in IP rights filings from the previous year to the selected year for the stats section, handling cases where the previous year's value is zero to avoid division by zero errors
         $mxyear_value = RDIPRights::where('filyear', $maxYear)->count();
         $prevyear_value_test = RDIPRights::where('filyear', $secondYear)->count();
         $prevyear_value = ($prevyear_value_test > 0) ? $prevyear_value_test : 0;
@@ -113,6 +120,7 @@ class IPRightsController extends Controller
         $year_perc = ($prevyear_value == 0) ? 0:((($mxyear_value-$prevyear_value)/$prevyear_value) * 100);
         //---------------------------------------------------------
 
+        // Pass all the prepared data to the view for rendering, including stats, chart data, and percentages, as well as the selected year and grouping for the stacked chart to maintain state in the UI
         return view('radiis.iprights', [
             'stats' => [
                 'total_ipr'   => RDIPRights::where('filyear','<=',$maxYear)->count(),
@@ -141,9 +149,12 @@ class IPRightsController extends Controller
          ]);
     }
 
+    // Helper function to format the data for the stacked chart based on the raw results, grouping, and display years
     protected function formatStacked($rawResults, $grouping, $displayYears)
         {   
+            // Get the unique categories based on the grouping parameter, filter out any null or empty values, and prepare the series data for the stacked chart
             $categories = $rawResults->pluck($grouping)->unique()->filter()->values();
+            // For each category, map the counts for each year in the display range, ensuring that if there's no data for a particular year-category combination, it defaults to 0
             $series = $categories->map(function ($name) use ($rawResults, $displayYears, $grouping) {
                 return [
                     'name' => $name,
@@ -155,11 +166,13 @@ class IPRightsController extends Controller
                     })
                 ];
             });
+            // Calculate the total number of IP rights filings for each year across all categories to prepare the total line data for the stacked chart
             $totalLine = collect($displayYears)->map(function ($year) use ($rawResults) {
                 return $rawResults->where('filyear', $year)->sum('total');
             });
 
-            return [
+            // Return the formatted data for the stacked chart, including the labels (years), series (categories with their counts), and the total line data
+             return [
                 'labels' => $displayYears,
                 'series' => $series,
                 'total_line' => $totalLine

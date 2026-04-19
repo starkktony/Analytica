@@ -14,7 +14,7 @@
     
     <title>Siel Metrics</title>
 
-    
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -58,6 +58,7 @@
 <body>
     @include('components.sidebar')
 <div class="content">
+    //SECOND HEADER *contains specific page and filter options*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -72,6 +73,7 @@
                     Filter
                 </div>
 
+                //Year filter
                 <div class="flex flex-wrap items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-xs md:text-sm font-medium">Year:</span>
@@ -87,6 +89,7 @@
                         </form>
                     </div>
 
+                    //Group by filter for the time series chart
                     <div class="flex items-center gap-2">
                         <span class="text-xs md:text-sm font-medium">Time Series:</span>
                         <form action="{{ route('radiis.linkages') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
@@ -105,7 +108,9 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6">
+        //New Linkages Card with percentage change from previous year, styled with Tailwind CSS for a modern and clean look, including a colored border to indicate the positive or negative change, and a clear display of the number of new linkages established in the selected year along with the percentage change compared to the previous year, providing users with an at-a-glance understanding of the trend in linkages establishment over time
         <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
             <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-4">       
                 <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-45 sm:h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
@@ -124,6 +129,7 @@
             </div>
         </div>
 
+        //Grid layout for the various pie charts and the time series chart, styled with Tailwind CSS for a modern and clean look, including colored borders to indicate the different categories of linkages, and clear titles for each chart to provide users with an at-a-glance understanding of the distribution of linkages across different categories, types, statuses, levels, and units, as well as the annual trend of linkages establishment over a 10-year period, allowing users to easily analyze the data and identify patterns and trends in linkages establishment over time
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3">
             <div class="col-span-4 lg:col-span-6 h-100 lg:h-136 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
@@ -167,6 +173,7 @@
             </div>
         </div>
 
+        //Time series section for annual linkages establishment trend, styled with Tailwind CSS for a modern and clean look, including a colored border to indicate the positive trend in linkages establishment over time, and a clear title to provide users with an at-a-glance understanding of the annual trend of linkages establishment over a 10-year period, allowing users to easily analyze the data and identify patterns and trends in linkages establishment over time, while also providing a note to inform users about the availability of data for certain years
         <div id="time-series-section" class="grid grid-cols-4 lg:grid-cols-12 gap-3 mt-2">
             <div class="col-span-6 md:col-span-12">
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[400px] sm:h-[352px] md:h-[354px] mb-8">
@@ -186,11 +193,15 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    //JavaScript code to initialize the Plotly charts for linkages per category, type, status, level, unit, and the annual trend of linkages establishment, using the data passed from the backend and applying a common configuration for responsiveness and styling, while also adding a resize observer to ensure that the charts resize correctly when the window size changes or when the sidebar is toggled, enhancing the user experience by maintaining the readability and visual integrity of the charts across different screen sizes and layout changes
     <script>
+        // Wait for the DOM to load before initializing the charts to ensure that the HTML elements are available for rendering the charts
         document.addEventListener('DOMContentLoaded', function () {
 
+            // Define a common configuration object for all charts to ensure consistency in responsiveness, display options, and mode bar buttons across all the charts rendered on the page, allowing for a cohesive user experience when interacting with the charts and ensuring that they adapt well to different screen sizes and devices
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+            //most parts here are the same as what was in iprights.blade.php, just with different data and different chart types (pie charts instead of bar charts), so I won't add comments for the repeated parts, but I will add comments for the complex parts to explain what they do
             const catData = [{
                 values: @js($charts['per_cat_values']),
                 labels: @js($charts['per_cat_labels']),
@@ -303,12 +314,14 @@
 
             //---------------------------------------------------------------------------
 
-            const unitlabels = @js($charts['per_unit_labels']);
-            const unitvalues = @js($charts['per_unit_values']);
-            const unitFullNames = @js($charts['per_unit_names']); // Get the new field
+            const unitlabels = @js($charts['per_unit_labels']);//Gets the label to be shown in the legends
+            const unitvalues = @js($charts['per_unit_values']);//Gets the values to be shown in the pie chart
+            const unitFullNames = @js($charts['per_unit_names']); //Gets the full names of the units to be shown in the hovertemplate, since some unit names are too long and need to be shortened for the legends, but we still want to show the full names in the hovertemplate for better understanding
 
+            //Create a custom data array that contains the full names of the units, which will be used in the hovertemplate to show the full name of the unit when hovering over the pie chart, allowing users to easily identify the units without having to rely on the shortened labels in the legends, and providing a better user experience by giving more context and information about each unit when interacting with the chart
             const customDataArray = unitFullNames.map(name => [name]);
 
+            //Define a color mapping object that maps each unit label to a specific color, which will be used to assign consistent colors to the pie chart segments based on the unit labels, enhancing the visual distinction between different units in the chart and making it easier for users to identify and differentiate between them at a glance, while also providing a visually appealing and organized representation of the data in the pie chart
             const colorMapping = {
                 'CEn': '#800000',   // Maroon
                 'CBA': '#3498db',  // Blue
@@ -333,6 +346,7 @@
                 'OVPAd': '#ff6161', //Light Red
             };
 
+            //Create an array of colors for the pie chart segments by mapping the unit labels to their corresponding colors using the color mapping object, and if a label does not have a defined color in the mapping, it defaults to black ('#000000'), ensuring that all segments of the pie chart are colored appropriately based on their labels while also providing a fallback color for any labels that may not be explicitly defined in the color mapping, thus maintaining the visual integrity of the chart even when encountering unexpected or undefined labels
             const colors1 = unitlabels.map(label => colorMapping[label] || '#000000');
 
             const unitData = [{
@@ -413,6 +427,7 @@
 
             Plotly.newPlot('linkPerYear', yearData, yearLayout, commonConfig);
 
+            // Add a resize observer to the content div to ensure that the charts resize correctly when the window size changes or when the sidebar is toggled, enhancing the user experience by maintaining the readability and visual integrity of the charts across different screen sizes and layout changes
             const charts = ['linkPerCategory', 'linkPerType', 'linkPerStatus', 'linkPerLevel', 'linkPerUnit', 'linkPerYear'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

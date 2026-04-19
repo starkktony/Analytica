@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <title>Siel Metrics</title>
 
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -56,6 +57,7 @@
 <body>
     @include('components.sidebar')
 <div class="content">
+    //SECOND HEADER *contains specific page and filter options*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -68,6 +70,8 @@
                 <div class="hidden sm:block font-[650] border-r border-gray-500 pr-4">
                     Filter
                 </div>
+
+                //Year filter
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-medium">Year:</span>
                     <form action="{{ route('radiis.researchers') }}" method="GET" id="filterForm" class="m-0">
@@ -85,7 +89,9 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6 pt-4">
+        //Card for new researchers hired in the selected year
         <div class="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-3 mb-2 z-0">
             <div class="col-span-4 md:col-span-5 lg:col-span-4">
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
@@ -102,6 +108,7 @@
             </div>
         </div>
 
+        //Cards for researchers per type, status, and degree
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2 z-10">
             <div class='col-span-4'>
                 <div class='border-t-6 border-green-600 bg-linear-to-br bg-white/50 flex flex-wrap h-[350px] md:h-[400px] lg:h-[500px] rounded-[1vw] inset-shadow-xl shadow-xl'>
@@ -135,6 +142,7 @@
             </div>
         </div>
 
+        //Card for researchers hired per year (time series)
         <div id="time-series-section">
             <div class="border-l-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl h-[370px] sm:h-[352px] md:h-[354px] mb-8">
                 <div class="font-[650] text-sm sm:text-lg text-gray-700 pl-4 sm:pl-6 pt-4">
@@ -152,12 +160,14 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    //PLOTLY CHARTS FOR RESEARCHERS DASHBOARD------------------------------------------------------
     <script>
-        console.log(@js($charts['type_values'])),
+        //Wait for the DOM to load before initializing the charts to ensure that the chart containers are available and to prevent any potential issues with rendering the charts before the elements are fully loaded. This is especially important in a dynamic dashboard environment where the content may be loaded asynchronously or where there are interactive elements that could affect the timing of when the charts are rendered. By wrapping the chart initialization code inside a DOMContentLoaded event listener, we can ensure that all necessary elements are present and ready for manipulation before we attempt to create and render the Plotly charts, leading to a smoother user experience and preventing errors related to missing elements.
         document.addEventListener('DOMContentLoaded', function () {
             
-
+            // Define a common configuration object for all charts to ensure consistency in appearance and behavior across the different visualizations on the dashboard. This commonConfig object includes settings for responsiveness, logo display, and mode bar button removal, which helps to create a cohesive look and feel for all charts while also optimizing the user interface by removing unnecessary buttons that may not be relevant for the specific use case of the researchers dashboard. By centralizing these configuration settings, we can easily maintain and update the chart configurations in one place, ensuring that any changes are consistently applied across all charts without having to modify each chart's individual configuration.
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
+
             const typeData = [{
                 values: @js($charts['type_values']),
                 labels: @js($charts['type_labels']),
@@ -272,6 +282,7 @@
 
             Plotly.newPlot('resPerYear', yearData, yearLayout, commonConfig);
             
+            // Add a ResizeObserver to ensure charts resize correctly when the window size changes or when the sidebar is toggled, improving the user experience by maintaining the readability and usability of the charts across different screen sizes and layout configurations, especially in a responsive dashboard environment where users may frequently adjust their view. The ResizeObserver monitors changes to the size of the content area and triggers a resize of all charts whenever a change is detected, ensuring that the charts adapt to the available space and remain visually coherent and easy to interact with regardless of layout adjustments.
             const charts = ['resPerType', 'resPerStatus', 'resPerDegree', 'resPerYear'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

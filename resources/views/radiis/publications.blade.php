@@ -14,7 +14,7 @@
     
     <title>Siel Metrics</title>
 
-    
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -58,6 +58,7 @@
 <body>
     @include('components.sidebar')
 <div class="content">
+    //SECOND HEADER *contains specific page and filter options*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -72,6 +73,7 @@
                     Filter
                 </div>
 
+                //Year filter
                 <div class="flex flex-wrap items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-xs md:text-sm font-medium">Year:</span>
@@ -87,6 +89,7 @@
                         </form>
                     </div>
 
+                    //Group by filter for the time series chart
                     <div class="flex items-center gap-2">
                         <span class="text-xs md:text-sm font-medium">Time Series:</span>
                         <form action="{{ route('radiis.publications') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
@@ -103,7 +106,9 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6">
+        //Card for new publications with percentage change from previous year
         <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
             <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-4">       
                 <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-45 sm:h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
@@ -122,6 +127,7 @@
             </div>
         </div>
 
+        //Cards for publications per category, level, and unit
         <div class="grid grid-cols-4 xl:grid-cols-12 gap-3">
             <div class="col-span-4 h-[340px] sm:h-[500px] border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
@@ -148,6 +154,7 @@
                 </div>
             </div>
         </div>
+        //Card for annual publications trend with a note about data availability
         <div id="time-series-section">
             <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[380px] sm:h-[352px] md:h-[354px] mb-8">
                 <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>
@@ -165,9 +172,12 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    //JavaScript to initialize the Plotly charts for publications per category, level, unit, and annual trend, with a common configuration for responsiveness and styling, and a ResizeObserver to ensure the charts resize correctly when the window size changes or when the sidebar is toggled, improving the user experience by maintaining the readability and usability of the charts across different screen sizes and layout configurations, especially in a responsive dashboard environment where users may frequently adjust their view
     <script>
+        // Wait for the DOM to fully load before executing the script to ensure that all elements are available for manipulation and that the charts can be rendered correctly without encountering any issues related to missing elements or data, providing a smoother user experience and preventing potential errors during the chart rendering process
         document.addEventListener('DOMContentLoaded', function () {
 
+            // Define a common configuration object for all charts to ensure consistency in appearance and behavior, such as responsiveness, logo display, and mode bar button options, allowing for easier maintenance and updates to the chart settings across the entire dashboard by centralizing the configuration in one place
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
             const catData = [{
@@ -225,12 +235,14 @@
             Plotly.newPlot('pubsPerLevel', levelData, levelLayout, commonConfig);
 
             //---------------------------------------------------------------------------
-            const unitlabels = @js($charts['per_unit_labels']);
-            const unitvalues = @js($charts['per_unit_values']);
-            const unitFullNames = @js($charts['per_unit_names']); // Get the new field
+            const unitlabels = @js($charts['per_unit_labels']);//Gets the label to be shown in the legends
+            const unitvalues = @js($charts['per_unit_values']);//Gets the values to be shown in the pie chart
+            const unitFullNames = @js($charts['per_unit_names']);//Gets the full names of the units to be shown in the hovertemplate, as the labels are abbreviated for better display in the legend, but the full names provide more context when hovering over the pie chart segments, enhancing the user experience by providing detailed information about each unit without cluttering the visual presentation of the chart. The customDataArray is created to hold these full names and is used in the hovertemplate to display the full unit name when a user hovers over a segment of the pie chart, allowing for a more informative and user-friendly interaction with the chart while keeping the legend concise and visually appealing.
 
+            // Create a custom data array for the hovertemplate to display the full unit names, as the labels used in the legend are abbreviated for better visual fit, but the hovertemplate can provide more detailed information by showing the full names of the units when users interact with the pie chart segments, enhancing the user experience by providing clarity and context without overcrowding the legend with long names.
             const customDataArray = unitFullNames.map(name => [name]);
 
+            // Define a color mapping for each unit to ensure consistent and meaningful colors across the chart, where each unit is assigned a specific color that can be easily associated with it in the legend and the pie chart segments, improving the visual distinction between different units and enhancing the overall readability and interpretability of the chart. The colorMapping object maps each unit label to a specific color code, which is then used to create an array of colors for the pie chart segments based on the unit labels, ensuring that each segment is colored according to its corresponding unit in a visually coherent manner.
             const colorMapping = {
                 'CEn': '#800000',   // Maroon
                 'CBA': '#3498db',  // Blue
@@ -248,6 +260,7 @@
                 'URPO-FAC': '#5eafff', //Light Blue
             };
 
+            // Create an array of colors for the pie chart segments based on the unit labels, using the color mapping defined above to ensure that each segment is colored according to its corresponding unit, which enhances the visual distinction between different units in the chart and helps users quickly identify and associate each segment with its respective unit in both the legend and the pie chart.
             const colors1 = unitlabels.map(label => colorMapping[label] || '#000000');
 
             const unitData = [{
@@ -280,9 +293,10 @@
             Plotly.newPlot('pubsPerUnit', unitData, unitLayout, commonConfig);
 
             //---------------------------------------------------------------------------
-            const stackedData = @json($charts['stacked']);
-            const colors = ['#01ac42', '#F2EA00', '#4E98FF', '#D84CFF', '#FF6284', '#FF9760'];
+            const stackedData = @json($charts['stacked']);// Gets the data for the stacked bar chart, which includes the labels for the x-axis (years), the series data for each category (with counts for each year), and the total line data that represents the overall trend in publications across all categories over the years. The stackedData object is structured to provide all the necessary information to create a comprehensive stacked bar chart with an overlaying line chart, allowing for a clear visualization of how publications are distributed across different categories annually, as well as how the total number of publications has evolved over time, giving users insights into both individual category performance and overall trends in research output. The data is passed from the server-side to the client-side in JSON format, making it easy to work with in JavaScript for chart rendering using Plotly.
+            const colors = ['#01ac42', '#F2EA00', '#4E98FF', '#D84CFF', '#FF6284', '#FF9760'];// Define a color palette for the bar traces to ensure that each category in the stacked bar chart is visually distinct and easily identifiable, enhancing the readability and interpretability of the chart by allowing users to quickly differentiate between the various categories represented in the data. The colors array provides a set of visually appealing and contrasting colors that can be used to represent different series in the stacked bar chart, making it easier for users to understand the distribution and composition of publications across different categories over the years.
 
+            // Create bar traces for each category in the stacked bar chart using the series data from the stackedData object, where each trace corresponds to a specific category and includes the x-axis labels (years), y-axis values (counts), and styling options such as color and width. The barTraces array is constructed by mapping over the series data, creating a trace object for each category that can be used to render the stacked bars in the chart, allowing for a clear visualization of how publications are distributed across different categories annually. Each trace is styled with a specific color from the colors array to ensure visual distinction between categories, and the hovertemplate is configured to provide detailed information about each category's contribution to the total publications when users interact with the chart.
             const barTraces = (stackedData.series || []).map((s, index) => ({
             x: stackedData.labels.map(String),
             y: s.counts,
@@ -294,6 +308,7 @@
             }
             }));
 
+            // Create a trace for the total line, which is shown as a line chart overlaying the bar charts to represent the overall trend in publications across all categories over the years, with a distinct color and hover template to differentiate it from the individual category contributions. The totalLine trace uses the total_line data from the stackedData object for the y-axis values and shares the same x-axis labels (years) as the bar traces, allowing users to easily compare the total number of publications with the contributions of each category. The line is styled with a specific color and configured to display markers at each data point, enhancing the visibility of the overall trend in publications over time.
             const totalLine = {
                 x: stackedData.labels.map(String),
                 y: stackedData.total_line,
@@ -304,10 +319,13 @@
                 line: { shape: 'spline' }
             };
 
+            // Combine the bar traces and the total line trace into a single data array for the Plotly chart, allowing both the stacked bars and the overlaying line to be rendered together in the same chart. The yearData array includes all the individual category contributions as bar traces, as well as the total trend line, providing a comprehensive visualization of how publications are distributed across categories annually and how the total number of publications has evolved over time. This combination allows users to analyze both the specific contributions of each category and the overall trend in research output in a single, cohesive chart.
             const yearData = [
                 ...barTraces, 
                 totalLine
             ];
+
+            // Define the layout for the annual publications trend chart, which includes settings for the height, bar mode (stacked), background colors, margins, legend configuration, and axis styling. The yearLayout object is structured to create a visually appealing and informative chart that effectively communicates the distribution of publications across categories annually, as well as the overall trend in total publications over time. The layout settings ensure that the chart is easy to read and interpret, with clear distinctions between different categories and a well-defined presentation of the total trend line, enhancing the user experience when analyzing the annual publications data.
             const yearLayout = {
                 height: 280,
                 barmode: 'stack',
@@ -328,6 +346,7 @@
 
             Plotly.newPlot('pubsPerYear', yearData, yearLayout, commonConfig);
 
+            // Add a ResizeObserver to ensure charts resize correctly when the window size changes or when the sidebar is toggled, improving the user experience by maintaining the readability and usability of the charts across different screen sizes and layout configurations, especially in a responsive dashboard environment where users may frequently adjust their view. The ResizeObserver monitors changes to the size of the content area and triggers a resize of all charts whenever a change is detected, ensuring that the charts adapt to the available space and remain visually coherent and easy to interact with regardless of layout adjustments.
             const charts = ['pubsPerCategory', 'pubsPerLevel', 'pubsPerUnit', 'pubsPerYear'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

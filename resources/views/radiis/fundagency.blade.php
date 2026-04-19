@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <title>Siel Metrics</title>
 
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -56,6 +57,7 @@
 <body>
     @include('components.sidebar')
 <div class="content">
+    //SECOND HEADER *contains specific page name*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -67,8 +69,11 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6 pt-4">
+        //Top summary cards for total agencies, total funds, and top 3 agencies with highest given fund
         <div class="grid grid-cols-4 xl:grid-cols-12 gap-2 mb-2">
+            //Diplays the total number of funding agencies in a styled card with an icon, using the $total_agency variable passed from the controller
             <div class="col-span-4 md:col-span-2 xl:col-span-3">       
                 <div class='bg-green-600/80 backdrop-blur-md rounded-lg h-[160px] xl:h-[190px] inset-shadow-xs shadow-xl p-3'>
                     <div class='grid grid-rows-12 h-full'>
@@ -82,6 +87,7 @@
                     </div>
                 </div>
             </div>
+            //Displays the total accumulated funds provided by the funding agencies in a styled card with an icon, using the $total_fund variable passed from the controller and formatted as currency
             <div class="col-span-4 md:col-span-2 xl:col-span-3">
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-[160px] xl:h-[190px] rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-12 h-full'>
@@ -95,6 +101,7 @@
                     </div>
                 </div>
             </div>
+            //Displays the top 3 funding agencies with the highest given funds in a styled card, using the $top_names and $top_totals arrays passed from the controller to show the names and corresponding total funds for each agency, formatted as currency
             <div class="col-span-4 md:col-span-6">
                 <div class="grid grid-rows-12 h-[200px] xs:h-[160px] xl:h-[190px] gap-y-1">
                     <div class='row-span-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl overflow-hidden'>
@@ -123,6 +130,7 @@
             </div>
         </div>
 
+        //Three pie charts showing the distribution of funding agencies by category, type, and sector, using the $charts array passed from the controller to provide the values and labels for each chart, rendered with Plotly.js in designated HTML elements
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-8">
             <div class="col-span-4 h-90 lg:h-110 xl:h-120 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='grid grid-rows-7 h-full'>
@@ -153,11 +161,15 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    //Javascript code for PlotlyJS charts
     <script>
+        //Waits for the DOM content to be fully loaded before executing the code to render the Plotly charts for funding agencies per category, type, and sector, using the data passed from the controller and configuring the charts with a common configuration for responsiveness and styling. It also adds a resize observer to ensure the charts resize correctly when the window size changes or when the sidebar is toggled.
         document.addEventListener('DOMContentLoaded', function () {
 
+            //Common configuration for all Plotly charts, including responsiveness, hiding the Plotly logo, and removing specific mode bar buttons for a cleaner interface
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+            //Data for the Agencies per Category pie chart, using the values and labels from the $charts array passed from the controller, and customizing the hover template
             const catData = [{
                 values: @js($charts['per_category_values']),
                 labels: @js($charts['per_category_labels']),
@@ -167,6 +179,7 @@
                 marker: { colors: ['#01ac42', '#FFEB00'] }
             }];
 
+            //Layout configuration for the Agencies per Category pie chart, including transparent background, margins, legend styling, and font settings
             const catLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -182,10 +195,12 @@
                 font: { family: 'Inter, sans-serif' }
             };
 
+            //Render the Agencies per Category pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('agencyPerCategory', catData, catLayout, commonConfig);
 
             //--------------------------------------------------------------------
 
+            //Data for the Agencies per Type pie chart, using the values and labels from the $charts array passed from the controller, and customizing the hover template
             const typeData = [{
                 values: @js($charts['per_type_values']),
                 labels: @js($charts['per_type_labels']),
@@ -195,6 +210,7 @@
                 marker: { colors: ['#01ac42', '#FFEB00'] }
             }];
 
+            //Layout configuration for the Agencies per Type pie chart, including transparent background, margins, legend styling, and font settings
             const typeLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -210,10 +226,11 @@
                 font: { family: 'Inter, sans-serif' }
             };
 
+            //Render the Agencies per Type pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('agencyPerType', typeData, typeLayout, commonConfig);
 
             //---------------------------------------------------------------------------
-
+            //Data for the Agencies per Sector pie chart, using the values and labels from the $charts array passed from the controller, and customizing the hover template
             const sectData = [{
                 values: @js($charts['per_sect_values']),
                 labels: @js($charts['per_sect_labels']),
@@ -223,6 +240,7 @@
                 marker: { colors: ['#FFEB00', '#01ac42'] }
             }];
 
+            //Layout configuration for the Agencies per Sector pie chart, including transparent background, margins, legend styling, and font settings
             const sectLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -238,8 +256,10 @@
                 font: { family: 'Inter, sans-serif' }
             };
 
+            //Render the Agencies per Sector pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('agencyPerSector', sectData, sectLayout, commonConfig);
 
+            // Add a resize observer to ensure charts resize correctly when the window size changes or when the sidebar is toggled, by observing the content div and resizing each chart accordingly
             const charts = ['agencyPerCategory', 'agencyPerType', 'agencyPerSector'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

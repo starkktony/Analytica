@@ -14,7 +14,7 @@
     
     <title>Siel Metrics</title>
 
-    
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -52,133 +52,148 @@
             visibility: visible !important;
         }
     </style>
-
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     @include('components.sidebar')
-<div class="content">
-    <div class="sticky top-0 z-50">
-        <header>
-            <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
-        </header>
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4">
-            <div class="font-[650] text-sm md:text-lg">
-                Research Awards ({{$selectedYear}})
-            </div>
-
-            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
-                <div class="hidden sm:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
-                    Filter
+    <div class="content">
+        //SECOND HEADER *contains specific page and filter options*-----------------
+        <div class="sticky top-0 z-50">
+            <header>
+                <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
+            </header>
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 md:py-0 bg-gray-300 min-h-10 gap-4">
+                <div class="font-[650] text-sm md:text-lg">
+                    Research Awards ({{$selectedYear}})
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs md:text-sm font-medium">Year:</span>
-                        <form action="{{ route('radiis.awards') }}" method="GET" id="filterForm" class="m-0">
-                            <select name="year" onchange="this.form.submit()" 
-                                class="text-xs md:text-sm block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
-                                @foreach($stats['all_year'] as $year)
-                                    <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }} class="text-xs md:text-sm">
-                                        {{ $year }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </form>
+                <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                    <div class="hidden sm:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
+                        Filter
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs md:text-sm font-medium">Time Series:</span>
-                        <form action="{{ route('radiis.awards') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
-                            <input type="hidden" name="year" value="{{ $selectedYear }}">
-                            <select name="group_by" onchange="document.getElementById('filterGroup').submit()" 
-                                class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
-                                <option class="text-xs" value="category" {{ $selectedGroup == 'category' ? 'selected' : '' }}>Per Category</option>
-                                <option class="text-xs" value="level" {{ $selectedGroup == 'level' ? 'selected' : '' }}>Per Level</option>
-                                <option class="text-xs" value="mode" {{ $selectedGroup == 'mode' ? 'selected' : '' }}>Per Mode</option>
-                            </select>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="px-6">
-        <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
-            <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-4">       
-                <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-45 sm:h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
-                    <div class='grid grid-rows-4 h-full'>
-                        <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
-                            <i class="fa-solid fa-award text-white text-3xl"></i>
+                    //Year filter 
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs md:text-sm font-medium">Year:</span>
+                            <form action="{{ route('radiis.awards') }}" method="GET" id="filterForm" class="m-0">
+                                <input type="hidden" name="group_by" value="{{ $selectedGroup }}">// Preserve the selected group_by value when changing the year filter
+                                <select name="year" onchange="this.form.submit()" 
+                                    class="text-xs md:text-sm block pl-3 pr-8 py-1 bg-slate-100 border border-gray-300 text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-sm cursor-pointer">
+                                    @foreach($stats['all_year'] as $year)
+                                        <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }} class="text-xs md:text-sm">
+                                            {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </form>
                         </div>
-                        <div class='row-span-3 pt-4'>
-                            <p class='text-4xl sm:text-5xl text-right font-[750] pr-4 align-bottom text-gray-800'>{{ $stats['new_awd'] }}</p>
-                            <p class='text-[12px] md:text-[12px] text-right pr-4 font-medium'><span class="{{ $percentages['year_percent'] > 0 ? 'text-green-600' : 'text-red-500' }}">
-                                {{ $percentages['year_percent'] > 0 ? '▲ ' : '▼ ' }}{{ $percentages['year_percent'] }}%</span></p>
-                            <p class='text-[10px] lg:text-[12px] mb-8 text-right font-medium pr-4'>New Awards in {{ $stats['max_year'] }}</p>
+
+                        //Group by filter for the time series chart
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs md:text-sm font-medium">Time Series:</span>
+                            <form action="{{ route('radiis.awards') }}#time-series-section" method="GET" id="filterGroup" class="m-0">
+                                <input type="hidden" name="year" value="{{ $selectedYear }}">// Preserve the selected year value when changing the group_by filter
+                                <select name="group_by" onchange="document.getElementById('filterGroup').submit()" 
+                                    class="block pl-3 pr-3 py-1 bg-slate-100 border border-gray-300 text-xs text-gray-900 rounded-md focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                                    <option class="text-xs" value="category" {{ $selectedGroup == 'category' ? 'selected' : '' }}>Per Category</option>
+                                    <option class="text-xs" value="level" {{ $selectedGroup == 'level' ? 'selected' : '' }}>Per Level</option>
+                                    <option class="text-xs" value="mode" {{ $selectedGroup == 'mode' ? 'selected' : '' }}>Per Mode</option>
+                                </select>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-6 md:grid-cols-12 gap-3">
-            <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-xl">
-                <div class='grid grid-rows-7 h-full'>
-                    <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Category</div>
-                    <div class='row-span-6 h-full w-full'>
-                        <div id="awdPerCategory" style="width: 100%; height: 100%;"></div>
+        //START OF THE DASHBOARD CONTENT------------------------------------------------------
+        <div class="px-6">
+            //CARD FOR NEW AWARDS
+            <div class="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
+                <div class="col-span-4 md:col-span-6 lg:col-span-6 xl:col-span-4">       
+                    <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-45 sm:h-44 rounded-lg shadow-xl p-3 mt-3 overflow-hidden'>
+                        <div class='grid grid-rows-4 h-full'>
+                            <div class='bg-green-600/80 row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
+                                <i class="fa-solid fa-award text-white text-3xl"></i>
+                            </div>
+                            <div class='row-span-3 pt-4'>
+                                <p class='text-4xl sm:text-5xl text-right font-[750] pr-4 align-bottom text-gray-800'>{{ $stats['new_awd'] }}</p>
+                                <p class='text-[12px] md:text-[12px] text-right pr-4 font-medium'><span class="{{ $percentages['year_percent'] > 0 ? 'text-green-600' : 'text-red-500' }}">
+                                    {{ $percentages['year_percent'] > 0 ? '▲ ' : '▼ ' }}{{ $percentages['year_percent'] }}%</span></p>
+                                <p class='text-[10px] lg:text-[12px] mb-8 text-right font-medium pr-4'>New Awards in {{ $stats['max_year'] }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-xl">
-                <div class='grid grid-rows-7 h-full'>
-                    <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Level</div>
-                    <div class='row-span-6 h-full w-full'>
-                        <div id="awdPerLevel" style="width: 100%; height: 100%;"></div>
+
+            <div class="grid grid-cols-6 md:grid-cols-12 gap-3">
+                //AWARDS CATEGORY PIE CHART
+                <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-xl">
+                    <div class='grid grid-rows-7 h-full'>
+                        <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Category</div>
+                        <div class='row-span-6 h-full w-full'>
+                            <div id="awdPerCategory" style="width: 100%; height: 100%;"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl">
-                <div class='grid grid-rows-7 h-full'>
-                    <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Mode</div>
-                    <div class='row-span-6 h-full w-full'>
-                        <div id="awdPerMode" style="width: 100%; height: 100%;"></div>
+                //AWARDS LEVEL PIE CHART
+                <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-xl">
+                    <div class='grid grid-rows-7 h-full'>
+                        <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Level</div>
+                        <div class='row-span-6 h-full w-full'>
+                            <div id="awdPerLevel" style="width: 100%; height: 100%;"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-span-6 h-[400px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl">
-                <div class='grid grid-rows-7 h-full'>
-                    <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Unit</div>
-                    <div class='row-span-6 h-full w-full'>
-                        <div id="awdPerUnit" style="width: 100%; height: 100%;"></div>
+                //AWARDS MODE PIE CHART
+                <div class="col-span-6 h-[350px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl">
+                    <div class='grid grid-rows-7 h-full'>
+                        <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Mode</div>
+                        <div class='row-span-6 h-full w-full'>
+                            <div id="awdPerMode" style="width: 100%; height: 100%;"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div id="time-series-section" class="col-span-6 md:col-span-12">
-                <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[400px] sm:h-[352px] md:h-[344px] mb-8">
-                    <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>
-                        Annual Awards Trend (10-year period)
+                //AWARDS UNIT PIE CHART
+                <div class="col-span-6 h-[400px] md:h-[400px] lg:h-[500px] border-t-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl">
+                    <div class='grid grid-rows-7 h-full'>
+                        <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>Awards per Unit</div>
+                        <div class='row-span-6 h-full w-full'>
+                            <div id="awdPerUnit" style="width: 100%; height: 100%;"></div>
+                        </div>
                     </div>
-                    <div>
-                       <div id="awdPerYear" style="width: 100%; "></div>
-                    </div>    
-                    <div class="text-[8px] sm:text-[10px] text-gray-500/90 pl-6">
-                        <i>Note: Data for certain years is unavailable; only years with recorded initiations are displayed.</i>
-                    </div>         
                 </div>
-            </div>
-        </div>    
+                //AWARDS PER YEAR TIME SERIES
+                <div id="time-series-section" class="col-span-6 md:col-span-12">
+                    <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[400px] sm:h-[352px] md:h-[344px] mb-8">
+                        <div class='row-span-1 font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-5 sm:pl-7'>
+                            Annual Awards Trend (10-year period)
+                        </div>
+                        <div>
+                        <div id="awdPerYear" style="width: 100%; "></div>
+                        </div>    
+                        <div class="text-[8px] sm:text-[10px] text-gray-500/90 pl-6">
+                            <i>Note: Data for certain years is unavailable; only years with recorded initiations are displayed.</i>
+                        </div>         
+                    </div>
+                </div>
+            </div>    
+        </div>
     </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    //JAVASCRIPT FOR PLOTLY CHARTS
     <script>
+        // Ensure charts are rendered after the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function () {
 
+            // Common configuration for all charts: responsive, no logo, and limited mode bar buttons
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+            //Contains the data and configuration for the Awards per Category pie chart
             const catData = [{
                 values: @js($charts['per_category_values']),
                 labels: @js($charts['per_category_labels']),
@@ -188,6 +203,7 @@
                 marker: { colors: ['#01ac42', '#FFEB00', '#4e98ff', '#D84CFF', '#f77995']}
             }];
 
+            //Layout configuration for the Awards per Category pie chart, including background color, margins, legend styling, and font settings
             const catLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -203,10 +219,12 @@
                 font: { family: 'Inter, sans-serif' }
             };
 
+            //Render the Awards per Category pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('awdPerCategory', catData, catLayout, commonConfig);
 
             //--------------------------------------------------------------------
 
+            //Contains the data and configuration for the Awards per Level pie chart
             const levelData = [{
                 values: @js($charts['per_level_values']),
                 labels: @js($charts['per_level_labels']),
@@ -216,6 +234,7 @@
                 marker: { colors: ['#01ac42', '#FFEB00', '#4e98ff', '#D84CFF', '#f77995']}
             }];
 
+            //Layout configuration for the Awards per Level pie chart, including background color, margins, legend styling, and font settings
             const levelLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -231,10 +250,12 @@
                 font: { family: 'Inter, sans-serif' }
             };
 
+            //Render the Awards per Level pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('awdPerLevel', levelData, levelLayout, commonConfig);
 
             //---------------------------------------------------------------------------
 
+            //Contains the data and configuration for the Awards per Mode pie chart
             const modeData = [{
                 values: @js($charts['per_mode_values']),
                 labels: @js($charts['per_mode_labels']),
@@ -244,6 +265,7 @@
                 marker: { colors: ['#01ac42', '#FFEB00', '#4e98ff', '#D84CFF', '#f77995']}
             }];
 
+            //Layout configuration for the Awards per Mode pie chart, including background color, margins, legend styling, and font settings
             const modeLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -259,16 +281,19 @@
                 font: { family: 'Inter, sans-serif' }
             };
 
+            //Render the Awards per Mode pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('awdPerMode', modeData, modeLayout, commonConfig);
 
             //---------------------------------------------------------------------------
 
-            const unitlabels = @js($charts['per_unit_labels']);
-            const unitvalues = @js($charts['per_unit_values']);
-            const unitFullNames = @js($charts['per_unit_names']); // Get the new field
+            const unitlabels = @js($charts['per_unit_labels']);//Gets the label to be shown in the legends
+            const unitvalues = @js($charts['per_unit_values']);//Gets the values to be shown in the pie chart
+            const unitFullNames = @js($charts['per_unit_names']); // Gets the full names for the hover info
 
+            //Creates an array of custom data for the Awards per Unit pie chart, where each entry is an array containing the full name of the unit. This custom data will be used in the hover template to display the full unit name when hovering over each segment of the pie chart
             const customDataArray = unitFullNames.map(name => [name]);
 
+            //Assign specific colors to each unit based on the provided mapping, with a default color of black for any units not listed in the mapping
             const colorMapping = {
                 'CEn': '#800000',   // Maroon
                 'CBA': '#3498db',  // Blue
@@ -293,8 +318,10 @@
                 'OVPAd': '#ff6161', //Light Red
             };
 
+            //Maps each unit label to its corresponding color, using a default color of black for any units not listed in the mapping
             const colors1 = unitlabels.map(label => colorMapping[label] || '#000000');
 
+            //Constructs the data object for the Awards per Unit pie chart, including values, labels, custom data for hover info, hover template, chart type, and marker colors
             const unitData = [{
                 values: unitvalues,
                 labels: unitlabels,
@@ -307,6 +334,7 @@
                 }
             }];
 
+            //Layout configuration for the Awards per Unit pie chart, including background color, margins, legend styling, and font settings
             const unitLayout = {
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -321,12 +349,16 @@
                 },
                 font: { family: 'Inter, sans-serif' }
             };
+
+            //Render the Awards per Unit pie chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('awdPerUnit', unitData, unitLayout, commonConfig);
 
             //---------------------------------------------------------------------------
+            
             const stackedData = @json($charts['stacked']);
             const colors = ['#01ac42', '#F2EA00', '#4E98FF', '#D84CFF', '#FF6284', '#FF9760'];
 
+            //Generates an array of bar traces for the stacked bar chart, where each trace corresponds to a series in the stacked data. Each trace includes x and y values, name, type, width, and marker color based on the index.
             const barTraces = (stackedData.series || []).map((s, index) => ({
             x: stackedData.labels.map(String),
             y: s.counts,
@@ -338,9 +370,10 @@
             }
             }));
 
+            //Creates a trace for the total line in the stacked bar chart, which is a scatter plot with lines and markers. The x values are the labels from the stacked data, and the y values are the total counts. The line is styled with a specific color and shape.
             const totalLine = {
                 x: stackedData.labels.map(String),
-                y: stackedData.total_line,
+                y: stackedData.total_line,  
                 name: 'Total',
                 type: 'scatter',
                 mode: 'lines+markers',
@@ -348,10 +381,12 @@
                 line: { shape: 'spline' }
             };
 
+            //Combines the bar traces and the total line trace into a single array of data for the stacked bar chart. The layout is configured to have a specific height, stacked bars, transparent background, margins, legend styling, and axis settings.
             const yearData = [
                 ...barTraces, 
                 totalLine
             ];
+            //Layout configuration for the Awards per Year stacked bar chart, including height, stacked bars, background color, margins, legend styling, and axis settings
             const yearLayout = {
                 height: 270,
                 barmode: 'stack',
@@ -370,8 +405,10 @@
                 yaxis: { gridcolor: '#f0f0f0', rangemode: 'tozero' }
             };
 
+            //Render the Awards per Year stacked bar chart in the designated HTML element with the specified data, layout, and common configuration
             Plotly.newPlot('awdPerYear', yearData, yearLayout, commonConfig);
 
+            // Add a resize observer to ensure charts resize correctly when the window size changes or when the sidebar is toggled
             const charts = ['awdPerCategory', 'awdPerLevel', 'awdPerMode', 'awdPerUnit', 'awdPerYear'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

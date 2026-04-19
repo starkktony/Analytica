@@ -14,8 +14,18 @@
     
     <title>Siel Metrics</title>
 
-    
+    //CSS FOR SIDEBAR AND HEADER
     <style>
+        .sidebar-scrollable {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; /* Ensures children fill width */
+        }
+
+        /* Ensure the logo wrapper takes full width so text-center works */
+        .sidebar-logo-full {
+            width: 100%;
+        }
         .content {
             margin-left: 250px;
             transition: margin-left 0.3s ease, max-width 0.3s ease;
@@ -58,6 +68,7 @@
 <body>
     @include('components.sidebar')
 <div class="content w-100">
+    //SECOND HEADER *contains specific page and filter options*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -66,11 +77,13 @@
             <div class="font-[650] text-sm md:text-lg">
                 Research Programs ({{$selectedYear}})
             </div>
-            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            <div class="flex flex-wrap items-center gap-4 pr-4 w-full md:w-auto">
                 <div class="hidden sm:block font-[650] text-sm md:text-xs border-r border-gray-500 pr-4">
                     Filter
                 </div>
-                <div class="flex items-center gap-2">
+
+                //Year filter
+                <div class="flex items-center gap-3">
                     <span class="text-sm font-medium">Year:</span>
                     <form action="{{ route('radiis.programs') }}" method="GET" id="filterForm" class="m-0">
                         <select name="year" onchange="this.form.submit()" 
@@ -87,8 +100,10 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6 pt-4">
         <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 mb-2">
+            //Cards for new programs, completed programs, ongoing programs, and total budget with icons, values, percentages, and descriptions, styled with Tailwind CSS for a modern and clean look, and using conditional classes to indicate positive or negative percentage changes with green or red colors respectively
             <div class='col-span-3'>
                 <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg shadow-inner shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-3 h-full'>
@@ -148,6 +163,7 @@
         </div>
         
         <div class='grid grid-cols-6 xl:grid-cols-12 gap-2'>
+            //Charts for program distribution by type using Plotly.js for interactive visualizations and styled with Tailwind CSS for a cohesive look with the rest of the dashboard, while also including notes about data availability for certain years to provide context to users when interpreting the charts
             <div class='col-span-6 xl:col-span-4'>
                 <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white flex flex-wrap h-[320px] sm:h-[370px] lg:h-[570px] rounded-[1vw] shadow-inner shadow-xl'>
                 <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -159,6 +175,7 @@
                 </div>
             </div>
             
+            //Charts for annual program initiation trend and approved budget allocation over a 10-year period, using stacked bar charts with line overlays to show both the individual contributions of research and development programs as well as the overall totals, while also providing notes about data availability for certain years to ensure users have the necessary context when analyzing the trends displayed in the charts
             <div class='col-span-6 lg:col-span-8'>
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[342px] sm:h-[300px] md:h-[300px] lg:h-[280px]">
                     <div class="font-[650] text-sm md:text-lg text-gray-700 pl-6 pt-4">
@@ -189,10 +206,14 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    // JavaScript to initialize Plotly charts for program distribution by type, annual program initiation trend, and approved budget allocation, using data passed from the backend and configured with responsive settings, custom colors, hover templates, and layout options to create interactive and visually appealing charts that effectively communicate the insights derived from the research and development program data, while also ensuring that the charts resize correctly when the window size changes or when the sidebar is toggled for an optimal user experience across different devices and screen sizes
     <script>
-document.addEventListener('DOMContentLoaded', function () {
+    // JavaScript to initialize Plotly charts for program distribution by type, annual program initiation trend, and approved budget allocation, using data passed from the backend and configured with responsive settings, custom colors, hover templates, and layout options to create interactive and visually appealing charts that effectively communicate the insights derived from the research and development program data, while also ensuring that the charts resize correctly when the window size changes or when the sidebar is toggled for an optimal user experience across different devices and screen sizes
+    document.addEventListener('DOMContentLoaded', function () {
+    // Define common configuration for all charts to ensure consistency in appearance and behavior, including responsiveness, hiding the Plotly logo, and removing specific mode bar buttons to streamline the user interface and focus on the most relevant interactions for analyzing the research and development program data, while also maintaining a clean and professional look across all charts in the dashboard
     const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+    //most parts here are the same as what was in iprights.blade.php, just with different data and different chart types (pie charts instead of bar charts), so I won't add comments for the repeated parts, but I will add comments for the complex parts to explain what they do
     const typeData = [{
         values: [@js($charts['type_res']), @js($charts['type_dev'])],
         labels: ['Research', 'Development'],
@@ -220,7 +241,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     Plotly.newPlot('programTypeChart', typeData, typeLayout, commonConfig);
 
+    //----------------------------------------------------------------------------
     const yearData = [
+        //Data for the research data
         {
             x: @js($charts['year_labels']->values()),
             y: @js($charts['res_counts']),
@@ -230,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
             hovertemplate: '<b>Type:</b> Research <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
             width: 0.5,
         },
+        //Data for the development data
         {
             x: @js($charts['year_labels']->values()),
             y: @js($charts['dev_counts']),
@@ -239,6 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
             hovertemplate: '<b>Type:</b> Development <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
             width: 0.5,
         },
+        //Data for the total count, shown as a line chart overlaying the bar charts to show the overall trend in project initiations across all project types, with a distinct color and hover template to differentiate it from the individual type contributions and provide a clear visualization of how the total number of project initiations has changed over the years in relation to the specific contributions of each project type
         {
             x: @js($charts['year_labels']->values()),
             y: @js($charts['year_counts']),
@@ -256,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
         barmode: 'stack',
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: 40, r: 40, b: 10, t: 0 },
+        margin: { l: 40, r: 40, b: 20, t: 0 },
         legend: {
             font: {size: 10, color: 'black'},
             orientation: 'h',
@@ -272,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
     Plotly.newPlot('programYearChart', yearData, yearLayout, commonConfig);
 
     const budgetData = [
+        //Data for the research data
         {
             x: @js($charts['year_labels']->values()),
             y: @js($charts['res_sums']),
@@ -281,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
             hovertemplate: '<b>Type:</b> Research <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
             width: 0.5,
         },
+        //Data for the development data
         {
             x: @js($charts['year_labels']->values()),
             y: @js($charts['dev_sums']),
@@ -290,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
             hovertemplate: '<b>Type:</b> Development <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
             width: 0.5,
         },
+        //Data for the total budget, shown as a line chart overlaying the bar charts to show the overall trend in budget allocation across all project types, with a distinct color and hover template to differentiate it from the individual type contributions and provide a clear visualization of how the total budget has changed over the years in relation to the specific contributions of each project type
         {
             x: @js($charts['year_labels']->values()),
             y: @js($charts['budget_totals']),
@@ -307,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
         barmode: 'stack',
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: 50, r: 40, b: 10, t: 0 },
+        margin: { l: 50, r: 40, b: 20, t: 0 },
         legend: {
             font: {size: 10, color: 'black'},
             orientation: 'h',
@@ -322,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     Plotly.newPlot('programBudgetChart', budgetData, budgetLayout, commonConfig);
 
+    // Add a ResizeObserver to ensure charts resize correctly when the window size changes or when the sidebar is toggled, improving the user experience by maintaining the readability and usability of the charts across different screen sizes and layout configurations, especially in a responsive dashboard environment where users may frequently adjust their view
     const charts = ['programTypeChart', 'programYearChart', 'programBudgetChart'];
     const contentDiv = document.querySelector('.content');
     if (contentDiv) {

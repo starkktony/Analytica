@@ -15,7 +15,7 @@
 
     <title>Siel Metrics</title>
 
-
+    <!-- CSS FOR SIDEBAR AND HEADER -->
     <style>
         .content {
             margin-left: 250px;
@@ -62,6 +62,7 @@
 <body>
     @include('components.sidebar')
     <div class="content">
+        //SECOND HEADER *contains specific page and filter options*-----------------
         <div class="sticky top-0 z-50">
         <header>
             <span class="text-2xl font-[650] text-white">Executive Information</span>
@@ -76,6 +77,7 @@
                     Year Filters
                 </div>
 
+                //Year filter for Trust Fund
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Trust Fund:</span>
@@ -95,6 +97,7 @@
                         </form>
                     </div>
 
+                    //Year filter for Fund 101
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Fund 101:</span>
                         <form action="{{ route('eis.fund') }}" method="GET" id="filterForm">
@@ -112,6 +115,7 @@
                         </form>
                     </div>
 
+                    //Year filter for Fund 161
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Fund 161:</span>
                         <form action="{{ route('eis.fund') }}#f161" method="GET" id="filterGroup">
@@ -129,6 +133,8 @@
                         </form>
                     </div>
 
+                    //Year filter for Fund 163
+                     <div class="flex items
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Fund 163:</span>
                         <form action="{{ route('eis.fund') }}#f163" method="GET" id="filter163">
@@ -146,6 +152,7 @@
                         </form>
                     </div>
 
+                    //Year filter for Fund 164
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Fund 164:</span>
                         <form action="{{ route('eis.fund') }}#f164" method="GET" id="filter164">
@@ -167,6 +174,9 @@
         </div>
         </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
+
+    //SECTION 1: TRUST FUND
     <div class="flex items-center justify-between py-2 px-6 min-h-10 font-(family-name: --font-inter)">
         <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
         <div class="font-[650] text-white text-md">Trust Fund</div>
@@ -177,6 +187,7 @@
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
             <div class="col-span-4 lg:col-span-4 h-80">
                 <div class='grid grid-rows-4'>
+                    //Current balance of the trust fund
                     <div class='row-span-2'>
                         <div class="grid grid-rows-8 h-39 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                             <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -188,6 +199,7 @@
                             </div>
                         </div>
                     </div>
+                    //Cash flow ratio of the trust fund
                     <div class='row-span-2'>
                         <div class='border-l-5 h-39 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 mt-1 overflow-hidden'>
                             <div class='grid grid-rows-8'>
@@ -207,6 +219,8 @@
                     </div>
                 </div>
             </div>
+
+            //Graph for trust fund balance over time
             <div class="col-span-4 lg:col-span-8 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
                     Trust Fund Balance Over Time
@@ -220,6 +234,7 @@
             </div>
         </div>
 
+        //SECTION 2: FUND 101
         <div class="flex items-center justify-between py-2 min-h-10 font-(family-name: --font-inter)">
             <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
             <div class="font-[650] text-white text-md">Fund 101</div>
@@ -227,6 +242,7 @@
         </div>
 
         <div class="grid grid-cols-12 gap-3 mt-3">
+            //Fixed allotment for Fund 101 - Personnel Services
             <div class="col-span-12 lg:col-span-4">
                 <div class="grid grid-rows-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                     <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -238,6 +254,8 @@
                     </div>
                 </div>
             </div>
+
+            //Fixed allotment for Fund 101 - Capital Outlays
             <div class="col-span-12 lg:col-span-4">
                 <div class="grid grid-rows-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                     <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -249,6 +267,8 @@
                     </div>
                 </div>         
             </div>
+
+            //Fixed allotment for Fund 101 - MOOE
             <div class="col-span-12 lg:col-span-4">
                 <div class="grid grid-rows-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                     <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -261,6 +281,7 @@
                 </div>         
             </div>
             
+            //Allotment utilization rates for PS
             <div class="col-span-12 md:col-span-4">               
                 <div class='grid grid-rows-5 border-l-5 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='bg-green-600/80 row-span-2 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -273,6 +294,8 @@
                     </div>
                 </div>
             </div>
+
+            //Allotment utilization rates for CO
             <div class="col-span-12 md:col-span-4">               
                 <div class='grid grid-rows-5 border-l-5 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='bg-green-600/80 row-span-2 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -285,6 +308,8 @@
                     </div>
                 </div>
             </div>
+
+            //Allotment utilization rates for MOOE
             <div class="col-span-12 md:col-span-4">               
                 <div class='grid grid-rows-5 border-l-5 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='bg-green-600/80 row-span-2 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -298,6 +323,7 @@
                 </div>
             </div>
 
+            //Pie charts for liquidation breakdowns for PS
             <div class="col-span-12 lg:col-span-4">               
                 <div class="border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl h-[320px] xs:h-[300px] sm:h-[400px] shadow-xl">
                     <div class='grid grid-rows-7 h-full'>
@@ -308,6 +334,8 @@
                     </div>
                 </div>
             </div>
+
+            //Pie charts for liquidation breakdowns for CO
             <div class="col-span-12 lg:col-span-4">               
                 <div class="border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl h-[320px] xs:h-[300px] sm:h-[400px] shadow-xl">
                     <div class='grid grid-rows-7 h-full'>
@@ -318,6 +346,8 @@
                     </div>
                 </div>
             </div>
+
+            //Pie charts for liquidation breakdowns for MOOE
             <div class="col-span-12 lg:col-span-4">               
                 <div class="border-t-[6px] border-green-600 bg-white rounded-[1vw] inset-shadow-xl h-[320px] xs:h-[300px] sm:h-[400px] shadow-xl">
                     <div class='grid grid-rows-7 h-full'>
@@ -329,6 +359,7 @@
                 </div>
             </div>
 
+            //Time series chart for Fund 101 expenditures over time
             <div class='col-span-12'>
                 <div class="border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                     <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 101 Expenditures Over Time</div>
@@ -340,9 +371,9 @@
                     </div> 
                 </div>
             </div>
-    
         </div>
 
+        //SECTION 3: FUND 161
         <div id="f161" class="flex items-center justify-between py-2 min-h-10 font-(family-name: --font-inter)">
             <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
             <div class="font-[650] text-white text-md">Fund 161</div>
@@ -350,6 +381,7 @@
         </div>
 
         <div class="grid grid-cols-12 gap-3 mb-2 mt-2">
+            //Current balance of Fund 161
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">
                 <div class="grid grid-rows-8 h-35 sm:h-42 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                     <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -361,6 +393,8 @@
                     </div>
                 </div> 
             </div>
+
+            //Collections to expenditures ratio for Fund 161
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">               
                 <div class='grid grid-rows-8 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -379,6 +413,7 @@
         </div>
 
         <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-2 mt-2">
+            //Time series chart for Fund 161 balance over time
             <div class="col-span-6 border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 161 Balance Over Time</div>
                 <div>
@@ -388,6 +423,8 @@
                     <i>Note: Only dates with recorded initiations are displayed.</i>
                 </div> 
             </div>
+
+            //Time series chart for Fund 161 available balance and expenditures over time
             <div class="col-span-6 border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 161 Available Balance and Expenditures</div>
                 <div>
@@ -399,6 +436,7 @@
             </div>
         </div>
 
+        //SECTION 4: FUND 163
         <div id="f163" class="flex items-center justify-between py-2 min-h-10 font-(family-name: --font-inter)">
             <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
             <div class="font-[650] text-white text-md">Fund 163</div>
@@ -406,6 +444,7 @@
         </div>
 
         <div class="grid grid-cols-12 gap-3 mb-2 mt-2">
+            //Current balance of Fund 163
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">
                 <div class="grid grid-rows-8 h-35 sm:h-42 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                     <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -417,6 +456,8 @@
                     </div>
                 </div> 
             </div>
+
+            //Collections to expenditures ratio for Fund 163
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">               
                 <div class='grid grid-rows-8 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -435,6 +476,7 @@
         </div>
 
         <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-2 mt-2">
+            //Time series chart for Fund 163 balance over time
             <div class="col-span-6 border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 163 Balance Over Time</div>
                 <div>
@@ -444,6 +486,8 @@
                     <i>Note: Only dates with recorded initiations are displayed.</i>
                 </div> 
             </div>
+
+            //Time series chart for Fund 163 available balance and expenditures over time
             <div class="col-span-6 border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 163 Available Balance and Expenditures</div>
                 <div>
@@ -455,6 +499,7 @@
             </div>
         </div>
 
+        //SECTION 5: FUND 164
         <div id="f164" class="flex items-center justify-between py-2 min-h-10 font-(family-name: --font-inter)">
             <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
             <div class="font-[650] text-white text-md">Fund 164</div>
@@ -462,6 +507,7 @@
         </div>
 
         <div class="grid grid-cols-12 gap-3 mb-2 mt-2">
+            //Current balance of Fund 164
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">
                 <div class="grid grid-rows-8 h-35 sm:h-42 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                     <div class='bg-white row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -473,6 +519,8 @@
                     </div>
                 </div> 
             </div>
+
+            //Collections to expenditures ratio for Fund 164
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">               
                 <div class='grid grid-rows-8 border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-42 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='bg-green-600/80 row-span-4 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -491,6 +539,7 @@
         </div>
 
         <div class="grid grid-cols-6 xl:grid-cols-12 gap-3 mb-2 mt-2">
+            //Time series chart for Fund 164 balance over time
             <div class="col-span-6 border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 164 Balance Over Time</div>
                 <div>
@@ -500,6 +549,8 @@
                     <i>Note: Only dates with recorded initiations are displayed.</i>
                 </div> 
             </div>
+
+            //Time series chart for Fund 164 available balance and expenditures over time
             <div class="col-span-6 border-t-4 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-4 sm:pl-7'>Fund 164 Available Balance and Expenditures</div>
                 <div>
@@ -515,11 +566,16 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    //Javascript for rendering the charts using Plotly
     <script>
+        // Common configuration for all charts
         document.addEventListener('DOMContentLoaded', function () {
 
+        // Common configuration for all charts
         const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+        //Graph for trust fund balance over time
         xData = @js($charts['trust_labels']),
         yData = @js($charts['trust_values']),
         max = @js($charts['trust_max'] +2000000),
@@ -538,6 +594,7 @@
             name: 'Balance'
         }
 
+        //Highlight the most recent balance with a marker
         lastData = {
             x: [xData[0]],
             y: [yData[0]],
@@ -564,12 +621,11 @@
 
     Plotly.newPlot('trustBalance', trustData, trustLayout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------
+    //Graph for fund 161 balance over time
 
-    x161Data = @js($charts['f161_labels']),
-        y161Data = @js($charts['f161_values']),
-        max161 = @js($charts['f161_max'] +2000000),
-        min161 = @js($charts['f161_min'] -2000000),
+        x161Data = @js($charts['f161_labels']), 
+        y161Data = @js($charts['f161_values']), 
+        max161 = @js($charts['f161_max'] +2000000),// Add some padding to the maximum value for better visualization
 
         f161BalData = {   
             x: x161Data,
@@ -585,6 +641,7 @@
             name: 'Balance'
         }
 
+        //Highlight the most recent balance with a marker
         f161lastData = {
             x: [x161Data[0]],
             y: [y161Data[0]],
@@ -611,16 +668,18 @@
 
     Plotly.newPlot('fund161Balance', f161Data, f161Layout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------
+    //Graph for fund 161 available balance and expenditures over time
 
     xDateData = @js($charts['f161_labels']),
         ycolData = @js($charts['f161_avail']),
         yexpData = @js($charts['f161_exps']),
-        maxavail161 = @js($charts['f161_avail_max'] +2000000),
-        maxexp161 = @js($charts['f161_exp_max'] +2000000),
+        maxavail161 = @js($charts['f161_avail_max'] +2000000), // Add padding for better visualization
+        maxexp161 = @js($charts['f161_exp_max'] +2000000),// Add padding for better visualization
 
+        // Determine the maximum value between available balance and expenditures for setting the y-axis range
         finMax = Math.max(maxavail161, maxexp161),
 
+        //Data for the available balance line
         f161ColData = {   
             x: xDateData,
             y: ycolData,
@@ -634,6 +693,7 @@
             name: 'Available Balance'
         }
 
+        //Data for the expenditures line
         f161ExpData = {
             x: xDateData,
             y: yexpData,
@@ -668,8 +728,9 @@
 
     Plotly.newPlot('colexp161Balance', f161ColExpData, f161ColExpLayout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------
+    //Graph for Fund 101 expenditures over time with separate lines for PS, CO, and MOOE
 
+    //Data for personnel services expenditures
     psexpData = {   
     x: @js($charts['f101_labels']),
     y: @js($charts['f101_psexp']),
@@ -682,6 +743,7 @@
     name: 'PS'
 };
 
+//Data for capital overlay expenditures
 coexpData = {   
     x: @js($charts['f101_labels']),
     y: @js($charts['f101_coexp']),
@@ -694,6 +756,7 @@ coexpData = {
     name: 'CO'
 };
 
+//Data for MOOE expenditures
 moexpData = {   
     x: @js($charts['f101_labels']),
     y: @js($charts['f101_mooeexp']),
@@ -727,7 +790,7 @@ const psLayout = {
 
 Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------
+    //Pie chart for liquidation breakdown of PS
 
     const psPieData = [{
         values: [@js($charts['f101_psdisbperc']),@js($charts['f101_psobliperc'])],
@@ -755,7 +818,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
     Plotly.newPlot('psPieChart', psPieData, psPieLayout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------------
+    //Pie chart for liquidation breakdown of CO
 
     const coPieData = [{
         values: [@js($charts['f101_codisbperc']),@js($charts['f101_coobliperc'])],
@@ -783,7 +846,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
     Plotly.newPlot('coPieChart', coPieData, coPieLayout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------------
+    //Pie chart for liquidation breakdown of MOOE
 
     const moPieData = [{
         values: [@js($charts['f101_modisbperc']),@js($charts['f101_moobliperc'])],
@@ -811,7 +874,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
     Plotly.newPlot('mooePieChart', moPieData, moPieLayout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------------
+    //Graph for fund 163 balance over time
 
     x163Data = @js($charts['f163_labels']),
         y163Data = @js($charts['f163_values']),
@@ -833,6 +896,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
             name: 'Balance'
         }
 
+        //Highlight the most recent balance with a marker
         f163lastData = {
             x: [x163Data[0]],
             y: [y163Data[0]],
@@ -859,16 +923,18 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
     Plotly.newPlot('fund163Balance', f163Data, f163Layout, commonConfig);
 
-    //-------------------------------------------------------------------------------------------------
+    //Graph for fund 163 available balance and expenditures over time
 
     const x163Date = @js($charts['f163_labels']);
     const y163Col = @js($charts['f163_avail']);
     const y163Exp = @js($charts['f163_exps']);
-    const maxavail163 = @js($charts['f163_avail_max'] + 2000000);
-    const maxexp163 = @js($charts['f163_exp_max'] + 2000000);
+    const maxavail163 = @js($charts['f163_avail_max'] + 2000000);// Add padding for better visualization
+    const maxexp163 = @js($charts['f163_exp_max'] + 2000000);// Add padding for better visualization
 
+    // Determine the maximum value between available balance and expenditures for setting the y-axis range
     const finMax163 = Math.max(maxavail163, maxexp163);
 
+    //Data for the available balance line
     const f163ColData = {   
         x: x163Date, 
         y: y163Col,  
@@ -881,6 +947,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
         name: 'Available Balance'
     };
 
+    //Data for the expenditures line
     const f163ExpData = {
         x: x163Date,
         y: y163Exp,  
@@ -919,13 +986,11 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
     Plotly.newPlot('colexp163Balance', f163ColExpData, f163ColExpLayout, commonConfig);
 
-    //---------------------------------------------------------------------------------------------------
+    //Graph for fund 164 balance over time
 
-    x164Data = @js($charts['f164_labels']),
+        x164Data = @js($charts['f164_labels']),
         y164Data = @js($charts['f164_values']),
-        max164 = @js($charts['f164_max'] +2000000),
-
-        console.log(y164Data);
+        max164 = @js($charts['f164_max'] +2000000),// Add some padding to the maximum value for better visualization
 
         f164BalData = {   
             x: x164Data,
@@ -941,6 +1006,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
             name: 'Balance'
         }
 
+        //Highlight the most recent balance with a marker
         f164lastData = {
             x: [x164Data[0]],
             y: [y164Data[0]],
@@ -967,16 +1033,18 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
 
     Plotly.newPlot('fund164Balance', f164Data, f164Layout, commonConfig);
 
-    //----------------------------------------------------------------------------------------------------
+    //Graph for fund 164 available balance and expenditures over time
 
     const x164Date = @js($charts['f164_labels']);
     const y164Col = @js($charts['f164_avail']);
     const y164Exp = @js($charts['f164_exps']);
-    const maxavail164 = @js($charts['f164_avail_max'] + 2000000);
-    const maxexp164 = @js($charts['f164_exp_max'] + 2000000);
+    const maxavail164 = @js($charts['f164_avail_max'] + 2000000);// Add padding for better visualization
+    const maxexp164 = @js($charts['f164_exp_max'] + 2000000);// Add padding for better visualization
 
+    // Determine the maximum value between available balance and expenditures for setting the y-axis range
     const finMax164 = Math.max(maxavail164, maxexp164);
 
+    //Data for the available balance line
     const f164ColData = {   
         x: x164Date, 
         y: y164Col,  
@@ -989,6 +1057,7 @@ Plotly.newPlot('psExpChart', psData, psLayout, commonConfig);
         name: 'Available Balance'
     };
 
+    //Data for the expenditures line
     const f164ExpData = {
         x: x164Date,
         y: y164Exp,  

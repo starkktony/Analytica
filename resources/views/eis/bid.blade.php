@@ -15,7 +15,7 @@
 
     <title>Siel Metrics</title>
 
-
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -62,6 +62,7 @@
 <body>
     @include('components.sidebar')
     <div class="content">
+      //SECOND HEADER *contains specific page and filter options*-----------------
         <div class="sticky top-0 z-50">
         <header>
             <span class="text-2xl font-[650] text-white">Executive Information</span>
@@ -76,6 +77,7 @@
                       Year Filters
                   </div>
 
+                  //Year filter for Goods and Services and Infrastructure
                   <div class="flex flex-wrap items-center gap-2">
                       <div class="flex items-center gap-2">
                           <span class="text-xs font-medium">Goods and Services:</span>
@@ -91,6 +93,7 @@
                           </form>
                       </div>
 
+                      //Year filter for Infrastructure
                       <div class="flex items-center gap-2">
                           <span class="text-xs font-medium">Infrastructure:</span>
                           <form action="{{ route('eis.bid') }}" method="GET" id="filterForm" class="m-0">
@@ -110,6 +113,9 @@
           </div>
         </div>
 
+      //START OF THE DASHBOARD CONTENT------------------------------------------------------
+
+      //SECTION 1: GOODS AND SERVICES-----------------
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-6 py-2 min-h-10 font-(family-name: --font-inter) gap-4">
           <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-full md:w-60 flex items-center justify-center">
               <div class="font-[650] text-white text-md">Goods and Services</div>
@@ -117,7 +123,9 @@
       </div>
 
     <div class="px-6 pt-2">
+      //Cards containing the total count of bids, completed, ongoing, failed, total approved budget, total bid amount, and bid-to-budget ratio
       <div class="grid grid-cols-12 gap-2 mb-2">
+        //Card for total public bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class="grid grid-rows-2 bg-green-600/80  backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
               <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -129,6 +137,8 @@
               </div>
             </div>
           </div>
+
+          //Card for completed bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -142,6 +152,8 @@
               </div>
             </div>
           </div>
+
+          //Card for ongoing bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -155,6 +167,8 @@
               </div>
             </div>
           </div>
+
+          //Card for failed bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -169,6 +183,7 @@
             </div>
           </div>
 
+          //Card for total approved budget
           <div class="col-span-12 lg:col-span-4 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -182,6 +197,8 @@
               </div>
             </div>
           </div>
+
+          //Card for total bid amount
           <div class="col-span-12 lg:col-span-4 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -195,6 +212,8 @@
               </div>
             </div>
           </div>
+
+          //Card for bid-to-budget ratio
           <div class="col-span-12 lg:col-span-4 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -209,6 +228,7 @@
             </div>
           </div>
 
+          //Graph for yearly public bids per status
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-md xl:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Yearly Public Bids per Status
@@ -221,6 +241,7 @@
             </div>  
           </div>
 
+          //Graph for approved budget and bid amount per year
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-md xl:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Approved Budget and Bid Amount per Year
@@ -234,6 +255,8 @@
           </div>
       </div>
 
+      //SECTION 2:INFRASTRUCTURE------------------
+
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-1 py-2 min-h-10 font-(family-name: --font-inter) gap-4">
           <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-full md:w-60 flex items-center justify-center">
               <div class="font-[650] text-white text-md">Infrastructure</div>
@@ -241,7 +264,8 @@
       </div>
 
       <div class="grid grid-cols-12 gap-2 mb-4">
-      <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
+        //Card containing the total public bids for infrastructure
+          <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class="grid grid-rows-2 bg-green-600/80  backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
               <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
                 <i class="fa-solid fa-money-bills text-green-600 text-3xl"></i>
@@ -252,6 +276,8 @@
               </div>
             </div>
           </div>
+
+          //Card for completed bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -265,6 +291,8 @@
               </div>
             </div>
           </div>
+
+          //Card for ongoing bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -278,6 +306,8 @@
               </div>
             </div>
           </div>
+
+          //Card for failed bids
           <div class="col-span-12 sm:col-span-6 lg:col-span-3 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -292,6 +322,7 @@
             </div>
           </div>
 
+          //Card for total approved budget
           <div class="col-span-12 lg:col-span-4 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -305,6 +336,8 @@
               </div>
             </div>
           </div>
+
+          //Card for total bid amount
           <div class="col-span-12 lg:col-span-4 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -318,6 +351,8 @@
               </div>
             </div>
           </div>
+
+          //Card for bid-to-budget ratio
           <div class="col-span-12 lg:col-span-4 ">
             <div class='border-l-5  border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3  overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -332,6 +367,7 @@
             </div>
           </div>
 
+          //Graph for yearly public bids per status
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-md xl:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Yearly Public Bids per Status
@@ -344,6 +380,7 @@
             </div>  
           </div>
 
+          //Graph for approved budget and bid amount per year
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-md xl:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Approved Budget and Bid Amount per Year
@@ -360,10 +397,16 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    //SCRIPT FOR PLOTLY GRAPHS
     <script>
+    
+    // Common configuration for all graphs
     const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+    //Goods and Services Status Bar Graph
         const statusData = [
+          //Data for completed bids
             {
                 x: @js($charts['bidLabel']->values()),
                 y: @js($charts['bidComp']),
@@ -372,6 +415,8 @@
                 marker: { color: '#01ac42' },
                 width: 0.5,
             },
+
+            //Data for ongoing bids
             {
                 x: @js($charts['bidLabel']->values()),
                 y: @js($charts['bidOngoing']),
@@ -380,6 +425,8 @@
                 marker: { color: '#F2EA00' },
                 width: 0.5,
             },
+
+            //Data for failed bids
             {
                 x: @js($charts['bidLabel']->values()),
                 y: @js($charts['bidFail']),
@@ -388,6 +435,8 @@
                 marker: { color: '#4E98FF' },
                 width: 0.5,
             },
+
+            // Data for total bids (line graph)
             {
                 x: @js($charts['bidLabel']->values()),
                 y: @js($charts['bidTotal']),
@@ -419,7 +468,9 @@
 
         Plotly.newPlot('perStatusGraph', statusData, statusLayout, commonConfig);
 
+        //Goods and Services Approved Budget and Bid Amount Line Graph
         const amtData = [
+          //Data for approved budget
             {
                 x: @js($charts['bidYear']->values()),
                 y: @js($charts['bidAppr']),
@@ -430,6 +481,7 @@
                 line: { shape: 'spline' },
                 name: 'Approved Budget'
             },
+          // Data for bid amount
             {
                 x: @js($charts['bidYear']->values()),
                 y: @js($charts['bidAmt']),
@@ -461,9 +513,9 @@
 
         Plotly.newPlot('budgetAmtGraph', amtData, amtLayout, commonConfig);
 
-        console.log(@js($charts['infraComp']));
-        console.log(@js($charts['infraTotal']));
+        //Infrastructure Status Bar Graph
         const infrastatData = [
+          //Data for completed bids
             {
                 x: @js($charts['infraLabel']->values()),
                 y: @js($charts['infraComp']),
@@ -472,6 +524,7 @@
                 marker: { color: '#01ac42' },
                 width: 0.6,
             },
+            //Data for ongoing bids
             {
                 x: @js($charts['infraLabel']->values()),
                 y: @js($charts['infraOngoing']),
@@ -480,6 +533,7 @@
                 marker: { color: '#F2EA00' },
                 width: 0.6,
             },
+            //Data for failed bids
             {
                 x: @js($charts['infraLabel']->values()),
                 y: @js($charts['infraFail']),
@@ -488,6 +542,7 @@
                 marker: { color: '#4E98FF' },
                 width: 0.6,
             },
+            // Data for total bids (line graph)
             {
                 x: @js($charts['infraLabel']->values()),
                 y: @js($charts['infraTotal']),
@@ -519,7 +574,9 @@
 
         Plotly.newPlot('infraStatusGraph', infrastatData, infrastatLayout, commonConfig);
 
+        //Infrastructure Approved Budget and Bid Amount Line Graph
         const infraamtData = [
+          //Data for approved budget
             {
                 x: @js($charts['infraYear']->values()),
                 y: @js($charts['infraAppr']),
@@ -531,6 +588,7 @@
                 width: .5,
                 name: 'Approved Budget'
             },
+            // Data for bid amount
             {
                 x: @js($charts['infraYear']->values()),
                 y: @js($charts['infraAmt']),
