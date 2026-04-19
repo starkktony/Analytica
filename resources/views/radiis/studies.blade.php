@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <title>Siel Metrics</title>
     
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -53,6 +54,7 @@
 <body>
     @include('components.sidebar')
 <div class="content w-100">
+    //SECOND HEADER *contains specific page and filter options*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -65,6 +67,8 @@
                 <div class="hidden sm:block font-[650] border-r border-gray-500 pr-4">
                     Filter
                 </div>
+
+                //Year filter
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-medium">Year:</span>
                     <form action="{{ route('radiis.programs') }}" method="GET" id="filterForm" class="m-0">
@@ -82,8 +86,11 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6 pt-4">
+        //Card for new studies, completed studies, ongoing studies, and total budget
         <div class="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-12 gap-3 mb-2">
+            //Card for new studies, showing the total number of new studies initiated in the selected year, along with a percentage change compared to the previous year
             <div class='col-span-3'>
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-3 h-full'>
@@ -99,6 +106,7 @@
                     </div>
                 </div>
             </div>
+            //Card for completed studies, showing the total number of studies that have been completed in the selected year, along with the percentage of completed studies out of the total number of studies initiated in that year
             <div class='col-span-3'>
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-3 h-full'>
@@ -113,6 +121,7 @@
                     </div>
                 </div>
             </div>
+            //Card for ongoing studies, showing the total number of studies that are currently ongoing in the selected year, along with the percentage of ongoing studies out of the total number of studies initiated in that year
             <div class='col-span-3'>
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-3 h-full'>
@@ -127,6 +136,7 @@
                     </div>
                 </div>
             </div>
+            //Card for total study budget, showing the total budget allocated for studies initiated in the selected year, along with a percentage change compared to the previous year
             <div class='col-span-3'>
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-3 h-full'>
@@ -143,6 +153,7 @@
         </div>
         
         <div class='grid grid-cols-6 lg:grid-cols-12 gap-2'>
+            //Card for studies per type, showing a breakdown of the number of studies initiated in the selected year by type
             <div class='col-span-6 lg:col-span-4'>
                 <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white flex flex-wrap h-[320px] sm:h-[370px] lg:h-[570px] rounded-[1vw] shadow-inner shadow-xl'>
                 <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -154,7 +165,7 @@
                 </div>
             </div>
       
-            <div class='col-span-6 lg:col-span-8'>
+            //Card for annual study initiation trend, showing the number of studies initiated each year over the past 10 years, along with a line chart overlaying the bar chart to show the overall trend in study initiations across all types over time.
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[342px] sm:h-[300px] md:h-[300px] lg:h-[280px]">
                     <div class="font-[650] text-sm md:text-lg text-gray-700 pl-6 pt-4">
                         Annual Study Initiation Trend (10-year period)
@@ -166,6 +177,8 @@
                         <i>Note: Data for certain years is unavailable; only years with recorded initiations are displayed.</i>
                     </div>         
                 </div>
+
+            //Card for approved budget allocation, showing the total budget allocated for studies initiated each year over the past 10 years, along with a line chart overlaying the bar chart to show the overall trend in budget allocation across all types over time.
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[342px] sm:h-[300px] md:h-[300px] lg:h-[280px] mt-2 mb-4">
                     <div class="font-[650] text-sm md:text-lg text-gray-700 pl-6 pt-4">
                         Approved Budget Allocation (10-year period)
@@ -183,9 +196,12 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    // JavaScript to initialize the charts using Plotly and handle responsive resizing
     <script>
+        // Wait for the DOM to load before initializing the charts, ensuring that all necessary elements are available and that the charts are rendered correctly with the provided data and configurations. This event listener ensures that the chart initialization code runs only after the entire page has been loaded, preventing potential issues with accessing DOM elements or rendering charts before the page is fully ready.
         document.addEventListener('DOMContentLoaded', function () {
 
+            // Define a common configuration object for all charts to ensure consistency in appearance and behavior, such as responsiveness, hiding the Plotly logo, and removing specific mode bar buttons that are not needed for the user interface. This commonConfig object is used when initializing each chart to apply these settings uniformly across all charts, enhancing the overall user experience by providing a cohesive look and feel while also simplifying the chart initialization code by centralizing shared configurations.
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
             const typeData = [{
@@ -216,6 +232,7 @@
 
             //--------------------------------------------------------------------
             const yearData = [
+                //Data for research 
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['res_counts']),
@@ -225,6 +242,7 @@
                     hovertemplate: '<b>Type:</b> Research <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for research and development
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['resdev_counts']),
@@ -234,6 +252,7 @@
                     hovertemplate: '<b>Type:</b> Research & Development <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for total count
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['year_counts']),
@@ -251,7 +270,7 @@
                 barmode: 'stack',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                margin: { l: 40, r: 40, b: 10, t: 15 },
+                margin: { l: 40, r: 40, b: 20, t: 15 },
                 legend: {
                     font: {size: 10, color: 'black'},
                     orientation: 'h',
@@ -268,6 +287,7 @@
 
             //---------------------------------------------------------------------------
             const budgetData = [
+                //Data for research
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['res_sums']),
@@ -277,6 +297,7 @@
                     hovertemplate: '<b>Type:</b> Research <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for research and development
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['resdev_sums']),
@@ -286,6 +307,7 @@
                     hovertemplate: '<b>Type:</b> Research & Development <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for total budget
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['budget_totals']),
@@ -303,7 +325,7 @@
                 barmode: 'stack',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                margin: { l: 60, r: 40, b: 10, t: 15 },
+                margin: { l: 60, r: 40, b: 20, t: 15 },
                 legend: {
                     font: {size: 10, color: 'black'},
                     orientation: 'h',
@@ -318,6 +340,7 @@
 
             Plotly.newPlot('studyBudgetChart', budgetData, budgetLayout, commonConfig);
 
+            // Add a ResizeObserver to ensure charts resize correctly when the window size changes or when the sidebar is toggled, improving the user experience by maintaining the readability and usability of the charts across different screen sizes and layout configurations, especially in a responsive dashboard environment where users may frequently adjust their view. The ResizeObserver monitors changes to the size of the content area and triggers a resize of all charts whenever a change is detected, ensuring that the charts adapt to the available space and remain visually coherent and easy to interact with regardless of layout adjustments.
             const charts = ['studyTypeChart', 'studyYearChart', 'studyBudgetChart'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

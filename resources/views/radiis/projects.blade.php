@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <title>Siel Metrics</title>
     
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -53,6 +54,7 @@
 <body>
     @include('components.sidebar')
 <div class="content w-100">
+    //SECOND HEADER *contains specific page and filter options*-----------------
     <div class="sticky top-0 z-50">
         <header>
             <span class="text-lg md:text-2xl font-[650] text-white">Research and Development</span>
@@ -65,6 +67,8 @@
                 <div class="hidden sm:block font-[650] border-r border-gray-500 pr-4">
                     Filter
                 </div>
+
+                //Year filter
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-medium">Year:</span>
                     <form action="{{ route('radiis.projects') }}" method="GET" id="filterForm" class="m-0">
@@ -82,7 +86,9 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
     <div class="px-6 pt-4">
+        // Cards for new projects, completed projects, ongoing projects, and total budget with icons, values, percentages, and descriptions, styled with Tailwind CSS for a modern and clean look, and using conditional classes to indicate positive or negative percentage changes with green or red colors respectively
         <div class="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-12 gap-3 mb-2">
             <div class='col-span-3'>
                 <div class='border-l-[5px] border-green-600 bg-white/50 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
@@ -154,6 +160,7 @@
                 </div>
             </div>
             
+            //Charts for annual project initiation trend and approved budget allocation over a 10-year period, using stacked bar charts with line overlays to show both the individual contributions of research and development projects as well as the overall totals, while also providing notes about data availability for certain years to ensure users have the necessary context when analyzing the trends displayed in the charts
             <div class='col-span-6 lg:col-span-8'>
                 <div class="border-l-[6px] border-green-600 bg-white rounded-[1vw] shadow-inner shadow-xl h-[342px] sm:h-[300px] md:h-[300px] lg:h-[280px]">
                     <div class="font-[650] text-sm md:text-lg text-gray-700 pl-6 pt-4">
@@ -183,9 +190,13 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    // JavaScript to initialize Plotly charts for project distribution by type, annual project initiation trend, and approved budget allocation, using data passed from the backend and configured with responsive settings, custom colors, hover templates, and layout options to create interactive and visually appealing charts that effectively communicate the insights derived from the research and development project data, while also ensuring that the charts resize correctly when the window size changes or when the sidebar is toggled for an optimal user experience across different devices and screen sizes
     <script>
+        // JavaScript to initialize Plotly charts for project distribution by type, annual project initiation trend, and approved budget allocation, using data passed from the backend and configured with responsive settings, custom colors, hover templates, and layout options to create interactive and visually appealing charts that effectively communicate the insights derived from the research and development project data, while also ensuring that the charts resize correctly when the window size changes or when the sidebar is toggled for an optimal user experience across different devices and screen sizes
         document.addEventListener('DOMContentLoaded', function () {
 
+            // Define common configuration for all charts to ensure consistency in appearance and behavior, including responsiveness, hiding the Plotly logo, and removing specific mode bar buttons to streamline the user interface and focus on the most relevant interactions for analyzing the research and development project data, while also maintaining a clean and professional look across all charts in the dashboard
             const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
             const typeData = [{
@@ -217,6 +228,7 @@
 
             //--------------------------------------------------------------------
             const yearData = [
+                //Data for the research data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['res_counts']),
@@ -226,6 +238,7 @@
                     hovertemplate: '<b>Type:</b> Research <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the development data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['dev_counts']),
@@ -235,6 +248,7 @@
                     hovertemplate: '<b>Type:</b> Development <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the research and development data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['resdev_counts']),
@@ -244,6 +258,7 @@
                     hovertemplate: '<b>Type:</b> Research & Development <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the book writing data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['bw_counts']),
@@ -253,6 +268,7 @@
                     hovertemplate: '<b>Type:</b>Book Writing <br><b>Year:</b> %{x}<br><b>Count: </b>%{y}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the total count, shown as a line chart overlaying the bar charts to show the overall trend in project initiations across all project types, with a distinct color and hover template to differentiate it from the individual type contributions and provide a clear visualization of how the total number of project initiations has changed over the years in relation to the specific contributions of each project type
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['year_counts']),
@@ -287,6 +303,7 @@
 
             //---------------------------------------------------------------------------
             const budgetData = [
+                //Data for the research data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['res_sums']),
@@ -296,6 +313,7 @@
                     hovertemplate: '<b>Type:</b> Research <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the development data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['dev_sums']),
@@ -305,6 +323,7 @@
                     hovertemplate: '<b>Type:</b> Development <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the research and development data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['resdev_sums']),
@@ -314,6 +333,7 @@
                     hovertemplate: '<b>Type:</b> Research & Development <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the book writing data
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['bw_sums']),
@@ -323,6 +343,7 @@
                     hovertemplate: '<b>Type:</b> Book Writing <br><b>Year:</b> %{x}<br><b>Budget: </b>₱%{y:,.2f}<extra></extra>',
                     width: 0.5,
                 },
+                //Data for the total budget, shown as a line chart overlaying the bar charts to show the overall trend in budget allocation across all project types, with a distinct color and hover template to differentiate it from the individual type contributions and provide a clear visualization of how the total budget has changed over the years in relation to the specific contributions of each project type
                 {
                     x: @js($charts['year_labels']->values()),
                     y: @js($charts['budget_totals']),
@@ -355,6 +376,7 @@
 
             Plotly.newPlot('projectBudgetChart', budgetData, budgetLayout, commonConfig);
 
+            // Add event listener to handle resizing of charts when the window size changes or when the sidebar is toggled, ensuring that the charts remain responsive and visually appealing across different screen sizes and layouts by using a ResizeObserver to detect changes in the content area and calling Plotly's resize function on each chart accordingly for an optimal user experience
             const charts = ['projectTypeChart', 'projectYearChart', 'projectBudgetChart'];
             const contentDiv = document.querySelector('.content');
             if (contentDiv) {

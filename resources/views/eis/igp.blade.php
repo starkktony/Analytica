@@ -15,7 +15,7 @@
 
     <title>Siel Metrics</title>
 
-
+    //CSS FOR SIDEBAR AND HEADER
     <style>
         .content {
             margin-left: 250px;
@@ -62,6 +62,7 @@
 <body>
     @include('components.sidebar')
     <div class="content">
+        //SECOND HEADER *contains specific page and filter options*-----------------
         <div class="sticky top-0 z-50">
         <header>
             <span class="text-2xl font-[650] text-white">Executive Information</span>
@@ -76,6 +77,7 @@
                     Year Filters
                 </div>
 
+                // Year Filter for Cash on Bank Graph
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Cash on Bank:</span>
@@ -95,6 +97,9 @@
         </div>
     </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
+
+    //SECTION 1: Cash on Bank
     <div class="px-6 pt-2">
         <div class='grid grid-cols-12 mb-2'>
             <div class="col-span-12 lg:col-span-5 xl:col-span-4 rounded-3xl mt-2 p-2 bg-green-600/80 flex item-center justify-center">
@@ -105,6 +110,7 @@
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
             <div class="col-span-4 xl:col-span-3 h-80">
                 <div class='grid grid-rows-4'>
+                    //Cash on Bank Balance Card
                     <div class='row-span-2'>
                         <div class="grid grid-rows-8 h-39 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
                             <div class='bg-white row-span-3 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -117,6 +123,8 @@
                             </div>
                         </div>
                     </div>
+
+                    //Net Cash Flow Card
                     <div class='row-span-2'>
                         <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-39 rounded-lg inset-shadow-xs shadow-xl p-3 mt-1 overflow-hidden'>
                             <div class='grid grid-rows-8 '>
@@ -133,6 +141,8 @@
                     </div>
                 </div>
             </div>
+
+            //Cash on Bank Balance Over Time Line Graph
             <div class="col-span-4 lg:col-span-8 xl:col-span-9 border-t-[4px] h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                 <div class='font-[750] text-sm sm:text-md xl:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
                 Bank Balance Over Time
@@ -146,6 +156,7 @@
             </div>
         </div>
 
+        //SECTION 2: Existing MOAs
         <div class='grid grid-cols-12'>
             <div class="col-span-12 lg:col-span-5 xl:col-span-4 rounded-3xl mt-2 mb-2 p-2 bg-green-600/80 flex item-center justify-center">
                 <div class="font-[650] text-white text-md">Existing MOAs</div>
@@ -153,6 +164,7 @@
         </div>
 
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
+            // Existing MOAs - Private Companies
             <div class='col-span-4'>
                 <div class='bg-green-600/80 backdrop-blur-md h-36 lg:h-40 rounded-lg inset-shadow-xs shadow-xl p-3'>
                     <div class='grid grid-rows-2'>
@@ -166,6 +178,8 @@
                     </div>
                 </div>
             </div>
+
+            // Existing MOAs - Total Landholdings with Active MOAs
             <div class='col-span-4'>
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 lg:h-40 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-2'>
@@ -179,6 +193,8 @@
                     </div>
                 </div>
             </div>
+
+            // Existing MOAs - Expected Total Rate per Month
             <div class='col-span-4'>
                 <div class='border-l-5 border-green-600 bg-white/50 backdrop-blur-md h-36 lg:h-40 rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
                     <div class='grid grid-rows-2'>
@@ -195,6 +211,7 @@
         </div>
 
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
+            // Existing MOAs - Landholdings per Status Pie Chart
             <div class='col-span-4'>
                 <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white flex flex-wrap h-[300px] sm:h-[400px] lg:h-[380px] xl:h-[500px] rounded-[1vw] shadow-inner shadow-xl'>
                 <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -205,6 +222,8 @@
                 </div>
                 </div>
             </div>
+
+            // Existing MOAs - Landholdings per Company Pie Chart
             <div class='col-span-4'>
                 <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white flex flex-wrap h-[300px] sm:h-[400px] lg:h-[380px] xl:h-[500px] rounded-[1vw] shadow-inner shadow-xl'>
                 <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -215,6 +234,8 @@
                 </div>
                 </div>
             </div>
+
+            // Existing MOAs - Landholdings per Rate Pie Chart
             <div class='col-span-4'>
                 <div class='border-t-[6px] border-green-600 bg-linear-to-br bg-white flex flex-wrap h-[300px] sm:h-[400px] lg:h-[380px] xl:h-[500px] rounded-[1vw] shadow-inner shadow-xl'>
                 <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -227,6 +248,7 @@
             </div>
         </div>
 
+        //Government Agencies Landholdings
         <div class="grid grid-cols-12 gap-3 mb-2">
             <div class="col-span-12 lg:col-span-6 xl:col-span-4">
                 <div class='bg-green-600/80 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3'>
@@ -243,6 +265,7 @@
             </div>
         </div>
 
+        //SECTION 3: Business Development Office
         <div class='grid grid-cols-12'>
             <div class="col-span-12 lg:col-span-5 xl:col-span-4 rounded-3xl mt-6 mb-2 p-2 bg-green-600/80 flex item-center justify-center">
                 <div class="font-[650] text-white text-md">Business Development Office</div>
@@ -250,6 +273,7 @@
         </div>
 
         <div class="grid grid-cols-4 lg:grid-cols-12 gap-3 mb-2">
+            //Number of stalls in gateway 
             <div class='col-span-4'>
                 <div class='bg-green-600/80 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3'>
                     <div class='grid grid-rows-2'>
@@ -263,6 +287,8 @@
                     </div>
                 </div>
             </div>
+
+            //Number of stalls in marketing center
             <div class='col-span-4'>
                 <div class='bg-green-600/80 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3'>
                     <div class='grid grid-rows-2 '>
@@ -276,6 +302,8 @@
                     </div>
                 </div>
             </div>
+
+            //Number of stalls in community market
             <div class='col-span-4'>
                 <div class='bg-green-600/80 backdrop-blur-md h-36 rounded-lg inset-shadow-xs shadow-xl p-3'>
                     <div class='grid grid-rows-1 '>
@@ -292,7 +320,8 @@
         </div>
 
         <div class="grid grid-cols-12 gap-2">
-            <div class="col-span-12 xl:col-span-2">                
+            <div class="col-span-12 xl:col-span-2"> 
+                //Total Rentals per Month Card               
                 <div class='border-l-4 border-green-600 bg-white/50 backdrop-blur-md rounded-lg h-[150px] xl:h-[190px] shadow-sm p-4 mb-2 overflow-hidden'>
                     <div class='grid grid-rows-4'>
                         <div class='bg-green-600/80 row-span-2 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -300,10 +329,11 @@
                         </div>
                         <div class='row-span-2'>
                             <p class='text-lg sm:text-2xl xl:text-xl text-right font-[650] align-bottom text-gray-800 pt-[8px] sm:pt-[5px] xl:pt-[15px]'>₱ {{number_format($stats['rental_total'])}}</p>
-                            <p class='text-[10px] md:text-[11px] text-right font-medium'>Total Rentals per Month</p>
+                    f        <p class='text-[10px] md:text-[11px] text-right font-medium'>Total Rentals per Month</p>
                         </div>
                     </div>
                 </div>
+                //Total SQM per Month Card
                 <div class='border-l-4 border-green-600 bg-white/50 backdrop-blur-md rounded-lg h-[150px] xl:h-[190px] shadow-sm p-4 mb-2 overflow-hidden'>
                     <div class='grid grid-rows-4 '>
                         <div class='bg-green-600/80 row-span-2 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -316,6 +346,8 @@
                     </div>
                 </div>
             </div>
+
+            //Stalls per Rental Line Graph
             <div class="col-span-12 lg:col-span-6 xl:col-span-5">
                 <div class='border-t-[6px] border-green-600 bg-white/50 backdrop-blur-md flex flex-wrap h-[386px] rounded-[1vw] inset-shadow-xl shadow-xl'>
                     <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -326,6 +358,8 @@
                     </div>
                 </div>
             </div>
+
+            //Stalls per Sqm Line Graph
             <div class="col-span-12 lg:col-span-6 xl:col-span-5">
                 <div class='border-t-[6px] border-green-600 bg-white/50 backdrop-blur-md flex flex-wrap h-[386px] rounded-[1vw] inset-shadow-xl shadow-xl'>
                     <div class='w-full grid grid-cols-12 grid-rows-7'>
@@ -342,11 +376,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    //Javascript for Plotly Graphs
     <script>
+        // Ensure the DOM is fully loaded before executing the script
         document.addEventListener('DOMContentLoaded', function () {
 
+        // Common configuration for all charts
         const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
        
+        //Graph for Cash on Bank Balance Over Time
         xData = @js($charts['balance_labels']),
         yData = @js($charts['balance_values']),
         max = @js($charts['bal_max'] +2000000),
@@ -365,6 +403,7 @@
             name: 'Balance'
         }
 
+        //Highlight the most recent data point
         lastData = {
             x: [xData[xData.length - (xData.length )]],
             y: [yData[yData.length - (xData.length )]],
@@ -378,7 +417,7 @@
             showlegend: false 
             };
 
-        const balData = [bankData, lastData];
+    const balData = [bankData, lastData];
 
     const balLayout = {
         height: 250,
@@ -391,6 +430,7 @@
 
     Plotly.newPlot('bankBalance', balData, balLayout, commonConfig);
 
+    //Graph for Landholdings per Status
         const statusData = [{
             values: [@js($charts['act_priv']), @js($charts['exp_priv'])],
             labels: ['Active', 'Expired'],
@@ -417,6 +457,7 @@
 
         Plotly.newPlot('privStatusChart', statusData, statusLayout, commonConfig);
         
+        //Graph for Landholdings per Company
         const sqmData = [{
             values: @js($charts['sqm_values']),
             labels: @js($charts['sqm_labels']),
@@ -436,6 +477,7 @@
 
         Plotly.newPlot('privSqmChart', sqmData, sqmLayout, commonConfig);
 
+        //Graph for Landholdings per Rate
         const rateData = [{
             values: @js($charts['rate_values']),
             labels: @js($charts['rate_labels']),
@@ -455,6 +497,7 @@
 
         Plotly.newPlot('privRateChart', rateData, rateLayout, commonConfig);
 
+        //Graph for Stalls per Rental
         const rentData = [{
             values: [@js($charts['gateway_rent']), @js($charts['marketing_rent']), @js($charts['commart_rent'])],
             labels: ['Gateway', 'Marketing Center', 'Community Market'],
@@ -481,6 +524,7 @@
 
         Plotly.newPlot('stallsRentChart', rentData, rentLayout, commonConfig);
 
+        //Graph for Stalls per Sqm
         const sqmStallsData = [{
             values: [@js($charts['commart_sqm']), @js($charts['marketing_sqm']), @js($charts['gateway_sqm'])],
             labels: ['Community Market', 'Marketing Center', 'Gateway'],

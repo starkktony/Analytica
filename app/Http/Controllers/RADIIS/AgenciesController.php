@@ -12,27 +12,32 @@ class AgenciesController extends Controller
 
     public function index()
     {
-        $query = RDAgency::query();
+        $query = RDAgency::query();// Start with a base query
 
+        // Apply year filter if provided
         $queryData = (clone $query)
         ->get();
 
+        // Get top 3 agencies by total funded amount
         $top_three = RDAgency::select('abbr', 'total_funded')
         ->orderBy('total_funded', 'desc')
         ->get();
 
+        //Data for the per category pie chart
         $per_category = $queryData
         ->groupBy('category')
         ->map(function ($items) {
         return $items->count(); 
         });
 
+        //Data for the per type pie chart
         $per_type = $queryData
         ->groupBy('type')
         ->map(function ($items) {
         return $items->count(); 
         });
 
+        //Data for the per sector pie chart
         $per_sector = $queryData
         ->groupBy('sector')
         ->map(function ($items) {

@@ -15,7 +15,7 @@
 
     <title>Siel Metrics</title>
 
-
+    <!-- CSS FOR SIDEBAR AND HEADER -->
     <style>
         .content {
             margin-left: 250px;
@@ -62,6 +62,7 @@
 <body>
     @include('components.sidebar')
     <div class="content">
+      //SECOND HEADER *contains specific page and filter options*-----------------
         <div class="sticky top-0 z-50">
         <header>
             <span class="text-2xl font-[650] text-white">Executive Information</span>
@@ -76,6 +77,7 @@
                     Year Filters
                 </div>
 
+                //Year filter for Infrastructure Projects
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Infra. Projects:</span>
@@ -91,6 +93,7 @@
                         </form>
                     </div>
 
+                    //Year filter for GAA Approved Projects
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium">Fund 164:</span>
                         <form action="{{ route('eis.facility') }}" method="GET" id="filterYear">
@@ -109,6 +112,10 @@
         </div>
         </div>
 
+    //START OF THE DASHBOARD CONTENT------------------------------------------------------
+
+    //SECTION 1: Infrastructure Projects
+
     <div class="px-6 pt-2">
       <div class="flex items-center justify-between py-2 min-h-10">
         <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
@@ -117,6 +124,7 @@
       </div>
 
       <div class="grid grid-cols-12 gap-2 mb-2">
+        //Card for total infrastructure projects
           <div class="col-span-12 md:col-span-6 xl:col-span-3 ">
             <div class="grid grid-rows-2 h-38 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
               <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -128,6 +136,8 @@
               </div>
             </div>
           </div>
+
+          //Card for total infrastructure projects contract amount
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class='border-l-5 h-38 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -141,6 +151,8 @@
               </div>
             </div>
           </div>
+
+          //Card for completed infrastructure projects
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class='border-l-5  h-38 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -154,6 +166,8 @@
               </div>
             </div>
           </div>
+
+          //Card for ongoing infrastructure projects
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class='border-l-5 h-38 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -168,6 +182,7 @@
             </div>
           </div>
 
+          //Graph for infrastructure projects per year
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Infrastructure Projects Per Year
@@ -180,6 +195,7 @@
             </div>  
           </div>
 
+          //Graph for infrastructure projects budget per year
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Infrastructure Projects' Budget per Year
@@ -192,6 +208,7 @@
             </div>  
           </div>
 
+          //Table for recent ongoing infrastructure projects
           <div class="col-span-12 lg:col-span-6">
                 <div class="grid grid-rows-12 h-80 gap-y-1">
                     <div class='row-span-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl overflow-hidden flex flex-col justify-center items-center'>
@@ -219,6 +236,8 @@
                     </div>
                 </div>
             </div>
+
+            //Table for oldest ongoing infrastructure projects
             <div class="col-span-12 lg:col-span-6">
                 <div class="grid grid-rows-12 h-80 gap-y-1">
                     <div class='row-span-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl overflow-hidden flex flex-col justify-center items-center'>
@@ -248,6 +267,7 @@
               </div>
         </div>
 
+        //SECTION 2: GAA Approved Projects
         <div class="flex items-center justify-between px-1 py-2 min-h-10 font-(family-name: --font-inter)">
           <div class="rounded-3xl mt-2 p-2 bg-green-600/80 w-60 flex item-center justify-center">
             <div class="font-[650] text-white text-md">GAA Approved Projects</div>
@@ -255,6 +275,7 @@
         </div>
 
         <div class="grid grid-cols-12 gap-2 mb-2">
+          //Card for total GAA approved projects
           <div class="col-span-12 md:col-span-6 xl:col-span-3 ">
             <div class="grid grid-rows-2 h-38 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3">
               <div class='bg-white row-span-1 rounded-lg h-12 w-16 flex items-center justify-center'>
@@ -266,6 +287,8 @@
               </div>
             </div>
           </div>
+
+          //Card for total GAA approved projects contract amount
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class='border-l-5 h-38 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -279,6 +302,8 @@
               </div>
             </div>
           </div>
+
+          //Card for completed GAA approved projects
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class='border-l-5  h-38 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -292,6 +317,8 @@
               </div>
             </div>
           </div>
+
+          //Card for ongoing GAA approved projects
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class='border-l-5 h-38 border-green-600 bg-white/50 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl p-3 overflow-hidden'>
               <div class='grid grid-rows-2'>
@@ -306,6 +333,7 @@
             </div>
           </div>
 
+          //Graph for GAA approved projects per year
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Infrastructure Projects Per Year
@@ -318,6 +346,7 @@
             </div>  
           </div>
 
+          //Graph for GAA approved projects budget per year
           <div class="col-span-12 lg:col-span-6 border-t-4 h-80 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
             <div class='font-[750] text-sm sm:text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-3 pl-5 sm:pl-7'>
               Infrastructure Projects' Budget per Year
@@ -330,6 +359,7 @@
             </div>  
           </div>
 
+          //Table for recent ongoing GAA approved projects
           <div class="col-span-12 lg:col-span-6">
                 <div class="grid grid-rows-12 h-80 gap-y-1">
                     <div class='row-span-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl overflow-hidden flex flex-col justify-center items-center'>
@@ -357,6 +387,8 @@
                     </div>
                 </div>
             </div>
+
+            //Table for oldest ongoing GAA approved projects
             <div class="col-span-12 lg:col-span-6">
                 <div class="grid grid-rows-12 h-80 gap-y-1">
                     <div class='row-span-2 bg-green-600/80 backdrop-blur-md rounded-lg inset-shadow-xs shadow-xl overflow-hidden flex flex-col justify-center items-center'>
@@ -389,9 +421,12 @@
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    //JAVASCRIPT FOR PLOTLY GRAPHS
     <script>
       const commonConfig = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d','zoomIn2d','zoomOut2d', 'select2d'] };
 
+      //Infrastructure Projects Graphs
       const infraData = [
         {
             x: @js($charts['infraLabel']),
@@ -416,6 +451,7 @@
 
       Plotly.newPlot('infraTotalGraph', infraData, infraLayout, commonConfig);
 
+      //Graph for infrastructure projects budget per year
       const amtInfraData = [
         {
             x: @js($charts['infraAmtLabel']),
@@ -440,6 +476,7 @@
 
       Plotly.newPlot('infraAmtGraph', amtInfraData, amtInfraLayout, commonConfig);
 
+      //GAA Approved Projects Graphs
        const gaaData = [
         {
             x: @js($charts['gaaLabel']),
@@ -464,11 +501,12 @@
 
       Plotly.newPlot('gaaTotalGraph', gaaData, gaaLayout, commonConfig);
 
+      //Graph for GAA approved projects budget per year
       const amtGaaData = [
         {
             x: @js($charts['gaaAmtLabel']),
             y: @js($charts['gaaAmtValue']),
-            hovertemplate: '<b>Year:</b> %{x} <br><b>Total:</b> %{y}<extra></extra>',
+            hovertemplate: '<b>Year:</b> %{x} <br><b>Total:</b>₱%{y:,.2f}<extra></extra>',
             type: 'bar',
             marker: { color: '#01ac42' },
             width: 0.5,
