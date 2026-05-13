@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
+
 class GraduatesController extends Controller
 {
     public function index(Request $request): View
@@ -40,7 +41,7 @@ class GraduatesController extends Controller
         //         ->values()
         //         ->all()
         // );
-        return view('graduates', array_merge($payload, [
+        return view('student.graduates', array_merge($payload, [
             'active_page'      => 'graduates',
             'view_type'        => $viewType,
             'selected_view_type' => $viewType,
@@ -90,7 +91,7 @@ class GraduatesController extends Controller
 
     private function getBaseQuery()
     {
-        return DB::table('graduates')
+        return DB::connection('normativefunding')->table('graduates')
             ->select([
                 'student_id',
                 'gender',
@@ -155,7 +156,7 @@ class GraduatesController extends Controller
 
     private function getFilterOptions(string $college = 'All', string $studentLevel = 'All', string $semester = 'All'): array
     {
-        $rawColleges = DB::table('graduates')
+        $rawColleges = DB::connection('normativefunding')->table('graduates')
             ->whereNotNull('college')
             ->where('college', '!=', '')
             ->pluck('college');
@@ -180,7 +181,7 @@ class GraduatesController extends Controller
             ];
         }
 
-        $programQuery = DB::table('graduates')
+        $programQuery = DB::connection('normativefunding')->table('graduates')
             ->whereNotNull('date_graduated')
             ->whereNotNull('program_name')
             ->where('program_name', '!=', '')
